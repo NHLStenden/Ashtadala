@@ -588,8 +588,8 @@
            id="path34-4"
            style="fill:none;stroke:#eceef5;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" />
         <text
-           x="43"
-           y="18"
+           x="48"
+           y="19"
            class="text"
            id="text34-5"
            style="font-size:17px;fill:#e7e8ed">Recent</text>
@@ -604,8 +604,8 @@
            id="path35-5"
            style="fill:none;stroke:#eceef5;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" />
         <text
-           x="43"
-           y="18"
+           x="48"
+           y="19"
            class="text"
            id="text35-4"
            style="font-size:17px;fill:#e7e8ed">Starred</text>
@@ -622,7 +622,7 @@
            fill="#ff9e64"
            id="rect35" />
         <path
-           d="m 23,26 v -9 l 8,-6 8,6 v 9"
+           d="m 23,25 v -9 l 8,-6 8,6 v 9"
            fill="none"
            stroke="#16161e"
            stroke-width="2.2"
@@ -630,8 +630,8 @@
            stroke-linejoin="round"
            id="path36-4" />
         <text
-           x="55"
-           y="28"
+           x="60"
+           y="27"
            class="text darkText"
            font-weight="700"
            id="text36-4"
@@ -647,8 +647,8 @@
            id="path37-0"
            style="fill:none;stroke:#eceef5;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" />
         <text
-           x="43"
-           y="18"
+           x="48"
+           y="19"
            class="text"
            id="text37-7"
            style="font-size:17px;fill:#e7e8ed">Documents</text>
@@ -675,8 +675,8 @@
            id="path40-8"
            style="fill:none;stroke:#eceef5;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" />
         <text
-           x="43"
-           y="18"
+           x="48"
+           y="19"
            class="text"
            id="text40"
            style="font-size:17px;fill:#e7e8ed">Downloads</text>
@@ -709,8 +709,8 @@
            id="path41-8"
            style="fill:none;stroke:#eceef5;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" />
         <text
-           x="43"
-           y="18"
+           x="48"
+           y="19"
            class="text"
            id="text41"
            style="font-size:17px;fill:#e7e8ed">Pictures</text>
@@ -749,8 +749,8 @@
            id="ellipse44"
            style="fill:none;stroke:#eceef5;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" />
         <text
-           x="43"
-           y="18"
+           x="48"
+           y="19"
            class="text"
            id="text44"
            style="font-size:17px;fill:#e7e8ed">Music</text>
@@ -776,8 +776,8 @@
            id="path44-1"
            style="fill:none;stroke:#eceef5;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" />
         <text
-           x="43"
-           y="18"
+           x="48"
+           y="19"
            class="text"
            id="text45-4"
            style="font-size:17px;fill:#e7e8ed">Videos</text>
@@ -798,8 +798,8 @@
            id="path46-2"
            style="fill:none;stroke:#eceef5;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" />
         <text
-           x="43"
-           y="18"
+           x="48"
+           y="19"
            class="text"
            id="text46"
            style="font-size:17px;fill:#e7e8ed">Trash</text>
@@ -822,8 +822,8 @@
            id="path47-0"
            style="fill:none;stroke:#eceef5;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" />
         <text
-           x="43"
-           y="18"
+           x="48"
+           y="19"
            class="text"
            id="text47"
            style="font-size:17px;fill:#e7e8ed">Other Locations</text>
