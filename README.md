@@ -1,5 +1,7 @@
 # TokyoAdwaita Night
 
+[![TokyoAdwaita Night](assets/TokyoAdwaita-Night-preview.svg)](assets/TokyoAdwaita-Night-preview.svg)
+
 An Adwaita Dark theme for Fedora 45 with GNOME, with TokyoNight Night backgrounds and a
 configurable accent (`#ff9e64` by default). Adwaita's layout, icons, light foregrounds and
 transparency remain in place.
