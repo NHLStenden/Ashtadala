@@ -1,6 +1,6 @@
 # TokyoAdwaita Night
 
-An Adwaita Dark theme for Fedora 45 and GNOME 51, with TokyoNight Night backgrounds and a
+An Adwaita Dark theme for Fedora 45 with GNOME, with TokyoNight Night backgrounds and a
 configurable accent (`#ff9e64` by default). Adwaita's layout, icons, light foregrounds and
 transparency remain in place.
 
@@ -9,7 +9,7 @@ version installed on the machine.
 
 ## Requirements
 
-- Fedora 45 with GNOME Shell 51
+- Fedora 45 with GNOME Shell
 - Python 3, `gsettings`, `gresource`, `gnome-shell` and `gnome-extensions`
 - GNOME User Themes extension (`gnome-shell-extension-user-theme`)
 - Flatpak, if using the optional Flatpak integration
