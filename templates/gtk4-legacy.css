@@ -1,0 +1,14 @@
+/* SPDX-License-Identifier: MIT */
+/* Compatibility colors for applications using GTK named colors. */
+@define-color window_bg_color @BG@;
+@define-color view_bg_color @DEEP@;
+@define-color headerbar_bg_color @PANEL@;
+@define-color sidebar_bg_color @PANEL@;
+@define-color card_bg_color alpha(white, 0.08);
+@define-color accent_bg_color @ACCENT@;
+@define-color accent_fg_color @ACCENT_FG@;
+@define-color accent_color @ACCENT@;
+@define-color theme_selected_bg_color @ACCENT@;
+@define-color theme_selected_fg_color @ACCENT_FG@;
+@define-color theme_bg_color @BG@;
+@define-color theme_base_color @DEEP@;

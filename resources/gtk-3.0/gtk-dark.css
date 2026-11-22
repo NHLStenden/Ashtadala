@@ -1,0 +1,52 @@
+/* SPDX-License-Identifier: MIT */
+/* Adwaita provides the widget geometry and base states. */
+@import url("resource:///org/gtk/libgtk/theme/Adwaita/gtk-dark.css");
+@define-color theme_bg_color #1a1b26;
+@define-color theme_base_color #16161e;
+@define-color theme_selected_bg_color #ff9e64;
+@define-color theme_selected_fg_color #16161e;
+@define-color theme_unfocused_bg_color #1a1b26;
+@define-color theme_unfocused_base_color #16161e;
+@define-color theme_unfocused_selected_bg_color #ff9e64;
+@define-color theme_unfocused_selected_fg_color #16161e;
+@define-color accent_bg_color #ff9e64;
+@define-color accent_fg_color #16161e;
+@define-color accent_color #ff9e64;
+@define-color borders #414868;
+/* Adwaita embeds some colors in the GTK3 stylesheet; override selected roles. */
+window.background, dialog.background {background-color: #1a1b26;}
+headerbar, .titlebar {background-color: #1f2335;}
+headerbar:backdrop, .titlebar:backdrop {background-color: #1a1b26;}
+entry, textview text, treeview.view, iconview.view {background-color: #16161e;}
+/* Clear Adwaita's blue gradient on enabled suggested buttons. */
+button.suggested-action, button.default,
+button.suggested-action:hover, button.default:hover,
+button.suggested-action:active, button.default:active {
+  background-image: none;
+  background-color: #ff9e64;
+  color: #16161e;
+  text-shadow: none;
+  -gtk-icon-shadow: none;
+}
+/* Focused GTK3 file chooser rows need a more specific selection rule. */
+selection,
+treeview.view:selected,
+treeview.view:selected:focus,
+iconview.view:selected,
+iconview.view:selected:focus,
+row:selected {
+  background-color: #ff9e64;
+  color: #16161e;
+}
+/* Sidebar labels and symbolic icons have separate foreground rules. */
+placessidebar.sidebar row:selected,
+placessidebar.sidebar row:selected:hover {
+  background-color: #ff9e64;
+  color: #16161e;
+}
+placessidebar.sidebar row:selected label,
+placessidebar.sidebar row:selected image {
+  color: #16161e;
+}
+switch:checked, check:checked, radio:checked {background-color: #ff9e64; color: #16161e;}
+scale highlight, progressbar progress {background-color: #ff9e64;}

@@ -1,0 +1,18 @@
+Third-party notices
+===================
+
+TokyoNight Night palette
+  Source: https://github.com/folke/tokyonight.nvim
+  License: Apache License 2.0 (licenses/TOKYONIGHT-APACHE-2.0.txt)
+  Default theme colors are derived from TokyoNight Night.
+
+GNOME / Adwaita
+  GNOME Shell: https://gitlab.gnome.org/GNOME/gnome-shell
+  GTK: https://gitlab.gnome.org/GNOME/gtk
+  libadwaita: https://gitlab.gnome.org/GNOME/libadwaita
+
+  GNOME Shell is licensed under GPL-2.0-or-later; other GNOME components
+  have their own upstream licenses. This repository does not include the
+  upstream Shell stylesheet. The theme generates a modified stylesheet from
+  the installed GNOME resources. Redistribution of that generated file is
+  subject to the applicable upstream licenses.

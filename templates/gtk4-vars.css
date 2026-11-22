@@ -1,0 +1,22 @@
+/* SPDX-License-Identifier: MIT */
+/* Scope semantic colors to GTK windows, dialogs and popovers.
+ * A :root override alone does not cover every libadwaita widget. */
+window, dialog, popover {
+  --window-bg-color: @BG@;
+  --view-bg-color: @DEEP@;
+  --headerbar-bg-color: @PANEL@;
+  --headerbar-backdrop-color: @BG@;
+  --sidebar-bg-color: @PANEL@;
+  --sidebar-backdrop-color: @BG@;
+  --secondary-sidebar-bg-color: @BG@;
+  --secondary-sidebar-backdrop-color: @BG@;
+  --overview-bg-color: @BG@;
+  --thumbnail-bg-color: @SURFACE@;
+  --dialog-bg-color: @BG@;
+  --popover-bg-color: @PANEL@;
+
+  /* Keep Adwaita's light foregrounds and translucent card styles. */
+  --accent-bg-color: @ACCENT@;
+  --accent-fg-color: @ACCENT_FG@;
+  --accent-color: oklab(from @ACCENT@ max(l, 0.85) a b);
+}
