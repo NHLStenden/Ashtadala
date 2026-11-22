@@ -1,119 +1,1111 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title description">
-<title id="title">TokyoAdwaita Night theme preview</title>
-<desc id="description">Editable vector illustration of a GNOME desktop and Files window, with TokyoNight Night backgrounds, Adwaita-style foregrounds, a peach selection, and a neutral dock indicator. Not an operating-system screenshot.</desc>
-<defs>
-  <linearGradient id="wall" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#272849"/><stop offset="0.56" stop-color="#3a416d"/><stop offset="1" stop-color="#606391"/></linearGradient>
-  <linearGradient id="sweep" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7774b6" stop-opacity="0.8"/><stop offset="1" stop-color="#aa80b2" stop-opacity="0.15"/></linearGradient>
-  <filter id="shadowBlur" x="-15%" y="-15%" width="130%" height="140%"><feGaussianBlur stdDeviation="16"/></filter>
-  <clipPath id="appClip"><rect x="230" y="120" width="1140" height="645" rx="19"/></clipPath>
-</defs>
-<g font-family="Cantarell, 'Noto Sans', sans-serif">
-<rect x="0" y="0" width="1600" height="900" rx="0" fill="url(#wall)"/>
-<path d="M0 0 H640 C590 175 354 208 0 400 Z" fill="#655e9e" opacity="0.65"/>
-<path d="M1600 124 C1390 165 1380 288 1600 445 Z" fill="#9a76a6" opacity="0.4"/>
-<path d="M0 780 C360 620 480 855 865 790 C1200 735 1300 640 1600 720 V900 H0 Z" fill="#20284b" opacity="0.58"/>
-<path d="M970 900 C1240 795 1458 785 1600 862 V900 Z" fill="url(#sweep)" opacity="0.9"/>
-<path d="M0 525 C175 405 326 361 480 397" fill="none" stroke="#d9b4d2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.07"/>
-<rect x="0" y="0" width="1600" height="36" rx="0" fill="#131423" opacity="0.88"/>
-<text x="25" y="24" font-size="16" font-weight="600" fill="#f7f7f8">Activities</text>
-<text x="800" y="24" font-size="16" font-weight="600" text-anchor="middle" fill="#f7f7f8">Sun 22 Nov  09:25</text>
-<g transform="translate(1478,8) scale(0.83333)" fill="none" stroke="#f7f7f8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9 Q12 1 22 9 M5.5 12.5 Q12 7 18.5 12.5 M9 16 Q12 13 15 16 M12 19 L12 19.1"/></g>
-<g transform="translate(1513,8) scale(0.83333)" fill="none" stroke="#f7f7f8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9 H9 L14 5 V19 L9 15 H4 Z M17 8 Q22 12 17 16"/></g>
-<g transform="translate(1550,8) scale(0.83333)" fill="none" stroke="#f7f7f8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 V12 M7 5.5 A9 9 0 1 0 17 5.5"/></g>
-<rect x="239" y="143" width="1122" height="634" rx="21" fill="#070810" opacity="0.49" filter="url(#shadowBlur)"/>
-<rect x="230" y="120" width="1140" height="645" rx="19" fill="#16161e" stroke="#414868" stroke-width="1"/>
-<g clip-path="url(#appClip)">
-<rect x="230" y="120" width="1140" height="66" rx="0" fill="#1f2335"/>
-<rect x="230" y="186" width="254" height="579" rx="0" fill="#1f2335"/>
-<rect x="484" y="186" width="886" height="579" rx="0" fill="#16161e"/>
-<path d="M230 186 L1370 186" fill="none" stroke="#343a52" stroke-width="1" opacity="1"/>
-<path d="M484 186 L484 765" fill="none" stroke="#343a52" stroke-width="1" opacity="1"/>
-<rect x="249" y="135" width="36" height="36" rx="10" fill="#292e42"/>
-<rect x="293" y="135" width="36" height="36" rx="10" fill="#292e42"/>
-<g transform="translate(255,141) scale(1.00000)" fill="none" stroke="#f7f7f8" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4 L8 12 L16 20"/></g>
-<g transform="translate(299,141) scale(1.00000)" fill="none" stroke="#9aa2b7" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4 L16 12 L8 20"/></g>
-<rect x="348" y="135" width="192" height="36" rx="10" fill="#292e42"/>
-<g transform="translate(357,143) scale(0.83333)" fill="none" stroke="#ced0d9" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11 L12 4 L21 11 M5 10 V21 H19 V10 M10 21 V14 H14 V21"/></g>
-<text x="389" y="160" font-size="16" font-weight="600" fill="#f7f7f8">Home</text>
-<g transform="translate(507,142) scale(0.79167)" fill="none" stroke="#ced0d9" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9 L12 15 L18 9"/></g>
-<rect x="1178" y="135" width="36" height="36" rx="10" fill="#292e42"/>
-<rect x="1221" y="135" width="36" height="36" rx="10" fill="#292e42"/>
-<rect x="1264" y="135" width="36" height="36" rx="10" fill="#292e42"/>
-<rect x="1321" y="135" width="36" height="36" rx="10" fill="#292e42"/>
-<g transform="translate(1185,142) scale(0.91667)" fill="none" stroke="#f7f7f8" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 4 A6.5 6.5 0 1 0 10.5 17 A6.5 6.5 0 1 0 10.5 4 M15.5 15.5 L21 21"/></g>
-<g transform="translate(1228,142) scale(0.91667)" fill="none" stroke="#f7f7f8" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3 H10 V10 H3 Z M14 3 H21 V10 H14 Z M3 14 H10 V21 H3 Z M14 14 H21 V21 H14 Z"/></g>
-<g transform="translate(1271,142) scale(0.91667)" fill="none" stroke="#f7f7f8" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5 V5.3 M12 12 V12.3 M12 19 V19.3"/></g>
-<g transform="translate(1328,142) scale(0.91667)" fill="none" stroke="#f7f7f8" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6 L18 18 M18 6 L6 18"/></g>
-<g transform="translate(258,217) scale(0.87500)" fill="none" stroke="#ced0d9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 A9 9 0 1 0 12 21 A9 9 0 1 0 12 3 M12 7 V12 L16 14"/></g>
-<text x="294" y="237" font-size="17" font-weight="400" fill="#f7f7f8">Recent</text>
-<g transform="translate(258,264) scale(0.87500)" fill="none" stroke="#ced0d9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 L15 8.5 L22 9.4 L17 14.4 L18.2 21.5 L12 18.2 L5.8 21.5 L7 14.4 L2 9.4 L9 8.5 Z"/></g>
-<text x="294" y="284" font-size="17" font-weight="400" fill="#f7f7f8">Starred</text>
-<rect x="241" y="304" width="231" height="39" rx="9" fill="#363d51"/>
-<g transform="translate(258,311) scale(0.87500)" fill="none" stroke="#f7f7f8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11 L12 4 L21 11 M5 10 V21 H19 V10 M10 21 V14 H14 V21"/></g>
-<text x="294" y="331" font-size="17" font-weight="600" fill="#f7f7f8">Home</text>
-<g transform="translate(258,358) scale(0.87500)" fill="none" stroke="#ced0d9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7 Q3 5 5 5 H10 L12 7 H19 Q21 7 21 9 V18 Q21 20 19 20 H5 Q3 20 3 18 Z"/></g>
-<text x="294" y="378" font-size="17" font-weight="400" fill="#f7f7f8">Documents</text>
-<g transform="translate(258,405) scale(0.87500)" fill="none" stroke="#ced0d9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 V16 M6 10 L12 16 L18 10 M4 20 H20"/></g>
-<text x="294" y="425" font-size="17" font-weight="400" fill="#f7f7f8">Downloads</text>
-<g transform="translate(258,452) scale(0.87500)" fill="none" stroke="#ced0d9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4 H20 V20 H4 Z M9 8 H9.1 M5 18 L11 12 L15 16 L17 14 L20 18"/></g>
-<text x="294" y="472" font-size="17" font-weight="400" fill="#f7f7f8">Pictures</text>
-<g transform="translate(258,499) scale(0.87500)" fill="none" stroke="#ced0d9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17 V5 L20 3 V16 M10 7 L20 5 M4 19 Q4 16 10 17 Q10 20 4 20 Q1 20 4 19 M14 18 Q14 15 20 16 Q20 19 14 19 Q11 19 14 18"/></g>
-<text x="294" y="519" font-size="17" font-weight="400" fill="#f7f7f8">Music</text>
-<g transform="translate(258,546) scale(0.87500)" fill="none" stroke="#ced0d9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5 H16 V19 H3 Z M16 9 L21 6 V18 L16 15"/></g>
-<text x="294" y="566" font-size="17" font-weight="400" fill="#f7f7f8">Videos</text>
-<g transform="translate(258,593) scale(0.87500)" fill="none" stroke="#ced0d9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7 H20 M9 7 V4 H15 V7 M6 7 L7 21 H17 L18 7 M10 10 V18 M14 10 V18"/></g>
-<text x="294" y="613" font-size="17" font-weight="400" fill="#f7f7f8">Trash</text>
-<path d="M249 660 L468 660" fill="none" stroke="#41465f" stroke-width="1" opacity="0.7"/>
-<g transform="translate(258,674) scale(0.87500)" fill="none" stroke="#ced0d9" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 V21 M3 12 H21"/></g>
-<text x="294" y="694" font-size="17" font-weight="400" fill="#f7f7f8">Other Locations</text>
-<path d="M590 308 Q590 302 596 302 H615 L623 310 H648 Q654 310 654 316 V347 Q654 353 648 353 H596 Q590 353 590 347 Z" fill="#6483a0"/>
-<path d="M590 323 Q590 317 596 317 H648 Q654 317 654 323 V346 Q654 352 648 352 H596 Q590 352 590 346 Z" fill="#91acc5"/>
-<path d="M595 327 L649 327" fill="none" stroke="#dde4ed" stroke-width="1" opacity="0.25"/>
-<text x="622" y="390" font-size="17" font-weight="400" text-anchor="middle" fill="#f7f7f8">Documents</text>
-<path d="M791 308 Q791 302 797 302 H816 L824 310 H849 Q855 310 855 316 V347 Q855 353 849 353 H797 Q791 353 791 347 Z" fill="#6483a0"/>
-<path d="M791 323 Q791 317 797 317 H849 Q855 317 855 323 V346 Q855 352 849 352 H797 Q791 352 791 346 Z" fill="#91acc5"/>
-<path d="M796 327 L850 327" fill="none" stroke="#dde4ed" stroke-width="1" opacity="0.25"/>
-<text x="823" y="390" font-size="17" font-weight="400" text-anchor="middle" fill="#f7f7f8">Downloads</text>
-<path d="M992 308 Q992 302 998 302 H1017 L1025 310 H1050 Q1056 310 1056 316 V347 Q1056 353 1050 353 H998 Q992 353 992 347 Z" fill="#6483a0"/>
-<path d="M992 323 Q992 317 998 317 H1050 Q1056 317 1056 323 V346 Q1056 352 1050 352 H998 Q992 352 992 346 Z" fill="#91acc5"/>
-<path d="M997 327 L1051 327" fill="none" stroke="#dde4ed" stroke-width="1" opacity="0.25"/>
-<text x="1024" y="390" font-size="17" font-weight="400" text-anchor="middle" fill="#f7f7f8">Pictures</text>
-<path d="M1193 308 Q1193 302 1199 302 H1218 L1226 310 H1251 Q1257 310 1257 316 V347 Q1257 353 1251 353 H1199 Q1193 353 1193 347 Z" fill="#6483a0"/>
-<path d="M1193 323 Q1193 317 1199 317 H1251 Q1257 317 1257 323 V346 Q1257 352 1251 352 H1199 Q1193 352 1193 346 Z" fill="#91acc5"/>
-<path d="M1198 327 L1252 327" fill="none" stroke="#dde4ed" stroke-width="1" opacity="0.25"/>
-<text x="1225" y="390" font-size="17" font-weight="400" text-anchor="middle" fill="#f7f7f8">Music</text>
-<path d="M590 498 Q590 492 596 492 H615 L623 500 H648 Q654 500 654 506 V537 Q654 543 648 543 H596 Q590 543 590 537 Z" fill="#6483a0"/>
-<path d="M590 513 Q590 507 596 507 H648 Q654 507 654 513 V536 Q654 542 648 542 H596 Q590 542 590 536 Z" fill="#91acc5"/>
-<path d="M595 517 L649 517" fill="none" stroke="#dde4ed" stroke-width="1" opacity="0.25"/>
-<text x="622" y="580" font-size="17" font-weight="400" text-anchor="middle" fill="#f7f7f8">Videos</text>
-<rect x="741" y="462" width="164" height="151" rx="13" fill="#ff9e64"/>
-<path d="M791 498 Q791 492 797 492 H816 L824 500 H849 Q855 500 855 506 V537 Q855 543 849 543 H797 Q791 543 791 537 Z" fill="#445068"/>
-<path d="M791 513 Q791 507 797 507 H849 Q855 507 855 513 V536 Q855 542 849 542 H797 Q791 542 791 536 Z" fill="#52617a"/>
-<path d="M796 517 L850 517" fill="none" stroke="#dde4ed" stroke-width="1" opacity="0.25"/>
-<text x="823" y="580" font-size="17" font-weight="600" text-anchor="middle" fill="#16161e">Projects</text>
-<path d="M992 498 Q992 492 998 492 H1017 L1025 500 H1050 Q1056 500 1056 506 V537 Q1056 543 1050 543 H998 Q992 543 992 537 Z" fill="#6483a0"/>
-<path d="M992 513 Q992 507 998 507 H1050 Q1056 507 1056 513 V536 Q1056 542 1050 542 H998 Q992 542 992 536 Z" fill="#91acc5"/>
-<path d="M997 517 L1051 517" fill="none" stroke="#dde4ed" stroke-width="1" opacity="0.25"/>
-<text x="1024" y="580" font-size="17" font-weight="400" text-anchor="middle" fill="#f7f7f8">Templates</text>
-<path d="M1193 498 Q1193 492 1199 492 H1218 L1226 500 H1251 Q1257 500 1257 506 V537 Q1257 543 1251 543 H1199 Q1193 543 1193 537 Z" fill="#6483a0"/>
-<path d="M1193 513 Q1193 507 1199 507 H1251 Q1257 507 1257 513 V536 Q1257 542 1251 542 H1199 Q1193 542 1193 536 Z" fill="#91acc5"/>
-<path d="M1198 517 L1252 517" fill="none" stroke="#dde4ed" stroke-width="1" opacity="0.25"/>
-<text x="1225" y="580" font-size="17" font-weight="400" text-anchor="middle" fill="#f7f7f8">Public</text>
-</g>
-<rect x="563" y="800" width="474" height="72" rx="24" fill="#24283b" stroke="#a6a9bc" stroke-width="1" opacity="0.9"/>
-<g transform="translate(589,820) scale(1.33333)" fill="none" stroke="#f2f3f7" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4 H9 V9 H4 Z M15 4 H20 V9 H15 Z M4 15 H9 V20 H4 Z M15 15 H20 V20 H15 Z"/></g>
-<rect x="654" y="810" width="52" height="52" rx="13" fill="#535a74"/>
-<g transform="translate(663,818) scale(0.52)">
-<path d="M4 14 Q4 8 10 8 H29 L37 16 H62 Q68 16 68 22 V53 Q68 59 62 59 H10 Q4 59 4 53 Z" fill="#6483a0"/>
-<path d="M4 29 Q4 23 10 23 H62 Q68 23 68 29 V52 Q68 58 62 58 H10 Q4 58 4 52 Z" fill="#91acc5"/>
-<path d="M9 33 L63 33" fill="none" stroke="#dde4ed" stroke-width="1" opacity="0.25"/>
-</g>
-<circle cx="680" cy="867" r="3" fill="#f2f2f4"/>
-<circle cx="775" cy="836" r="22" fill="#df7357"/>
-<path d="M763 826 Q786 810 789 834 Q783 853 765 847 Q759 841 763 826 Z" fill="#7256b0"/>
-<path d="M775 819 Q796 825 782 846 Q799 841 795 827 Z" fill="#f0b86a"/>
-<rect x="833" y="812" width="47" height="47" rx="11" fill="#30374d"/>
-<g transform="translate(843,823) scale(1.12500)" fill="none" stroke="#e7e9f2" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7 L10 12 L4 17 M12 17 H20"/></g>
-<circle cx="946" cy="836" r="23" fill="#c4c8d5"/>
-<g transform="translate(932,822) scale(1.16667)" fill="none" stroke="#424961" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 L14 5.1 L17 4.5 L18 7.5 L21 9 L19.5 12 L21 15 L18 16.5 L17 19.5 L14 18.9 L12 21 L10 18.9 L7 19.5 L6 16.5 L3 15 L4.5 12 L3 9 L6 7.5 L7 4.5 L10 5.1 Z M12 9 A3 3 0 1 0 12 15 A3 3 0 1 0 12 9"/></g>
-</g></svg>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="1600"
+   height="900"
+   viewBox="0 0 1600 900"
+   role="img"
+   aria-labelledby="title description"
+   version="1.1"
+   id="svg72"
+   sodipodi:docname="TokyoAdwaita-Night-preview.svg"
+   inkscape:version="1.4.4 (dcaf3e7d9e, 2026-05-05)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview72"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="0.96444444"
+     inkscape:cx="800.46083"
+     inkscape:cy="450"
+     inkscape:window-width="1920"
+     inkscape:window-height="1127"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg72" />
+  <title
+     id="title">TokyoAdwaita Night theme preview</title>
+  <desc
+     id="description">Editable vector illustration of a GNOME desktop and Files window, with TokyoNight Night backgrounds, Adwaita-style foregrounds, a peach selection, and a neutral dock indicator. Not an operating-system screenshot.</desc>
+  <defs
+     id="defs5">
+    <linearGradient
+       id="wall"
+       x1="0"
+       y1="0"
+       x2="1200"
+       y2="1200"
+       gradientTransform="scale(1.3333333,0.75)"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         offset="0"
+         stop-color="#272849"
+         id="stop1" />
+      <stop
+         offset="0.56"
+         stop-color="#3a416d"
+         id="stop2" />
+      <stop
+         offset="1"
+         stop-color="#606391"
+         id="stop3" />
+    </linearGradient>
+    <linearGradient
+       id="sweep"
+       x1="363.43241"
+       y1="2166.0535"
+       x2="599.47614"
+       y2="2402.0973"
+       gradientTransform="scale(2.668997,0.37467259)"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         offset="0"
+         stop-color="#7774b6"
+         stop-opacity="0.8"
+         id="stop4" />
+      <stop
+         offset="1"
+         stop-color="#aa80b2"
+         stop-opacity="0.15"
+         id="stop5" />
+    </linearGradient>
+    <filter
+       id="shadowBlur"
+       x="-0.034224599"
+       y="-0.060567823"
+       width="1.0684492"
+       height="1.1211356">
+      <feGaussianBlur
+         stdDeviation="16"
+         id="feGaussianBlur5" />
+    </filter>
+    <clipPath
+       id="appClip">
+      <rect
+         x="230"
+         y="120"
+         width="1140"
+         height="645"
+         rx="19"
+         id="rect5" />
+    </clipPath>
+    <linearGradient
+       id="windowBg"
+       x1="187.91993"
+       y1="147.84574"
+       x2="187.91993"
+       y2="977.58681"
+       gradientTransform="scale(1.327161,0.75348807)"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         offset="0%"
+         stop-color="#1f2335"
+         id="stop8" />
+      <stop
+         offset="100%"
+         stop-color="#1a1b26"
+         id="stop9" />
+    </linearGradient>
+    <linearGradient
+       id="sidebarBg"
+       x1="370.80992"
+       y1="125.40117"
+       x2="370.80992"
+       y2="496.2111"
+       gradientTransform="scale(0.67419986,1.4832397)"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         offset="0%"
+         stop-color="#232842"
+         id="stop10" />
+      <stop
+         offset="100%"
+         stop-color="#20243a"
+         id="stop11" />
+    </linearGradient>
+    <clipPath
+       id="files-window-clip">
+      <rect
+         x="250"
+         y="112"
+         width="1100"
+         height="624"
+         rx="28"
+         id="rect11" />
+    </clipPath>
+  </defs>
+  <rect
+     x="0"
+     y="0"
+     width="1600"
+     height="900"
+     rx="0"
+     fill="url(#wall)"
+     id="rect6"
+     style="font-family:Cantarell, 'Noto Sans', sans-serif;fill:url(#wall)" />
+  <path
+     d="M 0,0 H 640 C 590,175 354,208 0,400 Z"
+     fill="#655e9e"
+     opacity="0.65"
+     id="path6"
+     style="font-family:Cantarell, 'Noto Sans', sans-serif" />
+  <path
+     d="m 1600,124 c -210,41 -220,164 0,321 z"
+     fill="#9a76a6"
+     opacity="0.4"
+     id="path7"
+     style="font-family:Cantarell, 'Noto Sans', sans-serif" />
+  <path
+     d="m 0,780 c 360,-160 480,75 865,10 335,-55 435,-150 735,-70 V 900 H 0 Z"
+     fill="#20284b"
+     opacity="0.58"
+     id="path8"
+     style="font-family:Cantarell, 'Noto Sans', sans-serif" />
+  <path
+     d="m 970,900 c 270,-105 488,-115 630,-38 v 38 z"
+     fill="url(#sweep)"
+     opacity="0.9"
+     id="path9"
+     style="font-family:Cantarell, 'Noto Sans', sans-serif;fill:url(#sweep)" />
+  <path
+     d="M 0,525 C 175,405 326,361 480,397"
+     fill="none"
+     stroke="#d9b4d2"
+     stroke-width="2"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     opacity="0.07"
+     id="path10"
+     style="font-family:Cantarell, 'Noto Sans', sans-serif" />
+  <rect
+     x="0"
+     y="0"
+     width="1600"
+     height="36"
+     rx="0"
+     fill="#131423"
+     opacity="0.88"
+     id="rect10"
+     style="font-family:Cantarell, 'Noto Sans', sans-serif" />
+  <text
+     x="25"
+     y="24"
+     font-size="16px"
+     font-weight="600"
+     fill="#f7f7f8"
+     id="text10"
+     style="font-family:Cantarell, 'Noto Sans', sans-serif">Activities</text>
+  <text
+     x="800"
+     y="24"
+     font-size="16px"
+     font-weight="600"
+     text-anchor="middle"
+     fill="#f7f7f8"
+     id="text11"
+     style="font-family:Cantarell, 'Noto Sans', sans-serif">Sun 22 Nov 09:25</text>
+  <g
+     transform="matrix(0.83333,0,0,0.83333,1478,8)"
+     fill="none"
+     stroke="#f7f7f8"
+     stroke-width="2"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     id="g11"
+     style="font-family:Cantarell, 'Noto Sans', sans-serif">
+    <path
+       d="M 2,9 Q 12,1 22,9 M 5.5,12.5 q 6.5,-5.5 13,0 M 9,16 q 3,-3 6,0 m -3,3 v 0.1"
+       id="path11" />
+  </g>
+  <g
+     transform="matrix(0.83333,0,0,0.83333,1513,8)"
+     fill="none"
+     stroke="#f7f7f8"
+     stroke-width="2"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     id="g12"
+     style="font-family:Cantarell, 'Noto Sans', sans-serif">
+    <path
+       d="M 4,9 H 9 L 14,5 V 19 L 9,15 H 4 Z M 17,8 q 5,4 0,8"
+       id="path12" />
+  </g>
+  <g
+     transform="matrix(0.83333,0,0,0.83333,1550,8)"
+     fill="none"
+     stroke="#f7f7f8"
+     stroke-width="2"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     id="g13"
+     style="font-family:Cantarell, 'Noto Sans', sans-serif">
+    <path
+       d="m 12,3 v 9 M 7,5.5 a 9,9 0 1 0 10,0"
+       id="path13" />
+  </g>
+  <rect
+     x="563"
+     y="800"
+     width="474"
+     height="72"
+     rx="24"
+     fill="#24283b"
+     stroke="#a6a9bc"
+     stroke-width="1"
+     opacity="0.9"
+     id="rect63"
+     style="font-family:Cantarell, 'Noto Sans', sans-serif" />
+  <g
+     transform="matrix(1.33333,0,0,1.33333,589,820)"
+     fill="none"
+     stroke="#f2f3f7"
+     stroke-width="1.6"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     id="g64"
+     style="font-family:Cantarell, 'Noto Sans', sans-serif">
+    <path
+       d="M 4,4 H 9 V 9 H 4 Z m 11,0 h 5 V 9 H 15 Z M 4,15 h 5 v 5 H 4 Z m 11,0 h 5 v 5 h -5 z"
+       id="path64" />
+  </g>
+  <rect
+     x="654"
+     y="810"
+     width="52"
+     height="52"
+     rx="13"
+     fill="#535a74"
+     id="rect64"
+     style="font-family:Cantarell, 'Noto Sans', sans-serif" />
+  <g
+     transform="matrix(0.52,0,0,0.52,663,818)"
+     id="g67"
+     style="font-family:Cantarell, 'Noto Sans', sans-serif">
+    <path
+       d="M 4,14 Q 4,8 10,8 h 19 l 8,8 h 25 q 6,0 6,6 v 31 q 0,6 -6,6 H 10 Q 4,59 4,53 Z"
+       fill="#6483a0"
+       id="path65" />
+    <path
+       d="m 4,29 q 0,-6 6,-6 h 52 q 6,0 6,6 v 23 q 0,6 -6,6 H 10 Q 4,58 4,52 Z"
+       fill="#91acc5"
+       id="path66" />
+    <path
+       d="M 9,33 H 63"
+       fill="none"
+       stroke="#dde4ed"
+       stroke-width="1"
+       opacity="0.25"
+       id="path67" />
+  </g>
+  <circle
+     cx="680"
+     cy="867"
+     r="3"
+     fill="#f2f2f4"
+     id="circle67"
+     style="font-family:Cantarell, 'Noto Sans', sans-serif" />
+  <circle
+     cx="775"
+     cy="836"
+     r="22"
+     fill="#df7357"
+     id="circle68"
+     style="font-family:Cantarell, 'Noto Sans', sans-serif" />
+  <path
+     d="m 763,826 q 23,-16 26,8 -6,19 -24,13 -6,-6 -2,-21 z"
+     fill="#7256b0"
+     id="path68"
+     style="font-family:Cantarell, 'Noto Sans', sans-serif" />
+  <path
+     d="m 775,819 q 21,6 7,27 17,-5 13,-19 z"
+     fill="#f0b86a"
+     id="path69"
+     style="font-family:Cantarell, 'Noto Sans', sans-serif" />
+  <rect
+     x="833"
+     y="812"
+     width="47"
+     height="47"
+     rx="11"
+     fill="#30374d"
+     id="rect69"
+     style="font-family:Cantarell, 'Noto Sans', sans-serif" />
+  <g
+     transform="matrix(1.125,0,0,1.125,843,823)"
+     fill="none"
+     stroke="#e7e9f2"
+     stroke-width="1.9"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     id="g70"
+     style="font-family:Cantarell, 'Noto Sans', sans-serif">
+    <path
+       d="m 4,7 6,5 -6,5 m 8,0 h 8"
+       id="path70" />
+  </g>
+  <circle
+     cx="946"
+     cy="836"
+     r="23"
+     fill="#c4c8d5"
+     id="circle70"
+     style="font-family:Cantarell, 'Noto Sans', sans-serif" />
+  <g
+     transform="matrix(1.16667,0,0,1.16667,932,822)"
+     fill="none"
+     stroke="#424961"
+     stroke-width="1.5"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     id="g71"
+     style="font-family:Cantarell, 'Noto Sans', sans-serif">
+    <path
+       d="m 12,3 2,2.1 3,-0.6 1,3 3,1.5 -1.5,3 1.5,3 -3,1.5 -1,3 L 14,18.9 12,21 10,18.9 7,19.5 6,16.5 3,15 4.5,12 3,9 6,7.5 l 1,-3 3,0.6 z m 0,6 a 3,3 0 1 0 0,6 3,3 0 1 0 0,-6"
+       id="path71" />
+  </g>
+  <g
+     class="ui"
+     id="g74"
+     style="font-family:Inter, Cantarell, 'Noto Sans', system-ui, sans-serif">
+    <rect
+       x="250"
+       y="112"
+       width="1100"
+       height="624"
+       rx="28"
+       fill="url(#windowBg)"
+       stroke="#404768"
+       stroke-width="1.2"
+       id="rect22-6"
+       style="fill:url(#windowBg)" />
+    <rect
+       x="250"
+       y="112"
+       width="1100"
+       height="74"
+       rx="28"
+       fill="#1b1f31"
+       id="rect23-3" />
+    <rect
+       x="250"
+       y="140"
+       width="1100"
+       height="46"
+       fill="#1b1f31"
+       id="rect24-2" />
+    <rect
+       x="250"
+       y="186"
+       width="250"
+       height="550"
+       fill="url(#sidebarBg)"
+       clip-path="url(#files-window-clip)"
+       id="rect25-0"
+       style="fill:url(#sidebarBg)" />
+    <line
+       x1="250"
+       y1="186"
+       x2="1350"
+       y2="186"
+       class="divider"
+       id="line25"
+       style="stroke:#3a4160;stroke-width:1" />
+    <line
+       x1="500"
+       y1="186"
+       x2="500"
+       y2="736"
+       class="divider"
+       id="line26"
+       style="stroke:#3a4160;stroke-width:1" />
+    <!-- headerbar -->
+    <g
+       transform="translate(270,129)"
+       id="g29-6">
+      <rect
+         x="0"
+         y="0"
+         width="42"
+         height="40"
+         rx="12"
+         fill="#2b3250"
+         id="rect26" />
+      <path
+         class="icon"
+         d="M 25,10 15,20 25,30"
+         id="path26-1"
+         style="fill:none;stroke:#eceef5;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" />
+      <rect
+         x="54"
+         y="0"
+         width="42"
+         height="40"
+         rx="12"
+         fill="#2b3250"
+         opacity="0.72"
+         id="rect27" />
+      <path
+         class="icon"
+         d="M 70,10 80,20 70,30"
+         opacity="0.48"
+         id="path27-5"
+         style="fill:none;stroke:#eceef5;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" />
+      <rect
+         x="108"
+         y="0"
+         width="164"
+         height="40"
+         rx="12"
+         fill="#2b3250"
+         id="rect28" />
+      <path
+         class="icon"
+         d="m 124,25 v -8 l 8,-6 8,6 v 8"
+         id="path28-5"
+         style="fill:none;stroke:#eceef5;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" />
+      <text
+         x="151"
+         y="26"
+         class="text"
+         font-weight="700"
+         id="text28"
+         style="font-size:17px;fill:#e7e8ed">Home</text>
+      <path
+         class="icon"
+         d="m 240,16 7,7 7,-7"
+         id="path29-4"
+         style="fill:none;stroke:#eceef5;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" />
+    </g>
+    <text
+       x="799"
+       y="155"
+       class="title"
+       text-anchor="middle"
+       id="text29-7"
+       style="font-weight:700;font-size:20px;fill:#f7f7f9">Files</text>
+    <g
+       transform="translate(1045,129)"
+       id="g33-6">
+      <rect
+         x="0"
+         y="0"
+         width="42"
+         height="40"
+         rx="12"
+         fill="#2b3250"
+         id="rect29" />
+      <circle
+         cx="18"
+         cy="17"
+         r="8"
+         class="icon"
+         id="circle29"
+         style="fill:none;stroke:#eceef5;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" />
+      <path
+         class="icon"
+         d="m 24,23 6,6"
+         id="path30-5"
+         style="fill:none;stroke:#eceef5;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" />
+      <rect
+         x="56"
+         y="0"
+         width="42"
+         height="40"
+         rx="12"
+         fill="#2b3250"
+         id="rect30-6" />
+      <path
+         class="icon"
+         d="M 66,12 H 88 M 66,20 H 88 M 66,28 H 88"
+         id="path31-9"
+         style="fill:none;stroke:#eceef5;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" />
+      <rect
+         x="112"
+         y="0"
+         width="42"
+         height="40"
+         rx="12"
+         fill="#2b3250"
+         id="rect31" />
+      <circle
+         cx="133"
+         cy="14"
+         r="2.3"
+         fill="#eef1f7"
+         id="circle31" />
+      <circle
+         cx="133"
+         cy="20"
+         r="2.3"
+         fill="#eef1f7"
+         id="circle32" />
+      <circle
+         cx="133"
+         cy="26"
+         r="2.3"
+         fill="#eef1f7"
+         id="circle33" />
+      <rect
+         x="245"
+         y="0"
+         width="42"
+         height="40"
+         rx="12"
+         fill="#2b3250"
+         id="rect33" />
+      <path
+         class="icon"
+         d="m 258,14 16,12 m 0,-12 -16,12"
+         id="path33-3"
+         style="fill:none;stroke:#eceef5;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" />
+    </g>
+    <!-- sidebar -->
+    <g
+       transform="translate(270,215)"
+       id="g48">
+      <g
+         id="g34-7">
+        <circle
+           cx="12"
+           cy="12"
+           r="10"
+           class="icon"
+           opacity="0.8"
+           id="circle34"
+           style="fill:none;stroke:#eceef5;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" />
+        <path
+           class="icon"
+           d="m 12,7 v 5 l 4,4"
+           opacity="0.8"
+           id="path34-4"
+           style="fill:none;stroke:#eceef5;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" />
+        <text
+           x="43"
+           y="18"
+           class="text"
+           id="text34-5"
+           style="font-size:17px;fill:#e7e8ed">Recent</text>
+      </g>
+      <g
+         transform="translate(0,48)"
+         id="g35-2">
+        <path
+           class="icon"
+           d="m 12,1 3.5,7 8,1.1 -5.8,5.4 1.4,7.8 L 12,18.5 4.9,22.3 6.3,14.5 0.5,9.1 8.5,8 Z"
+           opacity="0.8"
+           id="path35-5"
+           style="fill:none;stroke:#eceef5;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" />
+        <text
+           x="43"
+           y="18"
+           class="text"
+           id="text35-4"
+           style="font-size:17px;fill:#e7e8ed">Starred</text>
+      </g>
+      <g
+         transform="translate(-10,90)"
+         id="g36-7">
+        <rect
+           x="0"
+           y="0"
+           width="228"
+           height="44"
+           rx="14"
+           fill="#ff9e64"
+           id="rect35" />
+        <path
+           d="m 23,26 v -9 l 8,-6 8,6 v 9"
+           fill="none"
+           stroke="#16161e"
+           stroke-width="2.2"
+           stroke-linecap="round"
+           stroke-linejoin="round"
+           id="path36-4" />
+        <text
+           x="55"
+           y="28"
+           class="text darkText"
+           font-weight="700"
+           id="text36-4"
+           style="font-size:17px;fill:#16161e">Home</text>
+      </g>
+      <g
+         transform="translate(0,148)"
+         id="g37-3">
+        <path
+           class="icon"
+           d="m 3,8 h 11 l 4,4 H 28 V 24 H 3 Z"
+           opacity="0.8"
+           id="path37-0"
+           style="fill:none;stroke:#eceef5;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" />
+        <text
+           x="43"
+           y="18"
+           class="text"
+           id="text37-7"
+           style="font-size:17px;fill:#e7e8ed">Documents</text>
+      </g>
+      <g
+         transform="translate(0,196)"
+         id="g40">
+        <path
+           class="icon"
+           d="M 12,2 V 19"
+           opacity="0.8"
+           id="path38-8"
+           style="fill:none;stroke:#eceef5;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" />
+        <path
+           class="icon"
+           d="m 5,12 7,7 7,-7"
+           opacity="0.8"
+           id="path39-6"
+           style="fill:none;stroke:#eceef5;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" />
+        <path
+           class="icon"
+           d="M 4,24 H 20"
+           opacity="0.8"
+           id="path40-8"
+           style="fill:none;stroke:#eceef5;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" />
+        <text
+           x="43"
+           y="18"
+           class="text"
+           id="text40"
+           style="font-size:17px;fill:#e7e8ed">Downloads</text>
+      </g>
+      <g
+         transform="translate(0,244)"
+         id="g41">
+        <rect
+           x="3"
+           y="4"
+           width="24"
+           height="17"
+           rx="3"
+           fill="none"
+           stroke="#eceef5"
+           stroke-width="2.2"
+           opacity="0.8"
+           id="rect40" />
+        <circle
+           cx="10"
+           cy="10"
+           r="2"
+           fill="#eceef5"
+           opacity="0.8"
+           id="circle40" />
+        <path
+           class="icon"
+           d="m 8,18 6,-6 4,4 4,-3 5,5"
+           opacity="0.8"
+           id="path41-8"
+           style="fill:none;stroke:#eceef5;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" />
+        <text
+           x="43"
+           y="18"
+           class="text"
+           id="text41"
+           style="font-size:17px;fill:#e7e8ed">Pictures</text>
+      </g>
+      <g
+         transform="translate(0,292)"
+         id="g44">
+        <path
+           class="icon"
+           d="M 11,8 25,4 v 15"
+           opacity="0.8"
+           id="path42-4"
+           style="fill:none;stroke:#eceef5;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" />
+        <path
+           class="icon"
+           d="M 11,8 V 24"
+           opacity="0.8"
+           id="path43-3"
+           style="fill:none;stroke:#eceef5;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" />
+        <ellipse
+           cx="7"
+           cy="24"
+           rx="4"
+           ry="2.7"
+           class="icon"
+           opacity="0.8"
+           id="ellipse43"
+           style="fill:none;stroke:#eceef5;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" />
+        <ellipse
+           cx="21"
+           cy="19"
+           rx="4"
+           ry="2.7"
+           class="icon"
+           opacity="0.8"
+           id="ellipse44"
+           style="fill:none;stroke:#eceef5;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" />
+        <text
+           x="43"
+           y="18"
+           class="text"
+           id="text44"
+           style="font-size:17px;fill:#e7e8ed">Music</text>
+      </g>
+      <g
+         transform="translate(0,340)"
+         id="g45">
+        <rect
+           x="4"
+           y="7"
+           width="19"
+           height="14"
+           rx="2"
+           fill="none"
+           stroke="#eceef5"
+           stroke-width="2.2"
+           opacity="0.8"
+           id="rect44" />
+        <path
+           class="icon"
+           d="M 23,11 30,7 V 21 L 23,17"
+           opacity="0.8"
+           id="path44-1"
+           style="fill:none;stroke:#eceef5;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" />
+        <text
+           x="43"
+           y="18"
+           class="text"
+           id="text45-4"
+           style="font-size:17px;fill:#e7e8ed">Videos</text>
+      </g>
+      <g
+         transform="translate(0,388)"
+         id="g46">
+        <path
+           class="icon"
+           d="m 6,6 h 12 l 2,16 H 4 Z"
+           opacity="0.8"
+           id="path45-9"
+           style="fill:none;stroke:#eceef5;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" />
+        <path
+           class="icon"
+           d="M 10,6 V 3 h 4 v 3"
+           opacity="0.8"
+           id="path46-2"
+           style="fill:none;stroke:#eceef5;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" />
+        <text
+           x="43"
+           y="18"
+           class="text"
+           id="text46"
+           style="font-size:17px;fill:#e7e8ed">Trash</text>
+      </g>
+      <line
+         x1="0"
+         y1="442"
+         x2="218"
+         y2="442"
+         class="divider"
+         id="line46"
+         style="stroke:#3a4160;stroke-width:1" />
+      <g
+         transform="translate(0,466)"
+         id="g47">
+        <path
+           class="icon"
+           d="M 12,2 V 22 M 2,12 h 20"
+           opacity="0.7"
+           id="path47-0"
+           style="fill:none;stroke:#eceef5;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" />
+        <text
+           x="43"
+           y="18"
+           class="text"
+           id="text47"
+           style="font-size:17px;fill:#e7e8ed">Other Locations</text>
+      </g>
+    </g>
+    <!-- content/list view -->
+    <g
+       transform="translate(530,212)"
+       id="g73">
+      <g
+         transform="translate(0,12)"
+         id="g51">
+        <rect
+           x="0"
+           y="0"
+           width="790"
+           height="34"
+           rx="10"
+           fill="#24283b"
+           id="rect48" />
+        <text
+           x="22"
+           y="22"
+           class="small"
+           font-weight="700"
+           id="text48-6"
+           style="font-size:14px;fill:#aab0c7">Name</text>
+        <text
+           x="500"
+           y="22"
+           class="small"
+           font-weight="700"
+           id="text49"
+           style="font-size:14px;fill:#aab0c7">Size</text>
+        <text
+           x="600"
+           y="22"
+           class="small"
+           font-weight="700"
+           id="text50"
+           style="font-size:14px;fill:#aab0c7">Type</text>
+        <text
+           x="705"
+           y="22"
+           class="small"
+           font-weight="700"
+           id="text51-8"
+           style="font-size:14px;fill:#aab0c7">Modified</text>
+      </g>
+      <g
+         transform="translate(0,60)"
+         id="g72-9">
+        <!-- row helper: row height 52 -->
+        <g
+           id="g55">
+          <rect
+             width="790"
+             height="52"
+             rx="9"
+             fill="#21263a"
+             opacity="0.15"
+             id="rect51"
+             x="0"
+             y="0" />
+          <path
+             d="m 20,16 h 18 l 5,5 h 18 a 4,4 0 0 1 4,4 v 12 a 5,5 0 0 1 -5,5 H 25 A 5,5 0 0 1 20,37 V 21 a 5,5 0 0 1 5,-5 z"
+             fill="#adc0d5"
+             id="path51-2" />
+          <text
+             x="86"
+             y="32"
+             class="text"
+             id="text52"
+             style="font-size:17px;fill:#e7e8ed">Documents</text>
+          <text
+             x="500"
+             y="32"
+             class="muted"
+             id="text53"
+             style="font-size:16px;fill:#aeb4cb">—</text>
+          <text
+             x="600"
+             y="32"
+             class="muted"
+             id="text54-6"
+             style="font-size:16px;fill:#aeb4cb">Folder</text>
+          <text
+             x="705"
+             y="32"
+             class="muted"
+             id="text55"
+             style="font-size:16px;fill:#aeb4cb">Yesterday</text>
+        </g>
+        <g
+           transform="translate(0,60)"
+           id="g59">
+          <rect
+             width="790"
+             height="52"
+             rx="9"
+             fill="#21263a"
+             opacity="0.15"
+             id="rect55"
+             x="0"
+             y="0" />
+          <path
+             d="m 20,16 h 18 l 5,5 h 18 a 4,4 0 0 1 4,4 v 12 a 5,5 0 0 1 -5,5 H 25 A 5,5 0 0 1 20,37 V 21 a 5,5 0 0 1 5,-5 z"
+             fill="#adc0d5"
+             id="path55-6" />
+          <text
+             x="86"
+             y="32"
+             class="text"
+             id="text56"
+             style="font-size:17px;fill:#e7e8ed">Downloads</text>
+          <text
+             x="500"
+             y="32"
+             class="muted"
+             id="text57-4"
+             style="font-size:16px;fill:#aeb4cb">—</text>
+          <text
+             x="600"
+             y="32"
+             class="muted"
+             id="text58"
+             style="font-size:16px;fill:#aeb4cb">Folder</text>
+          <text
+             x="705"
+             y="32"
+             class="muted"
+             id="text59"
+             style="font-size:16px;fill:#aeb4cb">Thu</text>
+        </g>
+        <g
+           transform="translate(0,120)"
+           id="g63-9">
+          <rect
+             width="790"
+             height="52"
+             rx="12"
+             fill="#ff9e64"
+             id="rect59"
+             x="0"
+             y="0" />
+          <path
+             d="m 20,16 h 18 l 5,5 h 18 a 4,4 0 0 1 4,4 v 12 a 5,5 0 0 1 -5,5 H 25 A 5,5 0 0 1 20,37 V 21 a 5,5 0 0 1 5,-5 z"
+             fill="#4d596f"
+             id="path59-5" />
+          <text
+             x="86"
+             y="32"
+             class="text darkText"
+             font-weight="700"
+             id="text60-0"
+             style="font-size:17px;fill:#16161e">Projects</text>
+          <text
+             x="500"
+             y="32"
+             class="small darkText"
+             id="text61"
+             style="font-size:14px;fill:#16161e">—</text>
+          <text
+             x="600"
+             y="32"
+             class="small darkText"
+             id="text62"
+             style="font-size:14px;fill:#16161e">Folder</text>
+          <text
+             x="705"
+             y="32"
+             class="small darkText"
+             id="text63-4"
+             style="font-size:14px;fill:#16161e">Today</text>
+        </g>
+        <g
+           transform="translate(0,180)"
+           id="g67-8">
+          <rect
+             width="790"
+             height="52"
+             rx="9"
+             fill="#21263a"
+             opacity="0.15"
+             id="rect63-7"
+             x="0"
+             y="0" />
+          <path
+             d="m 20,16 h 18 l 5,5 h 18 a 4,4 0 0 1 4,4 v 12 a 5,5 0 0 1 -5,5 H 25 A 5,5 0 0 1 20,37 V 21 a 5,5 0 0 1 5,-5 z"
+             fill="#adc0d5"
+             id="path63-1" />
+          <text
+             x="86"
+             y="32"
+             class="text"
+             id="text64"
+             style="font-size:17px;fill:#e7e8ed">Pictures</text>
+          <text
+             x="500"
+             y="32"
+             class="muted"
+             id="text65"
+             style="font-size:16px;fill:#aeb4cb">—</text>
+          <text
+             x="600"
+             y="32"
+             class="muted"
+             id="text66"
+             style="font-size:16px;fill:#aeb4cb">Folder</text>
+          <text
+             x="705"
+             y="32"
+             class="muted"
+             id="text67"
+             style="font-size:16px;fill:#aeb4cb">11 Nov</text>
+        </g>
+        <g
+           transform="translate(0,240)"
+           id="g71-7">
+          <rect
+             width="790"
+             height="52"
+             rx="9"
+             fill="#21263a"
+             opacity="0.15"
+             id="rect67"
+             x="0"
+             y="0" />
+          <path
+             d="m 20,16 h 18 l 5,5 h 18 a 4,4 0 0 1 4,4 v 12 a 5,5 0 0 1 -5,5 H 25 A 5,5 0 0 1 20,37 V 21 a 5,5 0 0 1 5,-5 z"
+             fill="#adc0d5"
+             id="path67-2" />
+          <text
+             x="86"
+             y="32"
+             class="text"
+             id="text68"
+             style="font-size:17px;fill:#e7e8ed">Videos</text>
+          <text
+             x="500"
+             y="32"
+             class="muted"
+             id="text69"
+             style="font-size:16px;fill:#aeb4cb">—</text>
+          <text
+             x="600"
+             y="32"
+             class="muted"
+             id="text70"
+             style="font-size:16px;fill:#aeb4cb">Folder</text>
+          <text
+             x="705"
+             y="32"
+             class="muted"
+             id="text71"
+             style="font-size:16px;fill:#aeb4cb">9 Nov</text>
+        </g>
+      </g>
+      <line
+         x1="0"
+         y1="446"
+         x2="790"
+         y2="446"
+         class="divider"
+         id="line72"
+         style="stroke:#3a4160;stroke-width:1" />
+      <text
+         x="0"
+         y="474"
+         class="muted"
+         id="text72"
+         style="font-size:16px;fill:#aeb4cb">5 items</text>
+    </g>
+    <rect
+       x="250"
+       y="112"
+       width="1100"
+       height="624"
+       rx="28"
+       fill="none"
+       stroke="#404768"
+       stroke-width="1.2"
+       id="rect73" />
+  </g>
+</svg>
