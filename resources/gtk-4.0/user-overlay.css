@@ -18,9 +18,9 @@ window, dialog, popover {
   --popover-bg-color: #1f2335;
 
   /* Keep Adwaita's light foregrounds and translucent card styles. */
-  --accent-bg-color: #ff9e64;
+  --accent-bg-color: #7aa2f7;
   --accent-fg-color: #16161e;
-  --accent-color: oklab(from #ff9e64 max(l, 0.85) a b);
+  --accent-color: oklab(from #7aa2f7 max(l, 0.85) a b);
 }
 
 }

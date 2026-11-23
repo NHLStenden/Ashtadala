@@ -17,6 +17,8 @@ import sys
 import tempfile
 from typing import Any
 
+from tokyonight_colors import ACCENTS as TOKYONIGHT_ACCENTS, DEFAULT as DEFAULT_ACCENT_NAME, resolve as resolve_tokyonight_accent
+
 ROOT = Path(__file__).resolve().parent
 THEME = 'TokyoAdwaita-Night'
 EXTENSION = 'user-theme@gnome-shell-extensions.gcampax.github.com'
@@ -24,7 +26,7 @@ STATE_NAME = 'tokyoadwaita-night'
 START = '/* BEGIN TOKYOADWAITA-NIGHT: managed GTK4 import */'
 END = '/* END TOKYOADWAITA-NIGHT */'
 IMPORT = '@import url("tokyoadwaita-night.css");'
-ACCENT_DEFAULT = '#ff9e64'
+ACCENT_DEFAULT = TOKYONIGHT_ACCENTS[DEFAULT_ACCENT_NAME]
 # Replace dark surfaces without changing Adwaita's light foregrounds.
 PALETTE = {
     'BG': '#1a1b26',
@@ -77,6 +79,49 @@ def accent_valid(value: str) -> str:
     if not re.fullmatch(r'#[0-9a-fA-F]{6}', value):
         raise ThemeError('The accent must be a six-digit #RRGGBB hexadecimal color')
     return value.lower()
+
+
+def accent_choice(value: str) -> str:
+    """Accept official TokyoNight color names or a custom #RRGGBB."""
+    try:
+        return resolve_tokyonight_accent(value)
+    except ValueError as e:
+        raise ThemeError(str(e)) from e
+
+
+def detour_file() -> Path:
+    return ROOT / 'native-detour/scripts/gnome-slate-detour.sh'
+
+
+def detour_run(action: str, color: str | None = None) -> None:
+    """Delegate lifecycle to the separately reversible, user-only v2 installer."""
+    argv = ['bash', str(detour_file()), action]
+    if color is not None:
+        argv.append(color)
+    result = run(argv, check=False)
+    if result.returncode:
+        details = (result.stderr or result.stdout or b'').decode(errors='replace').strip()
+        raise ThemeError(f'Native GNOME accent detour {action} failed: {details}')
+    output = result.stdout.decode(errors='replace').strip()
+    if output:
+        print(output)
+
+
+def detour_existing_color() -> str | None:
+    """Snapshot only our known v2 drop-in for transactional rollback."""
+    config = Path(os.environ.get('XDG_CONFIG_HOME') or str(Path.home() / '.config'))
+    dropin = config / 'systemd/user/org.gnome.Shell@user.service.d/80-gnome-slate-detour.conf'
+    if dropin.is_symlink():
+        raise ThemeError('Native accent drop-in is a symlink; refusing modification')
+    if not dropin.exists():
+        return None
+    data = dropin.read_text(encoding='utf-8')
+    if '# Managed by gnome-slate-detour v2' not in data.splitlines():
+        raise ThemeError('An unmanaged GNOME accent drop-in exists; refusing to adopt it')
+    matches = re.findall(r'^Environment="GNOME_SLATE_DETOUR_COLOR=(#[0-9a-fA-F]{6})"$', data, re.M)
+    if len(matches) != 1:
+        raise ThemeError('Managed native accent drop-in has an unexpected color definition')
+    return matches[0].lower()
 
 
 def relative_luminance(color: str) -> float:
@@ -521,7 +566,15 @@ def install(args):
         directory = p['system_theme'] if args.scope == 'system' else p['user_theme']
         check_conflicts(state, p, directory)
         source, _ = stock_shell_resource()
-        files, metrics = theme_files(accent_valid(args.accent), source)
+        files, metrics = theme_files(accent_choice(args.accent), source)
+        detour_enabled = getattr(args, 'native_detour', None)
+        if detour_enabled is None:
+            detour_enabled = bool(state and state.get('native_detour_enabled', False))
+        if detour_enabled:
+            if args.system_accent != 'slate':
+                raise ThemeError('--native-detour requires --system-accent slate')
+            detour_existing_color()  # fail on unmanaged drop-ins before any changes
+            detour_run('check')
         if args.flatpak: flatpak_preflight()
         print(f'Preflight OK: {args.scope} -> {directory}; shell theme size {len(files["gnome-shell/gnome-shell.css"])} B')
         print('Shell accent replacements:', metrics['shell_replacements'])
@@ -534,11 +587,27 @@ def install(args):
     if args.scope == 'system' and '/usr/local/share' not in \
             os.environ.get('XDG_DATA_DIRS', '/usr/local/share:/usr/share').split(':'):
         raise ThemeError('Your session does not search /usr/local/share for themes. Use --scope user instead.')
-    accent = accent_valid(args.accent)
+    accent = accent_choice(args.accent)
     if args.flatpak:
         flatpak_preflight()
     sys_accent = nearest_system_accent(accent) if args.system_accent == 'auto' else args.system_accent
+    detour_enabled = getattr(args, 'native_detour', None)
+    if detour_enabled is None:
+        detour_enabled = bool(state and state.get('native_detour_enabled', False))
+    if detour_enabled and sys_accent != 'slate':
+        raise ThemeError('--native-detour requires --system-accent slate')
     check_conflicts(state, p, directory)
+    previous_detour = None
+    if detour_enabled or (state and state.get('native_detour_enabled', False)):
+        previous_detour = detour_existing_color()
+    if detour_enabled:
+        detour_run('check')
+    # Preserve an already-installed standalone v2 detour, rather than claiming
+    # or removing it when the theme is later disabled/uninstalled.
+    if state and state.get('native_detour_enabled', False):
+        original_detour_color = state.get('native_detour_original_color')
+    else:
+        original_detour_color = previous_detour if detour_enabled else None
     source, _ = stock_shell_resource()
     files, metrics = theme_files(accent, source)
     previous_gtk = file_snapshot(p['gtk_css'])
@@ -553,6 +622,8 @@ def install(args):
         'shell_source_sha': metrics['source_sha256'],
         'gtk_css_existed': state.get('gtk_css_existed', True) if state else previous_gtk is not None,
         'flatpak_enabled': args.flatpak,
+        'native_detour_enabled': bool(detour_enabled),
+        'native_detour_original_color': original_detour_color if detour_enabled else None,
         'flatpak_old': state.get('flatpak_old') if state else None,
         'flatpak_written_sha': state.get('flatpak_written_sha') if state else None,
         'settings': old_settings,
@@ -568,6 +639,7 @@ def install(args):
     theme_applied = False
     flatpak_before = flatpak_snapshot() if args.flatpak else None
     flatpak_changed = False
+    detour_touched = False
     try:
         stage_theme(directory, files, state['files'] if state else None, args.scope)
         theme_applied = True
@@ -598,8 +670,25 @@ def install(args):
                 gset(schema, key, encoded)
                 changed_settings.append((schema, key, last))
             new_state['settings'][skey] = {'old': old, 'set': gget(schema, key)}
+        if detour_enabled:
+            detour_touched = True  # rollback even if the helper exits mid-install
+            detour_run('install', accent)
+        elif state and state.get('native_detour_enabled', False):
+            detour_touched = True
+            if original_detour_color:
+                detour_run('install', original_detour_color)
+            else:
+                detour_run('uninstall')
         atomic_write(p['state'], (json.dumps(new_state, sort_keys=True, indent=2) + '\n').encode())
     except Exception:
+        if detour_touched:
+            try:
+                if previous_detour:
+                    detour_run('install', previous_detour)
+                else:
+                    detour_run('uninstall')
+            except Exception as err:
+                print('ROLLBACK warning (native detour):', err, file=sys.stderr)
         # Restore settings and files changed by this attempt.
         for schema, key, previous in reversed(changed_settings):
             try: gset(schema, key, previous)
@@ -620,6 +709,7 @@ def install(args):
     print(f'Installed {THEME} ({args.scope}) — accent {accent} (CSS) / {sys_accent} (system API).')
     print('GNOME Shell colors updated:', metrics['shell_replacements'])
     if args.flatpak: print('Flatpak: granted read-only theme/config access for sandboxed GTK applications')
+    if detour_enabled: print(f'Native GNOME Shell accent: detour enabled ({accent}); applies after re-login')
     print('Log out and back in to load the GNOME Shell theme and new extension.')
     print('User Themes is enabled in the GNOME Shell settings; re-login may be required to load it.')
 
@@ -662,6 +752,13 @@ def uninstall(args):
         flatpak_restore = sha(fp_raw or b'') == state.get('flatpak_written_sha')
         if not flatpak_restore:
             print('WARNING: Flatpak override was modified after install; leaving it untouched')
+    # Remove the optional native hook only when explicitly managed by this theme.
+    # Abort uninstallation if the hook refuses removal; don't strand it unexpectedly.
+    if state.get('native_detour_enabled', False):
+        if state.get('native_detour_original_color'):
+            detour_run('install', state['native_detour_original_color'])
+        else:
+            detour_run('uninstall')
     # System-scope removal uses the restricted privileged helper.
     delete_theme(directory, state['files'], state['scope'])
     if not state.get('gtk_css_existed', True) and not new_css.strip():
@@ -699,6 +796,8 @@ def do_validate(args):
         css = file_snapshot(p['gtk_css'])
         if not css or START not in css.decode():
             raise ThemeError('GTK4 import not active')
+        if state.get('native_detour_enabled', False):
+            print('Native detour was enabled with theme; inspect ./diagnose.sh and native-detour helper status')
         if state.get('flatpak_enabled') and sha(flatpak_snapshot() or b'') != state.get('flatpak_written_sha'):
             print('NOTICE: Flatpak override changed since install')
         if EXTENSION not in parse_gvariant_array(gget('org.gnome.shell', 'enabled-extensions')):
@@ -740,6 +839,12 @@ def diagnose():
         print('GTK4 user import present:', p['gtk_css'].is_file() and START in p['gtk_css'].read_text())
         print('GTK4 managed color CSS present:', p['gtk_override'].is_file())
         print('Flatpak integration enabled:', state.get('flatpak_enabled', False))
+        print('Native Shell detour enabled:', state.get('native_detour_enabled', False))
+        if state.get('native_detour_enabled', False):
+            try:
+                print('Native detour configured color:', detour_existing_color() or '(not installed)')
+            except ThemeError as e:
+                print('Native detour check:', e)
     if shutil.which('flatpak'):
         q = run(['flatpak', 'override', '--user', '--show'], check=False)
         print('Flatpak user overrides (summary):')
@@ -755,15 +860,27 @@ def parse_args():
     cmd = parser.add_subparsers(dest='command', required=True)
     p = cmd.add_parser('install', help='Create theme, activate GTK3 + GNOME Shell + GTK4 overrides')
     p.add_argument('--scope', choices=['user', 'system'], default='user')
-    p.add_argument('--accent', default=ACCENT_DEFAULT)
+    p.add_argument('--accent', default=DEFAULT_ACCENT_NAME, help='TokyoNight name or #RRGGBB (default: blue)')
     p.add_argument('--system-accent', choices=['auto', *SYSTEM_ACCENTS], default='slate',
                    help='GNOME native accent: slate (default), or auto (nearest named color)')
     p.add_argument('--flatpak', action='store_true', help='Allow user Flatpaks to read GTK CSS and theme directories')
     p.add_argument('--install-extension', action='store_true', help='Allow sudo dnf to install Fedora User Themes extension')
     p.add_argument('--check', action='store_true', help='Read-only compatibility and conflict preflight')
+    p.add_argument('--list-accents', action='store_true', help='Show supported TokyoNight accent names')
+    dg = p.add_mutually_exclusive_group()
+    dg.add_argument('--native-detour', action='store_true', default=None,
+                    help='Opt in to native Shell accent via user-local LD_PRELOAD (requires re-login)')
+    dg.add_argument('--no-native-detour', dest='native_detour', action='store_false',
+                    help='Disable a previously managed native detour')
     cmd.add_parser('uninstall', help='Restore settings and remove only our own files')
     c = cmd.add_parser('configure', help='Rebuild in place with a new accent and current Shell stylesheet')
-    c.add_argument('--accent', default=None)
+    c.add_argument('--accent', default=None, help='TokyoNight name or #RRGGBB')
+    c.add_argument('--list-accents', action='store_true', help='Show supported TokyoNight accent names')
+    dg = c.add_mutually_exclusive_group()
+    dg.add_argument('--native-detour', action='store_true', default=None,
+                    help='Enable native Shell accent hook')
+    dg.add_argument('--no-native-detour', dest='native_detour', action='store_false',
+                    help='Disable managed native Shell accent hook')
     c.add_argument('--system-accent', choices=['auto', *SYSTEM_ACCENTS], default=None)
     c.add_argument('--flatpak', action='store_true', help='Enable GTK CSS access for Flatpak applications')
     c.add_argument('--refresh', action='store_true', help='Regenerate after a Fedora/GNOME update')
@@ -775,6 +892,11 @@ def parse_args():
 
 def main():
     args = parse_args()
+    if getattr(args, 'list_accents', False):
+        print('TokyoNight Night accents (default: blue):')
+        for name, color in TOKYONIGHT_ACCENTS.items():
+            print(f'  {name:8s} {color}')
+        return 0
     try:
         if args.command == 'install':
             install(args)
@@ -782,8 +904,8 @@ def main():
             state, _ = get_last_state()
             if not state:
                 raise ThemeError('Nothing installed; start with ./install.sh')
-            if args.accent is None and args.system_accent is None and not args.refresh and not args.flatpak:
-                raise ThemeError('Choose --accent #RRGGBB, --system-accent NAME, --flatpak, or --refresh')
+            if args.accent is None and args.system_accent is None and not args.refresh and not args.flatpak and args.native_detour is None:
+                raise ThemeError('Choose --accent NAME/#RRGGBB, --native-detour, --no-native-detour, --system-accent NAME, --flatpak, or --refresh')
             args.scope = state['scope']
             args.accent = args.accent or state['accent']
             args.system_accent = args.system_accent or state.get('system_accent_mode', 'auto')

@@ -3,7 +3,7 @@
 [![TokyoAdwaita Night](assets/TokyoAdwaita-Night-preview.svg)](assets/TokyoAdwaita-Night-preview.svg)
 
 An Adwaita Dark theme for Fedora 45 with GNOME, with TokyoNight Night backgrounds and a
-configurable accent (`#ff9e64` by default). Adwaita's layout, icons, light foregrounds and
+configurable accent (TokyoNight `blue` / `#7aa2f7` by default). Adwaita's layout, icons, light foregrounds and
 transparency remain in place.
 
 The theme covers GTK3, GTK4/libadwaita and GNOME Shell. It builds its Shell stylesheet from the
@@ -51,18 +51,31 @@ Log out and back in to reload GNOME Shell. Restart open applications to pick up 
 
 ## Change the accent
 
+TokyoNight's canonical `blue` (`#7aa2f7`) is the default: balanced against the Night background,
+with an ordinary UI selection color rather than a warm warning-like accent. Other supported names:
+
+| Name | Hex | Name | Hex |
+| --- | --- | --- | --- |
+| **blue (default)** | `#7aa2f7` | `cyan` | `#7dcfff` |
+| `purple` | `#9d7cd8` | `magenta` | `#bb9af7` |
+| `green` | `#9ece6a` | `teal` | `#1abc9c` |
+| `yellow` | `#e0af68` | `peach` | `#ff9e64` |
+| `red` | `#f7768e` | | |
+
 ```sh
-./configure.sh --accent '#f6a879'
-./configure.sh --accent '#ff9e64'  # default
+./install.sh --list-accents
+./configure.sh --accent magenta
+./configure.sh --accent peach
+./configure.sh --accent '#f6a879'  # custom colors still supported
 ```
 
-The color accepts any six-digit `#RRGGBB` value. Button and selection foregrounds are chosen for
-contrast with the configured accent.
+Named colors resolve to an exact hex throughout GTK3, GTK4 and Shell CSS. Button and selection
+foregrounds are automatically chosen for contrast.
 
-GNOME's native accent preference accepts named colors, not arbitrary hex values. The installer
-uses `slate` by default because GNOME's `orange` does not match the TokyoNight peach. GTK and
-Shell CSS use the exact chosen color; some Settings illustrations and other native-accent
-consumers will still use slate. To change that fallback:
+GNOME's native accent preference accepts nine GNOME names, not arbitrary hex values. The theme
+uses `slate` as the system preference by default; the custom stylesheet uses your TokyoNight accent.
+Without the optional native detour below, Shell-native widgets and some Settings illustrations may
+still show GNOME's slate. To change GNOME's named fallback:
 
 ```sh
 ./configure.sh --system-accent orange
@@ -70,6 +83,48 @@ consumers will still use slate. To change that fallback:
 ```
 
 `auto` picks the nearest named GNOME accent. It does not change the system API's available colors.
+
+## Optional native GNOME Shell accent detour (advanced)
+
+If you want GNOME Shell's **native** slate-based highlights to match GTK/Shell CSS exactly, opt in
+to a bundled, user-local `LD_PRELOAD` hook. This is the previously proven
+`cogl_color_from_string()` detour, installed for `org.gnome.Shell@user.service`. It does **not** edit
+`libst-51.so`, require root, or hook GTK/libadwaita applications. It is disabled by default because
+it injects code into the Wayland compositor.
+
+New install:
+
+```sh
+./install.sh --scope user --accent blue --native-detour
+```
+
+For an existing TokyoAdwaita-Night installation (including an existing standalone v2 detour):
+
+```sh
+./configure.sh --accent blue --native-detour
+./configure.sh --accent magenta  # updates theme + managed native detour together
+./diagnose.sh
+bash native-detour/scripts/gnome-slate-detour.sh status
+bash native-detour/scripts/gnome-slate-detour.sh logs
+```
+
+The hook requires `--system-accent slate`, GNOME Shell 51, `cc`, `readelf` and a user systemd session.
+`./install.sh --check --native-detour` can run compatibility checks before installation.
+**Log out and back in** after activation or accent changes; never restart your live Wayland Shell.
+
+Disable only the integrated hook:
+
+```sh
+./configure.sh --no-native-detour
+```
+
+If you had a standalone v2 detour before enabling integration, its previous accent is saved and
+restored when you disable integration or uninstall the theme; otherwise the managed hook is removed.
+If the hook causes a login loop, use Ctrl+Alt+F3 to enter a TTY and remove **only**
+`~/.config/systemd/user/org.gnome.Shell@user.service.d/80-gnome-slate-detour.conf`, then
+`systemctl --user daemon-reload` and reboot. Do not delete the entire service drop-in directory.
+The native hook may need revalidation after GNOME updates. GNOME Settings illustrations and
+GTK/libadwaita native accent consumers remain governed by the GNOME named preference.
 
 ## Update and remove
 
@@ -88,7 +143,8 @@ installation.
 
 ## Compatibility
 
-The theme does not modify application binaries, GDM or browser profiles. Applications with their
+The normal theme does not modify application binaries, GDM or browser profiles; the optional
+native detour injects a shared library into the current user's GNOME Shell only. Applications with their
 own rendering or color settings may not follow the GTK palette. GNOME's native accent colors and
 some artwork in Settings are separate from GTK and Shell CSS. Blur My Shell controls transparency
 and blur independently.

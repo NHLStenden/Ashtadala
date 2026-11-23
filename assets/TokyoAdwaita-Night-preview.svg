@@ -34,7 +34,7 @@
   <title
      id="title">TokyoAdwaita Night theme preview</title>
   <desc
-     id="description">Editable vector illustration of a GNOME desktop and Files window, with TokyoNight Night backgrounds, Adwaita-style foregrounds, a peach selection, and a neutral dock indicator. Not an operating-system screenshot.</desc>
+     id="description">Editable vector illustration of a GNOME desktop and Files window, with TokyoNight Night backgrounds, Adwaita-style foregrounds, a blue selection, and a neutral dock indicator. Not an operating-system screenshot.</desc>
   <defs
      id="defs5">
     <linearGradient
@@ -619,7 +619,7 @@
            width="228"
            height="44"
            rx="14"
-           fill="#ff9e64"
+           fill="#7aa2f7"
            id="rect35" />
         <path
            d="m 23,25 v -9 l 8,-6 8,6 v 9"
@@ -965,7 +965,7 @@
              width="790"
              height="52"
              rx="12"
-             fill="#ff9e64"
+             fill="#7aa2f7"
              id="rect59"
              x="0"
              y="0" />
