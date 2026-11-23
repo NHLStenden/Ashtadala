@@ -4,11 +4,9 @@ Adwaita, in TokyoNight's Night palette. For Fedora 45 and GNOME 51.
 
 ![TokyoAdwaita Night preview](assets/TokyoAdwaita-Night-preview.svg)
 
-*Illustration, not a screenshot.*
-
 ## Install
 
-Run as your desktop user, without `sudo`:
+Run as your desktop user:
 
 ```sh
 ./install.sh                # blue accent, random Papirus folders
