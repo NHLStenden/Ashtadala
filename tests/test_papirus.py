@@ -99,9 +99,9 @@ class IntegrationTests(unittest.TestCase):
 
     def test_random_install_and_uninstall(self):
         with mock.patch.object(pi.secrets, 'choice', return_value='magenta') as chooser:
-            t.install(argparse.Namespace(accent='blue', papirus_color=None))
+            t.install(argparse.Namespace(accent='blue', papirus_color=None, random_folders=True))
         state = t.read_state(self.paths['state'])
-        self.assertEqual(state['papirus']['color'], 'magenta')
+        self.assertEqual(state['papirus']['color'], '#bb9af7')
         self.assertEqual(state['papirus']['hex'], '#bb9af7')
         self.assertTrue(chooser.called)
         self.assertEqual(self.settings[('org.gnome.desktop.interface', 'icon-theme')], repr(pi.ICON_THEME))
@@ -117,16 +117,47 @@ class IntegrationTests(unittest.TestCase):
         t.install(argparse.Namespace(accent='blue', papirus_color='peach'))
         first = t.read_state(self.paths['state'])['papirus']['color']
         with mock.patch.object(pi.secrets, 'choice', return_value='cyan') as chooser:
-            t.install(argparse.Namespace(accent='purple', papirus_color=None))
+            t.install(argparse.Namespace(accent='purple', papirus_color=None, random_folders=True))
         self.assertTrue(chooser.called)
         self.assertNotIn('peach', chooser.call_args.args[0])
         self.assertNotIn('purple', chooser.call_args.args[0])
-        self.assertEqual(t.read_state(self.paths['state'])['papirus']['color'], 'cyan')
-        self.assertNotEqual(first, 'cyan')
+        self.assertEqual(t.read_state(self.paths['state'])['papirus']['color'], '#7dcfff')
+        self.assertNotEqual(first, '#7dcfff')
         t.install(argparse.Namespace(accent='green', papirus_color='magenta'))
-        self.assertEqual(t.read_state(self.paths['state'])['papirus']['color'], 'magenta')
+        self.assertEqual(t.read_state(self.paths['state'])['papirus']['color'], '#bb9af7')
         self.assertIn('#bb9af7', (self.paths['icon_theme']/'48x48/places/folder.svg').read_text())
         t.uninstall(argparse.Namespace())
+
+    def test_secondary_defaults_to_purple_and_persists_across_primary_changes(self):
+        t.install(argparse.Namespace(accent='blue', papirus_color=None))
+        state = t.read_state(self.paths['state'])
+        self.assertEqual(state['secondary_accent'], '#9d7cd8')
+        self.assertEqual(state['papirus']['hex'], '#9d7cd8')
+        self.assertEqual(__import__('json').loads((self.paths['user_theme'] / 'palette.json').read_text())['SECONDARY_ACCENT'], '#9d7cd8')
+        with mock.patch.object(pi, 'pick_color', side_effect=AssertionError('unexpected random color')):
+            t.install(argparse.Namespace(accent='green', papirus_color=None))
+        self.assertEqual(t.read_state(self.paths['state'])['secondary_accent'], '#9d7cd8')
+        t.uninstall(argparse.Namespace())
+
+    def test_explicit_secondary_persists_as_hex_and_old_state_migrates(self):
+        t.install(argparse.Namespace(accent='peach', papirus_color='cyan'))
+        state = t.read_state(self.paths['state'])
+        self.assertEqual(state['secondary_accent'], '#7dcfff')
+        state.pop('secondary_accent')
+        self.paths['state'].write_text(__import__('json').dumps(state))
+        t.install(argparse.Namespace(accent='blue', papirus_color=None))
+        self.assertEqual(t.read_state(self.paths['state'])['secondary_accent'], '#7dcfff')
+        t.uninstall(argparse.Namespace())
+
+    def test_primary_purple_uses_cyan_secondary_by_default(self):
+        t.install(argparse.Namespace(accent='purple', papirus_color=None))
+        self.assertEqual(t.read_state(self.paths['state'])['secondary_accent'], '#7dcfff')
+        t.uninstall(argparse.Namespace())
+
+    def test_randomization_conflicts_with_explicit_folder_color(self):
+        with self.assertRaisesRegex(t.ThemeError, 'either a folder color'):
+            t.install(argparse.Namespace(accent='blue', papirus_color='peach', random_folders=True))
+        self.assertFalse(self.paths['state'].exists())
 
     def test_modified_overlay_refuses_uninstall(self):
         t.install(argparse.Namespace(accent='peach', papirus_color='blue'))

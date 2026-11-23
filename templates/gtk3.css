@@ -50,3 +50,12 @@ placessidebar.sidebar row:selected image {
 }
 switch:checked, check:checked, radio:checked {background-color: @ACCENT@; color: @ACCENT_FG@;}
 scale highlight, progressbar progress {background-color: @ACCENT@;}
+
+/* Secondary hue for unvisited links only. Preserve GTK's native visited
+ * state, selection, hover and focus treatments. */
+label link:link, button.link:link { color: @SECONDARY_TEXT@; }
+
+/* TokyoNight diagnostic colors retain their meanings across accents. */
+@define-color success_color @SUCCESS@;
+@define-color warning_color @WARNING@;
+@define-color error_color @ERROR@;

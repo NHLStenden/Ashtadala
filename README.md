@@ -9,14 +9,15 @@ Adwaita, in TokyoNight's Night palette. For Fedora 45 and GNOME 51.
 Run as your desktop user:
 
 ```sh
-./install.sh                # blue accent, random Papirus folders
+./install.sh                # blue accent, purple Papirus folders
 ./install.sh peach cyan     # peach accent, cyan folders
-./configure.sh purple       # change accent, pick new folder color
+./configure.sh purple       # change accent, preserve folder color
 ./uninstall.sh
 ```
 
 The first color sets the desktop accent; the second sets Papirus folders. Omit
-it for a random folder color, different from the accent and the previous pick.
+it to preserve the previous folder color (purple by default; cyan when the
+primary is purple). Use `--random-folders` to explicitly pick a new color.
 Colors: `blue`, `cyan`, `purple`, `magenta`, `green`, `teal`, `yellow`, `peach`,
 `red`, or any `#RRGGBB`.
 

@@ -12,3 +12,8 @@
 @define-color theme_selected_fg_color @ACCENT_FG@;
 @define-color theme_bg_color @BG@;
 @define-color theme_base_color @DEEP@;
+
+/* Named aliases for legacy GTK4 consumers of Adwaita semantic colors. */
+@define-color success_color @SUCCESS@;
+@define-color warning_color @WARNING@;
+@define-color error_color @ERROR@;

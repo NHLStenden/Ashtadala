@@ -19,4 +19,25 @@ window, dialog, popover {
   --accent-bg-color: @ACCENT@;
   --accent-fg-color: @ACCENT_FG@;
   --accent-color: oklab(from @ACCENT@ max(l, 0.85) a b);
+
+  /* Success/warning/error are semantic, not additional accents. */
+  --success-bg-color: @SUCCESS@;
+  --success-fg-color: @SUCCESS_FG@;
+  --success-color: @SUCCESS@;
+  --warning-bg-color: @WARNING@;
+  --warning-fg-color: @WARNING_FG@;
+  --warning-color: @WARNING@;
+  --error-bg-color: @ERROR@;
+  --error-fg-color: @ERROR_FG@;
+  --error-color: @ERROR@;
+  --destructive-bg-color: @ERROR@;
+  --destructive-fg-color: @ERROR_FG@;
+  --destructive-color: @ERROR@;
+}
+
+/* Link-only secondary role. Leave libadwaita's --accent-* untouched.
+ * These nodes are GTK4-documented, rather than guessed app-specific classes. */
+window label link:link, dialog label link:link, popover label link:link,
+window button.link:link, dialog button.link:link, popover button.link:link {
+  color: @SECONDARY_TEXT@;
 }
