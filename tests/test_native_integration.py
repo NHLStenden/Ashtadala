@@ -19,6 +19,7 @@ class NativeAccentTests(unittest.TestCase):
         root = Path(temp.name)
         self.p = {
             'user_theme': root / 'themes' / t.THEME,
+            'icon_theme': root / 'icons' / t.papirus_icons.ICON_THEME,
             'gtk_css': root / 'gtk-4.0/gtk.css',
             'gtk_override': root / 'gtk-4.0/tokyoadwaita-night.css',
             'state': root / 'state/state.json',
@@ -27,6 +28,7 @@ class NativeAccentTests(unittest.TestCase):
         self.p['gtk_css'].write_text('/* unrelated user CSS */\n')
         self.settings = {
             ('org.gnome.desktop.interface', 'gtk-theme'): "'Adwaita'",
+            ('org.gnome.desktop.interface', 'icon-theme'): "'Adwaita'",
             ('org.gnome.desktop.interface', 'color-scheme'): "'default'",
             ('org.gnome.desktop.interface', 'accent-color'): "'blue'",
             ('org.gnome.shell.extensions.user-theme', 'name'): "''",
@@ -39,6 +41,7 @@ class NativeAccentTests(unittest.TestCase):
             mock.patch.object(t, 'gget', side_effect=lambda a,b: self.settings[a,b]),
             mock.patch.object(t, 'gset', side_effect=lambda a,b,v: self.settings.__setitem__((a,b),v)),
             mock.patch.object(t, 'flatpak_present', return_value=False),
+            mock.patch.object(t.papirus_icons, 'find_papirus', return_value=None),
             mock.patch.object(t, 'hook_run'),
         ]
         started = [item.start() for item in mocks]

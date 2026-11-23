@@ -18,6 +18,7 @@ import tempfile
 from typing import Any
 
 from tokyonight_colors import ACCENTS as TOKYONIGHT_ACCENTS, DEFAULT as DEFAULT_ACCENT_NAME, resolve as resolve_tokyonight_accent
+import papirus_icons
 
 ROOT = Path(__file__).resolve().parent
 THEME = 'TokyoAdwaita-Night'
@@ -309,6 +310,7 @@ def paths() -> dict[str, Path]:
     config = Path(os.environ.get('XDG_CONFIG_HOME') or str(home / '.config'))
     state = Path(os.environ.get('XDG_STATE_HOME') or str(home / '.local/state'))
     return {'user_theme': data / 'themes' / THEME,
+            'icon_theme': data / 'icons' / papirus_icons.ICON_THEME,
             'gtk_css': config / 'gtk-4.0/gtk.css',
             'gtk_override': config / 'gtk-4.0/tokyoadwaita-night.css',
             'state': state / STATE_NAME / 'state.json'}
@@ -498,9 +500,37 @@ def check_conflicts(state: dict[str, Any] | None, p: dict[str, Path], directory:
 def install(args):
     state, p = get_last_state()
     accent = accent_choice(args.accent or (state['accent'] if state else DEFAULT_ACCENT_NAME))
+    requested = getattr(args, 'papirus_color', None)
+    if requested is not None:
+        accent_choice(requested)
     directory = p['user_theme']
     check_conflicts(state, p, directory)
-    # This is a single, fully integrated, per-user installation.
+    previous_icons = state.get('papirus') if state else None
+    current_icon = gget('org.gnome.desktop.interface', 'icon-theme').strip("'")
+    preferred = previous_icons['base'] if previous_icons else (current_icon if current_icon in papirus_icons.PAPIRUS else None)
+    papirus = papirus_icons.find_papirus(preferred)
+    if not papirus and not previous_icons and preferred:
+        papirus = papirus_icons.find_papirus()
+    if previous_icons and not papirus:
+        raise ThemeError('Previously used Papirus theme is missing; cannot safely reconfigure icons')
+    icon_files = None
+    icon_color = None
+    if papirus:
+        if requested is None:
+            icon_color = papirus_icons.pick_color(accent, previous_icons['color'] if previous_icons else None)
+        else:
+            icon_color = requested.lower()
+        try:
+            icon_files = papirus_icons.build_overlay(papirus[0], papirus[1], accent_choice(icon_color))
+        except (papirus_icons.IconError, ValueError, OSError, UnicodeError) as e:
+            raise ThemeError(f'Papirus: {e}') from e
+        icon_dir = p['icon_theme']
+        if previous_icons:
+            assert_owned_theme(icon_dir, previous_icons['files'])
+        elif icon_dir.exists() or icon_dir.is_symlink():
+            raise ThemeError('Icon theme directory already exists: ' + str(icon_dir))
+    elif getattr(args, 'papirus_color', None):
+        print('Papirus is not installed; skipping folder recoloring.')
     flatpak_enabled = flatpak_present() or bool(state and state['flatpak_enabled'])
     if flatpak_enabled:
         flatpak_preflight()
@@ -523,18 +553,28 @@ def install(args):
         'flatpak_old': state['flatpak_old'] if state else None,
         'flatpak_written_sha': state['flatpak_written_sha'] if state else None,
         'settings': old_settings,
+        'papirus': ({'base': papirus[0], 'color': icon_color,
+                     'hex': accent_choice(icon_color),
+                     'files': {name: sha(data) for name, data in icon_files.items()}}
+                    if icon_files is not None else None),
     }
     old_css = previous_gtk.decode('utf-8') if previous_gtk is not None else ''
     new_css = insert_import(old_css)
     prev_theme_files = {k: (directory / k).read_bytes() for k in state['files']} if state else None
+    prev_icon_files = ({k: (p['icon_theme'] / k).read_bytes() for k in previous_icons['files']}
+                       if previous_icons else None)
     changed_settings: list[tuple[str, str, str]] = []
     theme_applied = False
+    icons_applied = False
     flatpak_before = flatpak_snapshot() if flatpak_enabled else None
     flatpak_changed = False
     hook_touched = False
     try:
         stage_theme(directory, files, state['files'] if state else None)
         theme_applied = True
+        if icon_files is not None:
+            stage_theme(p['icon_theme'], icon_files, previous_icons['files'] if previous_icons else None)
+            icons_applied = True
         atomic_write(p['gtk_override'], gtk4_override(accent).encode('utf-8'))
         atomic_write(p['gtk_css'], new_css.encode('utf-8'))
         if flatpak_enabled:
@@ -553,6 +593,8 @@ def install(args):
             ('org.gnome.desktop.interface', 'accent-color', 'slate'),
             ('org.gnome.shell', 'enabled-extensions', extensions),
         ]
+        if icon_files is not None:
+            settings_to_apply.append(('org.gnome.desktop.interface', 'icon-theme', papirus_icons.ICON_THEME))
         for schema, key, new_value in settings_to_apply:
             skey = schema + '/' + key
             old = old_settings[skey]['old'] if skey in old_settings else gget(schema, key)
@@ -587,12 +629,19 @@ def install(args):
                     stage_theme(directory, prev_theme_files, new_state['files'])
                 else:
                     delete_theme(directory, new_state['files'])
+            if icons_applied:
+                if previous_icons:
+                    stage_theme(p['icon_theme'], prev_icon_files, new_state['papirus']['files'])
+                else:
+                    delete_theme(p['icon_theme'], new_state['papirus']['files'])
         except Exception as err:
             print('ROLLBACK FAILED; inspect installation:', err, file=sys.stderr)
         raise
     print(f'Installed {THEME} — {accent} (GTK, GNOME Shell, native accent hook).')
     if flatpak_enabled:
         print('Flatpak: GTK theme directories shared read-only')
+    if icon_files is not None:
+        print(f'Papirus folders: {icon_color} ({accent_choice(icon_color)})')
     print('Log out and back in to load the native accent hook.')
 
 
@@ -604,6 +653,8 @@ def uninstall(args):
     directory = Path(state['theme_path'])
     # Verify ownership before removing any managed files.
     assert_owned_theme(directory, state['files'])
+    if state.get('papirus'):
+        assert_owned_theme(p['icon_theme'], state['papirus']['files'])
     owned_file(p['gtk_override'], state['gtk_override_sha'], 'GTK4 override')
     css = file_snapshot(p['gtk_css'])
     if css is None:
@@ -636,6 +687,8 @@ def uninstall(args):
             print('WARNING: Flatpak override was modified after install; leaving it untouched')
     # Stop the native hook first; fail closed if its systemd drop-in is not ours.
     hook_run('uninstall')
+    if state.get('papirus'):
+        delete_theme(p['icon_theme'], state['papirus']['files'])
     delete_theme(directory, state['files'])
     if not state.get('gtk_css_existed', True) and not new_css.strip():
         p['gtk_css'].unlink()
@@ -676,6 +729,12 @@ def diagnose() -> None:
         print('Theme: not installed')
         return
     print('Theme accent:', state['accent'])
+    if state.get('papirus'):
+        try:
+            assert_owned_theme(p['icon_theme'], state['papirus']['files'])
+            print('Papirus folders:', state['papirus']['color'], '(installed)')
+        except ThemeError as e:
+            print('Papirus icons:', e)
     print('Flatpak:', 'enabled' if state['flatpak_enabled'] else 'not installed')
     try:
         assert_owned_theme(Path(state['theme_path']), state['files'])
@@ -695,8 +754,12 @@ def parse_args():
     install_cmd = cmd.add_parser('install', help='Install GTK, Shell, Flatpak and native accent hook')
     install_cmd.add_argument('accent', nargs='?', default=None,
                              help='TokyoNight color name or #RRGGBB; default blue')
+    install_cmd.add_argument('papirus_color', nargs='?', default=None,
+                             help='Papirus folder color; random when omitted')
     configure_cmd = cmd.add_parser('configure', help='Change the installed accent')
     configure_cmd.add_argument('accent', help='TokyoNight color name or #RRGGBB')
+    configure_cmd.add_argument('papirus_color', nargs='?', default=None,
+                               help='Papirus folder color; random when omitted')
     cmd.add_parser('uninstall', help='Remove the theme and restore the previous settings')
     cmd.add_parser('diagnose', help='Inspect the installed theme and hook')
     cmd.add_parser('validate', help='Run automated tests')

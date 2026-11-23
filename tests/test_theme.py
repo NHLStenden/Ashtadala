@@ -181,6 +181,7 @@ class InstallationTests(unittest.TestCase):
         self.addCleanup(self.tmp.cleanup)
         base = Path(self.tmp.name)
         self.paths = {'user_theme': base / 'data/themes' / t.THEME,
+                      'icon_theme': base / 'data/icons' / t.papirus_icons.ICON_THEME,
                       'gtk_css': base / 'config/gtk-4.0/gtk.css',
                       'gtk_override': base / 'config/gtk-4.0/tokyoadwaita-night.css',
                       'state': base / 'state/tokyoadwaita/state.json'}
@@ -189,6 +190,7 @@ class InstallationTests(unittest.TestCase):
                           ':root { --custom-user-var: #abcdef; }\n').encode()
         self.paths['gtk_css'].write_bytes(self.prior_css)
         self.settings = {('org.gnome.desktop.interface','gtk-theme'): repr('Adwaita'),
+                         ('org.gnome.desktop.interface','icon-theme'): repr('Adwaita'),
                          ('org.gnome.desktop.interface','color-scheme'): repr('default'),
                          ('org.gnome.desktop.interface','accent-color'): repr('blue'),
                          ('org.gnome.shell.extensions.user-theme','name'): repr(''),
@@ -199,6 +201,7 @@ class InstallationTests(unittest.TestCase):
             mock.patch.object(t, 'stock_shell_resource', return_value=(SHELL_SOURCE, Path('/mock.gresource'))),
             mock.patch.object(t, 'hook_run'),
             mock.patch.object(t, 'flatpak_present', return_value=False),
+            mock.patch.object(t.papirus_icons, 'find_papirus', return_value=None),
             mock.patch.object(t, 'gget', side_effect=lambda s,k: self.settings[(s,k)]),
             mock.patch.object(t, 'gset', side_effect=lambda s,k,v: self.settings.__setitem__((s,k),v)),
         ]
