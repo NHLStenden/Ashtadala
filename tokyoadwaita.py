@@ -749,7 +749,7 @@ def diagnose() -> None:
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='TokyoAdwaita Night: one-command GNOME theme')
+    parser = argparse.ArgumentParser(description='TokyoAdwaita Night theme installer')
     cmd = parser.add_subparsers(dest='command', required=True)
     install_cmd = cmd.add_parser('install', help='Install GTK, Shell, Flatpak and native accent hook')
     install_cmd.add_argument('accent', nargs='?', default=None,

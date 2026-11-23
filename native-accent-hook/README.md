@@ -1,13 +1,11 @@
 # Native accent hook
 
-`LD_PRELOAD` intercepts GNOME Shell 51's `cogl_color_from_string()` and replaces
-`#6f8396` with the configured accent. Other calls are forwarded unchanged.
+GNOME Shell 51 hard-codes `#6f8396` as its slate accent. This hook intercepts
+`cogl_color_from_string()` via `LD_PRELOAD` and swaps just that color for your
+chosen accent. Everything else passes through.
 
 The installer builds `libaccent-hook.so` and adds a user-systemd drop-in for
-`org.gnome.Shell@user.service`. No Fedora libraries are changed.
+`org.gnome.Shell@user.service`. It doesn't patch system libraries.
 
-To disable injection from a TTY, remove
-`~/.config/systemd/user/org.gnome.Shell@user.service.d/80-tokyoadwaita-accent.conf`,
-run `systemctl --user daemon-reload` and reboot.
-
-Injection reference: https://github.com/ajirezk/saturation_gnome-wayland
+Recovery steps are in the main [README](../README.md). Technique based on
+[saturation_gnome-wayland](https://github.com/ajirezk/saturation_gnome-wayland).

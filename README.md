@@ -1,38 +1,34 @@
 # TokyoAdwaita Night
 
-Dark Adwaita styling with the TokyoNight Night palette. For Fedora 45 and GNOME 51.
+Adwaita, in TokyoNight's Night palette. For Fedora 45 and GNOME 51.
+
+![TokyoAdwaita Night preview](assets/TokyoAdwaita-Night-preview.svg)
+
+*Illustration, not a screenshot.*
 
 ## Install
 
 Run as your desktop user, without `sudo`:
 
 ```sh
-./install.sh                 # blue accent, random Papirus folder color
-./install.sh peach cyan      # peach accent, cyan folders
-./configure.sh purple       # purple accent, new random folder color
-./configure.sh blue magenta  # blue accent, magenta folders
+./install.sh                # blue accent, random Papirus folders
+./install.sh peach cyan     # peach accent, cyan folders
+./configure.sh purple       # change accent, pick new folder color
 ./uninstall.sh
 ```
 
-The first color controls GTK3, GTK4, GNOME Shell and its native accent hook.
-The second color controls Papirus folders. Without a second color, a new random
-TokyoNight color is selected, excluding the main accent and the previous folder
-color. Both colors accept a name or `#RRGGBB`.
+The first color sets the desktop accent; the second sets Papirus folders. Omit
+it for a random folder color, different from the accent and the previous pick.
+Colors: `blue`, `cyan`, `purple`, `magenta`, `green`, `teal`, `yellow`, `peach`,
+`red`, or any `#RRGGBB`.
 
-Available names: `blue` (default), `cyan`, `purple`, `magenta`, `green`,
-`teal`, `yellow`, `peach`, `red`.
+GTK 3, GTK 4 and GNOME Shell are themed together. A small `LD_PRELOAD` hook
+handles Shell's native accent without patching system libraries. Papirus folder
+colors and Flatpak GTK access are set up only if those apps are installed.
 
-If Papirus is installed, the installer creates a user-local icon theme that
-inherits `Papirus`, `Papirus-Dark` or `Papirus-Light`. The original icons are
-not modified. If Papirus is missing, icon setup is skipped.
-
-GTK and GNOME Shell themes, the native accent hook and Flatpak GTK access are
-installed together. Flatpak support is skipped when Flatpak is not installed.
-The hook uses `LD_PRELOAD` symbol interposition; it never edits Fedora libraries.
-
-Missing Fedora dependencies (`gcc`, `binutils`, User Themes) are installed via
-`sudo dnf` after a confirmation prompt. Log out and back in after installing
-or uninstalling to reload GNOME Shell. Restart Files if folder icons remain cached.
+Missing Fedora packages (`gcc`, `binutils`, User Themes) can be installed with
+`sudo dnf` after you confirm. Log out and back in to load Shell changes;
+restart Files if folder icons stay cached.
 
 ## Checks
 
@@ -42,16 +38,18 @@ or uninstalling to reload GNOME Shell. Restart Files if folder icons remain cach
 make -C native-accent-hook test
 ```
 
-Uninstallation restores the original settings and Flatpak permissions, provided
-they haven't been changed by another program. User CSS outside the managed
-import is left in place. Modified theme files are not overwritten or deleted.
+Uninstall restores the old settings and Flatpak permissions if they're still
+unchanged. Other GTK CSS and modified theme files are left alone.
 
-If GNOME Shell fails to start, switch to a TTY (`Ctrl+Alt+F3`), remove
-`~/.config/systemd/user/org.gnome.Shell@user.service.d/80-tokyoadwaita-accent.conf`,
-run `systemctl --user daemon-reload`, and reboot.
+If Shell won't start, switch to a TTY (`Ctrl+Alt+F3`) and run:
+
+```sh
+rm ~/.config/systemd/user/org.gnome.Shell@user.service.d/80-tokyoadwaita-accent.conf
+systemctl --user daemon-reload
+reboot
+```
 
 ## License
 
-Project code: MIT. TokyoNight palette: [TokyoNight](https://github.com/folke/tokyonight.nvim),
-Apache 2.0 (see `licenses/`). Papirus icons are generated from the installed
-Papirus theme and are not included in this repository.
+Code: MIT. [TokyoNight](https://github.com/folke/tokyonight.nvim) palette:
+Apache 2.0 (`licenses/`). Papirus icons are generated locally, not bundled.
