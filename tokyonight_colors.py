@@ -2,7 +2,6 @@
 """Named accents from folke/tokyonight.nvim's Night (Storm-derived) palette."""
 from __future__ import annotations
 import re
-import sys
 
 # Keep names explicit: TokyoNight 'magenta' and 'purple' are different colors.
 ACCENTS = {
@@ -26,18 +25,3 @@ def resolve(value: str) -> str:
         return value.lower()
     raise ValueError('Expected a TokyoNight accent (' + ', '.join(ACCENTS) + ') or #RRGGBB')
 
-
-if __name__ == '__main__':
-    if len(sys.argv) == 2 and sys.argv[1] == 'list':
-        print('TokyoNight accents (default: blue):')
-        for name, color in ACCENTS.items():
-            print(f'  {name:8s} {color}')
-    elif len(sys.argv) == 3 and sys.argv[1] == 'resolve':
-        try:
-            print(resolve(sys.argv[2]))
-        except ValueError as e:
-            print(e, file=sys.stderr)
-            sys.exit(2)
-    else:
-        print('Usage: tokyonight_colors.py list | resolve NAME_OR_HEX', file=sys.stderr)
-        sys.exit(2)

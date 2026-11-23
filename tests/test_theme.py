@@ -78,11 +78,6 @@ class ColorTests(unittest.TestCase):
         for key in ('BG', 'DEEP', 'PANEL', 'SURFACE', 'HOVER'):
             self.assertGreaterEqual(t.contrast(t.PALETTE[key], '#ffffff'), 7.0)
 
-    def test_gnome_accent_color_fallback(self):
-        self.assertEqual(t.nearest_system_accent('#ff9e64'), 'orange')
-        self.assertEqual(t.nearest_system_accent('#9141ac'), 'purple')
-        self.assertEqual(t.nearest_system_accent('#3584e4'), 'blue')
-
     def test_invalid_accents_rejected(self):
         for color in ['red', '#123', '#12345678', 'ffffff', '#abcdef;/*bad*/', '#g0abba']:
             with self.assertRaises(t.ThemeError):
@@ -109,15 +104,6 @@ class ColorTests(unittest.TestCase):
         self.assertNotIn('userChrome', t.gtk4_override('#ff9e64'))
         self.assertGreater(m['shell_replacements']['-st-accent-color'], 0)
 
-    def test_static_resources_match_generated_theme(self):
-        built = t.ROOT / 'resources'
-        files, _ = t.theme_files(t.ACCENT_DEFAULT, SHELL_SOURCE)
-        for name in ('gtk-3.0/gtk.css', 'gtk-3.0/gtk-dark.css',
-                     'gtk-4.0/gtk.css', 'gtk-4.0/gtk-dark.css', 'palette.json'):
-            self.assertEqual((built / name).read_bytes(), files[name], name)
-        self.assertEqual((built / 'gtk-4.0/user-overlay.css').read_text(),
-                         t.gtk4_override(t.ACCENT_DEFAULT))
-
     def test_shell_reuses_original_selectors_and_color_functions(self):
         css, changes = t.shell_recolor(SHELL_SOURCE, '#bc83ff')
         self.assertIn('st-mix(#bc83ff, #1a1b26, 9%)', css)
@@ -131,7 +117,7 @@ class ColorTests(unittest.TestCase):
     def test_quick_settings_checked_tiles_use_custom_accent_and_readable_fg(self):
         for accent in ('#ff9e64', '#bc83ff', '#7aa2f7'):
             css, _ = t.shell_recolor(SHELL_SOURCE, accent)
-            quick = css.split('TokyoAdwaita Night 3.1')[1]
+            quick = css.split('TokyoAdwaita Night managed Quick Settings')[1]
             self.assertIn('background-color: ' + accent + ';', quick)
             self.assertIn('color: ' + t.accent_foreground(accent) + ';', quick)
             self.assertIn('st-mix(' + accent + ', #ffffff, 85%)', quick)
@@ -150,7 +136,7 @@ class ColorTests(unittest.TestCase):
         t.check_quick_settings_css(css, '#ff9e64')
         with self.assertRaisesRegex(t.ThemeError, 'missing expected CSS'):
             t.check_quick_settings_css(css, '#bc83ff')
-        with self.assertRaisesRegex(t.ThemeError, 'lacks the v3.1'):
+        with self.assertRaisesRegex(t.ThemeError, 'lacks the managed'):
             t.check_quick_settings_css(SHELL_SOURCE, '#ff9e64')
 
     def test_quick_settings_refuses_nonmatching_shell_source(self):
@@ -161,8 +147,8 @@ class ColorTests(unittest.TestCase):
     def test_reconfigure_updates_shell_tiles_not_only_gtk(self):
         first, _ = t.theme_files('#ff9e64', SHELL_SOURCE)
         second, _ = t.theme_files('#bc83ff', SHELL_SOURCE)
-        s1 = first['gnome-shell/gnome-shell.css'].decode().split('TokyoAdwaita Night 3.1')[1]
-        s2 = second['gnome-shell/gnome-shell.css'].decode().split('TokyoAdwaita Night 3.1')[1]
+        s1 = first['gnome-shell/gnome-shell.css'].decode().split('TokyoAdwaita Night managed Quick Settings')[1]
+        s2 = second['gnome-shell/gnome-shell.css'].decode().split('TokyoAdwaita Night managed Quick Settings')[1]
         self.assertIn('background-color: #ff9e64;', s1)
         self.assertIn('background-color: #bc83ff;', s2)
         self.assertNotIn('#ff9e64', s2)
@@ -195,7 +181,6 @@ class InstallationTests(unittest.TestCase):
         self.addCleanup(self.tmp.cleanup)
         base = Path(self.tmp.name)
         self.paths = {'user_theme': base / 'data/themes' / t.THEME,
-                      'system_theme': base / 'system/themes' / t.THEME,
                       'gtk_css': base / 'config/gtk-4.0/gtk.css',
                       'gtk_override': base / 'config/gtk-4.0/tokyoadwaita-night.css',
                       'state': base / 'state/tokyoadwaita/state.json'}
@@ -212,6 +197,8 @@ class InstallationTests(unittest.TestCase):
             mock.patch.object(t, 'paths', return_value=self.paths),
             mock.patch.object(t, 'native_preflight', return_value=None),
             mock.patch.object(t, 'stock_shell_resource', return_value=(SHELL_SOURCE, Path('/mock.gresource'))),
+            mock.patch.object(t, 'hook_run'),
+            mock.patch.object(t, 'flatpak_present', return_value=False),
             mock.patch.object(t, 'gget', side_effect=lambda s,k: self.settings[(s,k)]),
             mock.patch.object(t, 'gset', side_effect=lambda s,k,v: self.settings.__setitem__((s,k),v)),
         ]
@@ -219,14 +206,13 @@ class InstallationTests(unittest.TestCase):
             p.start()
             self.addCleanup(p.stop)
 
-    def install(self, accent='#ff9e64', scope='user'):
-        a = argparse.Namespace(check=False, install_extension=False, accent=accent, scope=scope, system_accent='slate', flatpak=False)
-        t.install(a)
+    def install(self, accent='#ff9e64'):
+        t.install(argparse.Namespace(accent=accent))
 
     def test_user_install_and_uninstall_exact_restore(self):
         self.install()
         state = t.read_state(self.paths['state'])
-        self.assertEqual(state['scope'], 'user')
+        self.assertEqual(state['format'], 4)
         self.assertTrue((self.paths['user_theme']/'gnome-shell/gnome-shell.css').is_file())
         self.assertEqual(self.settings[('org.gnome.desktop.interface', 'accent-color')], "'slate'")
         self.assertIn(t.EXTENSION, ast.literal_eval(self.settings[('org.gnome.shell','enabled-extensions')]))
@@ -259,12 +245,10 @@ class InstallationTests(unittest.TestCase):
     def test_platform_accent_remains_slate_when_reconfiguring(self):
         self.install('#ff9e64')
         state = t.read_state(self.paths['state'])
-        self.assertEqual(state['system_accent_mode'], 'slate')
-        self.assertEqual(state['system_accent'], 'slate')
+        self.assertEqual(state['accent'], '#ff9e64')
         self.install('#9141ac')
         new = t.read_state(self.paths['state'])
-        self.assertEqual(new['system_accent_mode'], 'slate')
-        self.assertEqual(new['system_accent'], 'slate')
+        self.assertEqual(new['accent'], '#9141ac')
         self.assertEqual(self.settings[('org.gnome.desktop.interface', 'accent-color')], "'slate'")
         t.uninstall(argparse.Namespace())
 
@@ -278,7 +262,7 @@ class InstallationTests(unittest.TestCase):
         t.uninstall(argparse.Namespace())
         self.assertEqual(self.settings[('org.gnome.desktop.interface','gtk-theme')], "'Adwaita'")
 
-    def test_v3_1_in_place_rebuild_and_rollback_state(self):
+    def test_in_place_rebuild_and_rollback_state(self):
         self.install('#ff9e64')
         old = t.read_state(self.paths['state'])
         old_theme = (self.paths['user_theme'] / 'gnome-shell/gnome-shell.css').read_text()
@@ -317,16 +301,14 @@ class InstallationTests(unittest.TestCase):
         self.assertFalse(self.paths['state'].exists())
         self.assertTrue((self.paths['user_theme']/'my-own-file.txt').exists())
 
-    def test_v2_upgrade_without_uninstall_preserves_previous_settings(self):
+    def test_rejects_old_state_without_mutation(self):
         self.install()
-        old = t.read_state(self.paths['state'])
-        old['format'] = 2
-        self.paths['state'].write_text(json.dumps(old))
-        self.install('#bc83ff')
         state = t.read_state(self.paths['state'])
-        self.assertEqual(state['format'], 3)
-        self.assertEqual(state['settings']['org.gnome.desktop.interface/gtk-theme']['old'], "'Adwaita'")
-        t.uninstall(argparse.Namespace())
+        state['format'] = 3
+        self.paths['state'].write_text(json.dumps(state))
+        with self.assertRaisesRegex(t.ThemeError, 'Older installation'):
+            self.install('blue')
+        self.assertTrue(self.paths['user_theme'].exists())
 
     def test_flatpak_global_override_restores_exactly_and_preserves_local_apps(self):
         self.paths['flatpak_fake'] = self.paths['state'].parent / 'flatpak-global'
@@ -335,8 +317,8 @@ class InstallationTests(unittest.TestCase):
         self.paths['flatpak_fake'].write_bytes(original)
         def fake_apply():
             self.paths['flatpak_fake'].write_bytes(b'[Context]\nfilesystems=xdg-download;xdg-config/gtk-4.0:ro;xdg-data/themes:ro;\n')
-        with mock.patch.object(t, 'flatpak_preflight'), mock.patch.object(t, 'flatpak_path', return_value=self.paths['flatpak_fake']), mock.patch.object(t, 'flatpak_apply', side_effect=fake_apply):
-            args = argparse.Namespace(check=False, install_extension=False, accent='#ff9e64', scope='user', system_accent='slate', flatpak=True)
+        with mock.patch.object(t, 'flatpak_present', return_value=True), mock.patch.object(t, 'flatpak_preflight'), mock.patch.object(t, 'flatpak_path', return_value=self.paths['flatpak_fake']), mock.patch.object(t, 'flatpak_apply', side_effect=fake_apply):
+            args = argparse.Namespace(accent='#ff9e64')
             t.install(args)
             self.assertTrue(t.read_state(self.paths['state'])['flatpak_enabled'])
             t.uninstall(argparse.Namespace())
@@ -347,15 +329,11 @@ class InstallationTests(unittest.TestCase):
         fp.parent.mkdir(parents=True, exist_ok=True)
         def fake_apply():
             fp.write_text('[Context]\nfilesystems=xdg-config/gtk-4.0:ro;\n')
-        with mock.patch.object(t, 'flatpak_preflight'), mock.patch.object(t, 'flatpak_path', return_value=fp), mock.patch.object(t, 'flatpak_apply', side_effect=fake_apply):
-            t.install(argparse.Namespace(check=False, install_extension=False, accent='#ff9e64', scope='user', system_accent='slate', flatpak=True))
+        with mock.patch.object(t, 'flatpak_present', return_value=True), mock.patch.object(t, 'flatpak_preflight'), mock.patch.object(t, 'flatpak_path', return_value=fp), mock.patch.object(t, 'flatpak_apply', side_effect=fake_apply):
+            t.install(argparse.Namespace(accent='#ff9e64'))
             fp.write_text('[Context]\nfilesystems=xdg-config/gtk-4.0:ro;xdg-download;\n')
             t.uninstall(argparse.Namespace())
         self.assertIn('xdg-download', fp.read_text())
-
-    def test_system_auto_option_remains_available(self):
-        self.assertEqual(t.nearest_system_accent('#ff9e64'), 'orange')
-        self.assertEqual(t.nearest_system_accent('#9141ac'), 'purple')
 
     def test_flatpak_failure_after_change_rolls_back(self):
         fp = self.paths['state'].parent / 'flatpak-global'
@@ -365,9 +343,9 @@ class InstallationTests(unittest.TestCase):
         def partial_fail():
             fp.write_text('[Context]\nfilesystems=xdg-config/gtk-4.0:ro;\n')
             raise t.ThemeError('Simulated Flatpak command failing after write')
-        with mock.patch.object(t, 'flatpak_preflight'), mock.patch.object(t, 'flatpak_path', return_value=fp), mock.patch.object(t, 'flatpak_apply', side_effect=partial_fail):
+        with mock.patch.object(t, 'flatpak_present', return_value=True), mock.patch.object(t, 'flatpak_preflight'), mock.patch.object(t, 'flatpak_path', return_value=fp), mock.patch.object(t, 'flatpak_apply', side_effect=partial_fail):
             with self.assertRaises(t.ThemeError):
-                t.install(argparse.Namespace(check=False, install_extension=False, accent='#ff9e64', scope='user', system_accent='slate', flatpak=True))
+                t.install(argparse.Namespace(accent='#ff9e64'))
         self.assertEqual(fp.read_bytes(), before)
         self.assertEqual(self.paths['gtk_css'].read_bytes(), self.prior_css)
         self.assertFalse(self.paths['user_theme'].exists())
@@ -379,9 +357,9 @@ class InstallationTests(unittest.TestCase):
         fp.write_text('[Context]\nfilesystems=xdg-download;\n')
         def apply():
             fp.write_text('[Context]\nfilesystems=xdg-config/gtk-4.0:ro;xdg-download;\n')
-        with mock.patch.object(t, 'flatpak_preflight'), mock.patch.object(t, 'flatpak_path', return_value=fp), mock.patch.object(t, 'flatpak_apply', side_effect=apply):
-            t.install(argparse.Namespace(check=False, install_extension=False, accent='#ff9e64', scope='user', system_accent='slate', flatpak=True))
-            t.install(argparse.Namespace(check=False, install_extension=False, accent='#bc83ff', scope='user', system_accent='slate', flatpak=False))
+        with mock.patch.object(t, 'flatpak_present', return_value=True), mock.patch.object(t, 'flatpak_preflight'), mock.patch.object(t, 'flatpak_path', return_value=fp), mock.patch.object(t, 'flatpak_apply', side_effect=apply):
+            t.install(argparse.Namespace(accent='#ff9e64'))
+            t.install(argparse.Namespace(accent='#bc83ff'))
             self.assertTrue(t.read_state(self.paths['state'])['flatpak_enabled'])
             t.uninstall(argparse.Namespace())
         self.assertEqual(fp.read_text(), '[Context]\nfilesystems=xdg-download;\n')

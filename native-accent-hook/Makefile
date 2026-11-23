@@ -1,12 +1,12 @@
 CC ?= cc
 CFLAGS ?= -O2 -Wall -Wextra -Werror -std=c11
 BUILD_DIR ?= build
-TARGET = $(BUILD_DIR)/libgnome-slate-detour.so
+TARGET = $(BUILD_DIR)/libaccent-hook.so
 
 .PHONY: all clean test check
 all: $(TARGET)
 
-$(TARGET): src/gnome_slate_detour.c
+$(TARGET): src/accent_hook.c
 	mkdir -p "$(BUILD_DIR)"
 	$(CC) $(CFLAGS) -fPIC -shared -fvisibility=hidden -o "$@" "$<" -ldl -pthread
 
