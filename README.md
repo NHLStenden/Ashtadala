@@ -29,26 +29,6 @@ Missing Fedora packages (`gcc`, `binutils`, User Themes) can be installed with
 `sudo dnf` after you confirm. Log out and back in to load Shell changes;
 restart Files if folder icons stay cached.
 
-## Checks
-
-```sh
-./diagnose.sh
-./validate.sh
-make -C native-accent-hook test
-```
-
-Uninstall restores the old settings and Flatpak permissions if they're still
-unchanged. Other GTK CSS and modified theme files are left alone.
-
-If Shell won't start, switch to a TTY (`Ctrl+Alt+F3`) and run:
-
-```sh
-rm ~/.config/systemd/user/org.gnome.Shell@user.service.d/80-tokyoadwaita-accent.conf
-systemctl --user daemon-reload
-reboot
-```
-
 ## License
 
-Code: MIT. [TokyoNight](https://github.com/folke/tokyonight.nvim) palette:
-Apache 2.0 (`licenses/`). Papirus icons are generated locally, not bundled.
+This project is licensed under the MIT License.
