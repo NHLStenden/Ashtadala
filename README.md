@@ -2,7 +2,7 @@
 
 Ashtadala is a user theme for Fedora 45 and GNOME 51.
 
-![Ashtadala Night preview](assets/Ashtadala-Night-preview.svg)
+![Ashtadala preview](assets/Ashtadala-preview.svg)
 
 ## Install
 
