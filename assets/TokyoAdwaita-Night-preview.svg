@@ -325,8 +325,8 @@
     <path d="M532.50,972.86 L529.50,972.88 L525.50,970.90 L523.38,968.50 L522.31,965.50 L522.23,963.50 L523.07,960.50 L525.66,957.50 L528.50,955.99 L533.50,956.01 L535.50,956.99 L537.50,958.70 L539.03,961.50 L539.13,966.50 L538.50,967.66 L536.50,968.68 L533.50,967.89 L530.50,968.66 L528.50,967.87 L527.14,966.50 L526.78,965.50 L526.64,963.50 L527.65,961.50 L529.50,960.12 L531.50,959.96 L532.50,960.17 L534.20,961.50 L534.89,962.50 L535.28,965.50 L536.50,966.07 L537.08,965.50 L536.98,962.50 L536.69,961.50 L534.50,959.06 L531.50,958.04 L528.50,958.40 L526.81,959.50 L525.30,961.50 L524.92,965.50 L526.50,968.75 L527.50,969.58 L529.50,970.25 L531.50,970.43 L533.50,969.99 L534.50,970.05 L534.93,970.50 L535.02,971.50 L534.50,972.01 L532.50,972.86 Z M532.54,965.50 L532.94,964.50 L532.50,963.01 L531.50,962.31 L530.50,962.30 L529.50,962.96 L529.05,964.50 L529.50,965.59 L531.50,966.08 L532.54,965.50 Z" fill="#f2f2f5" fill-rule="evenodd" id="ref-icon-520-953"/><text x="552" y="970.7350" fill="#d3d8ec" font-size="17" font-weight="450" font-family="Cantarell, Noto Sans, sans-serif" id="text227">Online Accounts</text>
     <rect x="830.6667" y="392.6667" width="647.3333" height="233.3333" rx="13.3333" fill="#2c2d37" id="rect227"/>
     <text x="845.3333" y="428.2336" fill="#e6e9fa" font-size="18.0" font-weight="520" font-family="Cantarell, Noto Sans, sans-serif" id="text228">Wi-Fi</text>
-    <rect x="1414.0" y="408.0" width="48.6667" height="26.0" rx="13.3333" fill="#ff9e64" id="rect228"/>
-    <circle cx="1445" cy="420" r="9.5" fill="#fffaf7" id="circle228" transform="translate(4.0 0.0) "/>
+    <rect x="1413.7" y="407.5" width="49.5" height="28" rx="14" fill="#ff9e64" id="rect228"/>
+    <circle cx="1449.5" cy="421.5" r="10.7" fill="#ffffff" id="circle228"/>
     <path d="M830.6666666666666 450.66666666666663 H1478.0" fill="none" stroke="#3e3d4c" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" id="path228"/>
     <path d="M830.6666666666666 509.3333333333333 H1478.0" fill="none" stroke="#3e3d4c" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" id="path229"/>
     <path d="M830.6666666666666 568.0 H1478.0" fill="none" stroke="#3e3d4c" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" id="path230"/>
@@ -339,8 +339,8 @@
     <rect x="830.6667" y="652.0" width="647.3333" height="60.0" rx="13.3333" fill="#2c2d37" id="rect233"/>
     <text x="845.3333" y="676.5132" fill="#e1e0e7" font-size="17.3333" font-weight="460" font-family="Cantarell, 'Noto Sans', sans-serif" id="text233">Airplane Mode</text>
     <text x="845.3333" y="697.8465" fill="#9697a8" font-size="14.0" font-weight="420" font-family="Cantarell, Noto Sans, sans-serif" id="text234">Disables Wi-Fi, Bluetooth and mobile broadband</text>
-    <rect x="1414.0" y="669.3333" width="48.6667" height="26.0" rx="13.3333" fill="#5f606d" id="rect234"/>
-    <circle cx="1422" cy="680" r="9.5" fill="#e9e9ee" id="circle234" transform="translate(5.3333 1.3333) "/>
+    <rect x="1413.7" y="667.5" width="49.5" height="28" rx="14" fill="#4b4c55" id="rect234"/>
+    <circle cx="1428" cy="681.5" r="10.7" fill="#d0d0d2" id="circle234"/>
     <text x="830.6667" y="754.6667" fill="#e1e5fa" font-size="18.0" font-weight="650" font-family="Cantarell, Noto Sans, sans-serif" id="text235">Visible Networks</text>
     <rect x="830.6667" y="771.3333" width="647.3333" height="268.0" rx="13.3333" fill="#2c2d37" id="rect235"/>
     <path d="M830.6666666666666 830.6666666666666 H1478.0" fill="none" stroke="#41404c" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" id="path236"/>
