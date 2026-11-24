@@ -35,9 +35,84 @@ window, dialog, popover {
   --destructive-color: @ERROR@;
 }
 
-/* Link-only secondary role. Leave libadwaita's --accent-* untouched.
- * These nodes are GTK4-documented, rather than guessed app-specific classes. */
-window label link:link, dialog label link:link, popover label link:link,
-window button.link:link, dialog button.link:link, popover button.link:link {
-  color: @SECONDARY_TEXT@;
+/* Dim the text rather than compositing the whole label: markup links in
+ * preferences descriptions must keep their own full-opacity foreground.
+ * Retain the native dim factor, including its high-contrast value. */
+label.dimmed:not(:disabled), label.dim-label:not(:disabled) {
+  opacity: 1;
+  color: color-mix(in srgb, currentColor var(--dim-opacity, 55%), transparent);
+}
+
+/* Links are independent of the primary accent and Papirus folder hue.
+ * Keep native decoration, focus and disabled treatments. */
+label link:not(:disabled), button.link:not(:disabled) {color: @LINK@;}
+label link:visited:not(:disabled), button.link:visited:not(:disabled) {color: @LINK_VISITED@;}
+label link:hover:not(:disabled), button.link:hover:not(:disabled) {color: @LINK_HOVER@;}
+label link:active:not(:disabled), button.link:active:not(:disabled) {color: @LINK@;}
+/* Blue ink cannot contrast with an opaque pink navigation selection. */
+.navigation-sidebar > row:selected label link:not(:disabled),
+.navigation-sidebar > child:selected label link:not(:disabled),
+.navigation-sidebar > flowboxchild:selected label link:not(:disabled),
+.navigation-sidebar > row:selected button.link:not(:disabled),
+.navigation-sidebar > child:selected button.link:not(:disabled),
+.navigation-sidebar > flowboxchild:selected button.link:not(:disabled) {
+  color: @SELECTION_FG@;
+}
+
+/* Navigation sidebars normally use a translucent neutral selection. Use an
+ * opaque pink selection with contrasting ink; leave unselected rows alone. */
+.navigation-sidebar > row:selected:not(:disabled),
+.navigation-sidebar > child:selected:not(:disabled),
+.navigation-sidebar > flowboxchild:selected:not(:disabled) {
+  background-color: @SELECTION@;
+  color: @SELECTION_FG@;
+}
+.navigation-sidebar > row:selected:not(:disabled) label,
+.navigation-sidebar > row:selected:not(:disabled) image,
+.navigation-sidebar > child:selected:not(:disabled) label,
+.navigation-sidebar > child:selected:not(:disabled) image,
+.navigation-sidebar > flowboxchild:selected:not(:disabled) label,
+.navigation-sidebar > flowboxchild:selected:not(:disabled) image {
+  color: @SELECTION_FG@;
+}
+
+/* Keep the selected row visibly distinct during pointer interaction. */
+.navigation-sidebar > row:selected:not(:disabled):hover,
+.navigation-sidebar > child:selected:not(:disabled):hover,
+.navigation-sidebar > flowboxchild:selected:not(:disabled):hover {
+  background-color: color-mix(in srgb, @SELECTION@ 92%, white);
+}
+.navigation-sidebar > row:selected:not(:disabled):active,
+.navigation-sidebar > child:selected:not(:disabled):active,
+.navigation-sidebar > flowboxchild:selected:not(:disabled):active {
+  background-color: color-mix(in srgb, @SELECTION@ 90%, black);
+}
+
+/* Text selection uses the same hue without changing the application accent. */
+entry:not(:disabled) text selection,
+textview:not(:disabled) text selection, label:not(:disabled) selection {
+  background-color: @SELECTION@;
+  color: @SELECTION_FG@;
+}
+
+/* Scope accent variables to level and progress widgets so their native
+ * hover, focus and disabled treatments can continue to work. */
+scale:not(.color) {
+  --accent-bg-color: @LEVEL@;
+  --accent-color: @LEVEL@;
+  --accent-fg-color: @LEVEL_FG@;
+}
+progressbar {
+  --accent-bg-color: @PROGRESS@;
+  --accent-color: @PROGRESS@;
+  --accent-fg-color: @PROGRESS_FG@;
+}
+
+/* Recolor the notebook's native indicator, including vertical tabs. */
+notebook > header > tabs > tab {
+  --accent-bg-color: @TAB@;
+}
+/* AdwTabBar has a neutral selected surface rather than a notebook edge. */
+tabbar tabbox:not(.single-tab) tab:selected:not(:disabled) {
+  background-image: linear-gradient(to top, @TAB@ 3px, transparent 3px);
 }

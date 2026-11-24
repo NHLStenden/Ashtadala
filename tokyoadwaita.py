@@ -141,30 +141,22 @@ def secondary_choice(accent: str, requested: str | None = None, previous: str | 
     return default if default != accent else TOKYONIGHT_ACCENTS['cyan']
 
 
-def secondary_text_color(secondary: str) -> str:
-    """Keep secondary ink legible on every Night surface, including custom colors.
-
-    Folders retain the exact requested hue. Text and event markers may be
-    lightened to meet WCAG AA for normal text on the lightest Night panel.
-    """
-    secondary = accent_valid(secondary)
-    background = PALETTE['SURFACE']
-    if contrast(secondary, background) >= 4.5:
-        return secondary
-    channels = [int(secondary[i:i + 2], 16) for i in (1, 3, 5)]
-    for amount in range(1, 101):
-        ratio = amount / 100
-        mixed = '#' + ''.join(f'{round(c + (255 - c) * ratio):02x}' for c in channels)
-        if contrast(mixed, background) >= 4.5:
-            return mixed
-    return '#ffffff'
-
-
 def tokens(accent: str, secondary: str | None = None) -> dict[str, str]:
     if secondary is None:
         secondary = secondary_choice(accent)
+    # Fixed widget roles are independent of the primary and folder accents.
+    selection = TOKYONIGHT_ACCENTS['red']
     return dict(PALETTE, ACCENT=accent, ACCENT_FG=accent_foreground(accent),
-                SECONDARY_ACCENT=secondary, SECONDARY_TEXT=secondary_text_color(secondary),
+                SELECTION=selection, SELECTION_FG=accent_foreground(selection),
+                LEVEL=TOKYONIGHT_ACCENTS['green'],
+                LEVEL_FG=accent_foreground(TOKYONIGHT_ACCENTS['green']),
+                PROGRESS=TOKYONIGHT_ACCENTS['green'],
+                PROGRESS_FG=accent_foreground(TOKYONIGHT_ACCENTS['green']),
+                TAB=TOKYONIGHT_ACCENTS['magenta'],
+                SECONDARY_ACCENT=secondary,
+                LINK=TOKYONIGHT_ACCENTS['blue'],
+                LINK_VISITED='#8baaf7',  # Visited links stay blue, not neutral gray.
+                LINK_HOVER='#a0b9fa',  # Lighter blue for pointer feedback.
                 SUCCESS_FG=accent_foreground(PALETTE['SUCCESS']),
                 WARNING_FG=accent_foreground(PALETTE['WARNING']),
                 ERROR_FG=accent_foreground(PALETTE['ERROR']))

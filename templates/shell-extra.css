@@ -42,3 +42,18 @@
 .quick-settings .quick-toggle-has-menu:checked .quick-toggle-separator {
   background-color: st-transparentize(@ACCENT_FG@, 0.65);
 }
+
+/* Adjustable Quick Settings levels are distinct from checked toggles. */
+.quick-settings .slider {
+  -barlevel-active-background-color: @LEVEL@;
+}
+
+/* The overview's running-app dot is a persistent activity indicator. */
+.app-grid-running-dot {
+  background-color: @PROGRESS@;
+}
+
+/* Shell links and notification URLs retain conventional blue ink. */
+.shell-link {color: @LINK@;}
+.shell-link:hover {color: @LINK_HOVER@;}
+.url-highlighter {link-color: @LINK@;}

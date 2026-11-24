@@ -7,7 +7,7 @@
    aria-labelledby="title desc"
    version="1.1"
    id="svg344"
-   sodipodi:docname="TokyoAdwaita-Night-Screenshot-Anonymous.svg"
+   sodipodi:docname="TokyoAdwaita-Night-preview.svg"
    inkscape:version="1.4.4 (dcaf3e7d9e, 2026-05-05)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -23,14 +23,14 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:zoom="0.96"
-     inkscape:cx="432.8125"
+     inkscape:cx="365.10417"
      inkscape:cy="297.91667"
      inkscape:window-width="1920"
      inkscape:window-height="1127"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
-     inkscape:current-layer="svg344" />
+     inkscape:current-layer="g193" />
   <title
      id="title">TokyoAdwaita Night — Fedora GNOME desktop preview</title>
   <desc
@@ -1107,14 +1107,6 @@
        stroke-linejoin="round"
        id="path117" />
     <rect
-       x="49"
-       y="182"
-       width="243"
-       height="37"
-       rx="8"
-       fill="#343540"
-       id="rect117" />
-    <rect
        x="65"
        y="157"
        width="17"
@@ -1148,18 +1140,6 @@
        font-weight="440"
        font-family="Cantarell, Noto Sans, sans-serif"
        id="text119">Computer</text>
-    <path
-       d="M64 205 L73 197 L82 205 H79 V214 H75 V207 H71 V214 H67 V205 Z"
-       fill="#e4e3ec"
-       id="path120" />
-    <text
-       x="99"
-       y="212"
-       fill="#e1e5fa"
-       font-size="17"
-       font-weight="560"
-       font-family="Cantarell, Noto Sans, sans-serif"
-       id="text120">Home</text>
     <circle
        cx="73"
        cy="248"
@@ -2028,6 +2008,26 @@
        fill="#585664"
        opacity=".65"
        id="path193" />
+    <rect
+       x="49"
+       y="186"
+       width="243"
+       height="37"
+       rx="8"
+       fill="#f7768e"
+       id="rect117" />
+    <path
+       d="m 64,203 9,-8 9,8 h -3 v 9 h -4 v -7 h -4 v 7 h -4 v -9 z"
+       fill="#16161e"
+       id="path120" />
+    <text
+       x="99"
+       y="210"
+       fill="#16161e"
+       font-size="17px"
+       font-weight="560"
+       font-family="Cantarell, 'Noto Sans', sans-serif"
+       id="text120">Home</text>
   </g>
   <g
      filter="url(#win-shadow)"
@@ -2084,6 +2084,26 @@
        rx="0"
        fill="#202438"
        id="rect198" />
+    <rect
+       x="510"
+       y="374"
+       width="245"
+       height="47"
+       rx="9"
+       fill="#f7768e"
+       id="rect208" />
+    <path
+       d="m 522,396 q 9,-9 18,0 l -9,11 z"
+       fill="#16161e"
+       id="path211" />
+    <text
+       x="552"
+       y="405"
+       fill="#16161e"
+       font-size="17px"
+       font-weight="520"
+       font-family="Cantarell, 'Noto Sans', sans-serif"
+       id="text211">Wi-Fi</text>
     <rect
        x="762"
        y="363"
@@ -2222,14 +2242,6 @@
        stroke-linecap="round"
        stroke-linejoin="round"
        id="path208" />
-    <rect
-       x="510"
-       y="374"
-       width="245"
-       height="47"
-       rx="9"
-       fill="#383d50"
-       id="rect208" />
     <path
        d="M514 523 L748 523"
        fill="none"
@@ -2246,18 +2258,6 @@
        stroke-linecap="round"
        stroke-linejoin="round"
        id="path210" />
-    <path
-       d="M522 396 Q531 387 540 396 L531 407 Z"
-       fill="#e5e7f5"
-       id="path211" />
-    <text
-       x="552"
-       y="405"
-       fill="#edf0fa"
-       font-size="17"
-       font-weight="520"
-       font-family="Cantarell, Noto Sans, sans-serif"
-       id="text211">Wi-Fi</text>
     <path
        d="M522 444 H540 M522 450 H540"
        fill="none"
@@ -3142,7 +3142,8 @@
        height="5"
        rx="2"
        fill="#ff9e64"
-       id="rect268" />
+       id="rect268"
+       style="fill:#9ece6a;fill-opacity:1" />
     <circle
        cx="1763"
        cy="143"
@@ -3164,7 +3165,8 @@
        height="5"
        rx="2"
        fill="#ff9e64"
-       id="rect270" />
+       id="rect270"
+       style="fill:#9ece6a;fill-opacity:1" />
     <circle
        cx="1706"
        cy="184"
