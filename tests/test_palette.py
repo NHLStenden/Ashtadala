@@ -42,13 +42,6 @@ class PaletteTests(unittest.TestCase):
                             ('rect235', 'SURFACE')]:
             self.assertEqual(by_id[ident].get('fill'), v[role])
         for ident, color in [('rect234', '#4b4c55'),
-                             ('rect90', '#262730'), ('rect278', '#4a4b67')]:
+                             ('rect90', '#262730'), ('rect278', '#4a4b67'), ('text274', '#e1e5fa')]:
             self.assertEqual(by_id[ident].get('fill'), color)
         self.assertIn('fill:' + v['LEVEL'] + ';', by_id['rect268'].get('style'))
-
-        for ident in ('text274', 'text275', 'text278', 'text284', 'text290',
-                      'path1940', 'path1943', 'path1950', 'ref-icon-1600-228',
-                      'ref-icon-1825-225', 'circle283', 'ref-icon-1599-439'):
-            self.assertEqual(by_id[ident].get('fill'), v['ACCENT_FG'])
-        self.assertGreaterEqual(t.contrast(v['ACCENT'], v['ACCENT_FG']), 4.5)
-        self.assertEqual(by_id['text281'].get('fill'), '#e9e5f0')

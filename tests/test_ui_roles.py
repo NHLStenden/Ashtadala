@@ -61,25 +61,6 @@ class WidgetRoleTests(unittest.TestCase):
             self.assertIn(f'@define-color theme_selected_bg_color {primary};', stock)
             self.assertIn(f'@define-color theme_selected_fg_color {values["ACCENT_FG"]};', stock)
 
-    def test_gtk4_content_selections_are_independent_of_actions(self):
-        for primary in [*t.ACCENTS.values(), '#7e69dd']:
-            values = t.tokens(primary)
-            files, _ = t.theme_files(primary, SHELL_SOURCE)
-            for css in (t.gtk4_override(primary), files['gtk-4.0/gtk.css'].decode()):
-                import re
-                for selector in ('listview > row', 'list > row', 'gridview > child',
-                                 'flowbox > flowboxchild', 'treeview.view'):
-                    for state, color in (('', values['SELECTION']),
-                                         (':hover', 'color-mix(in srgb, #ee8bab 92%, white)'),
-                                         (':active', 'color-mix(in srgb, #ee8bab 90%, black)')):
-                        rule = re.search(re.escape(selector + ':selected:not(:disabled)' + state)
-                                         + r'(?=,|\s*\{)[^{]*\{([^}]+)\}', css)
-                        self.assertIsNotNone(rule)
-                        self.assertIn('background-color: ' + color + ';', rule[1])
-                        if not state:
-                            self.assertIn('color: ' + values['SELECTION_FG'] + ';', rule[1])
-                self.assertIn(f'background-color: {primary};\n  border-color: {primary};', css)
-
     def test_gtk3_and_shell_roles(self):
         files, _ = t.theme_files('#ef9369', SHELL_SOURCE, '#cc95e4')
         gtk = files['gtk-3.0/gtk.css'].decode()

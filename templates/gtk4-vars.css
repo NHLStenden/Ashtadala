@@ -112,42 +112,6 @@ label link:active:not(:disabled), button.link:active:not(:disabled) {color: @LIN
   background-color: color-mix(in srgb, @SELECTION@ 90%, black);
 }
 
-/* Content selections are distinct from suggested actions. Keep the legacy
- * accent aliases intact and target the actual selected list/grid nodes.
- * ColumnView uses ListView rows; do not recolor nested action buttons. */
-listview > row:selected:not(:disabled),
-list > row:selected:not(:disabled),
-gridview > child:selected:not(:disabled),
-flowbox > flowboxchild:selected:not(:disabled),
-treeview.view:selected:not(:disabled) {
-  background-color: @SELECTION@;
-  color: @SELECTION_FG@;
-}
-listview > row:selected:not(:disabled):hover,
-list > row:selected:not(:disabled):hover,
-gridview > child:selected:not(:disabled):hover,
-flowbox > flowboxchild:selected:not(:disabled):hover,
-treeview.view:selected:not(:disabled):hover {
-  background-color: color-mix(in srgb, @SELECTION@ 92%, white);
-}
-listview > row:selected:not(:disabled):active,
-list > row:selected:not(:disabled):active,
-gridview > child:selected:not(:disabled):active,
-flowbox > flowboxchild:selected:not(:disabled):active,
-treeview.view:selected:not(:disabled):active {
-  background-color: color-mix(in srgb, @SELECTION@ 90%, black);
-}
-listview > row:selected:not(:disabled) label link:not(:disabled),
-list > row:selected:not(:disabled) label link:not(:disabled),
-gridview > child:selected:not(:disabled) label link:not(:disabled),
-flowbox > flowboxchild:selected:not(:disabled) label link:not(:disabled),
-listview > row:selected:not(:disabled) button.link:not(:disabled),
-list > row:selected:not(:disabled) button.link:not(:disabled),
-gridview > child:selected:not(:disabled) button.link:not(:disabled),
-flowbox > flowboxchild:selected:not(:disabled) button.link:not(:disabled) {
-  color: @SELECTION_FG@;
-}
-
 /* Text selection uses the same hue without changing the application accent. */
 entry:not(:disabled) text selection,
 textview:not(:disabled) text selection, label:not(:disabled) selection {
