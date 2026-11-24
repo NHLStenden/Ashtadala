@@ -1,7 +1,7 @@
 # Ashtadala
 
 <p align="center">
-  <img src="assets/Ashtadala-logo.svg" alt="Ashtadala logo" width="100%">
+  <img src="assets/Ashtadala-logo.svg" alt="Ashtadala logo" width="75%">
 </p>
 
 Ashtadala is a user theme for Fedora 45 and GNOME 51.
