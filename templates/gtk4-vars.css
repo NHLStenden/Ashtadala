@@ -12,10 +12,11 @@ window, dialog, popover {
   --secondary-sidebar-backdrop-color: @BG@;
   --overview-bg-color: @BG@;
   --thumbnail-bg-color: @SURFACE@;
+  --card-bg-color: @SURFACE@;
   --dialog-bg-color: @BG@;
   --popover-bg-color: @PANEL@;
 
-  /* Keep Adwaita's light foregrounds and translucent card styles. */
+  /* Keep Adwaita's native foregrounds and card interactions. */
   --accent-bg-color: @ACCENT@;
   --accent-fg-color: @ACCENT_FG@;
   --accent-color: oklab(from @ACCENT@ max(l, 0.85) a b);

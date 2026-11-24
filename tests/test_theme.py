@@ -43,6 +43,21 @@ class ColorTests(unittest.TestCase):
         theme_css = t.theme_files('#ef9369', SHELL_SOURCE)[0]['gtk-4.0/gtk.css'].decode()
         self.assertIn('@define-color accent_bg_color #ef9369;', theme_css)
 
+    def test_gtk4_cards_use_palette_surface_in_both_layers(self):
+        surface = t.PALETTE['SURFACE']
+        for accent in ('#ef9369', '#8fa9fd'):
+            overlay = t.gtk4_override(accent)
+            self.assertIn(f'--card-bg-color: {surface};', overlay)
+            self.assertNotIn('@define-color', overlay)
+            files, _ = t.theme_files(accent, SHELL_SOURCE)
+            for name in ('gtk-4.0/gtk.css', 'gtk-4.0/gtk-dark.css'):
+                css = files[name].decode()
+                self.assertIn(f'--card-bg-color: {surface};', css)
+                self.assertIn(f'@define-color card_bg_color {surface};', css)
+                self.assertNotIn('card_bg_color alpha(white, 0.08)', css)
+        self.assertGreater(t.contrast(surface, '#ffffff'), 7)
+        self.assertGreater(t.relative_luminance(surface), t.relative_luminance(t.PALETTE['PANEL']))
+
     def test_gtk3_suggested_buttons_do_not_show_adwaita_blue_gradient(self):
         gtk3 = t.expand('gtk3.css', t.tokens('#ef9369'))
         self.assertIn('button.suggested-action:active', gtk3)

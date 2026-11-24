@@ -4,7 +4,7 @@
 @define-color view_bg_color @DEEP@;
 @define-color headerbar_bg_color @PANEL@;
 @define-color sidebar_bg_color @PANEL@;
-@define-color card_bg_color alpha(white, 0.08);
+@define-color card_bg_color @SURFACE@;
 @define-color accent_bg_color @ACCENT@;
 @define-color accent_fg_color @ACCENT_FG@;
 @define-color accent_color @ACCENT@;
