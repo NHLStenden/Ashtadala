@@ -14,9 +14,19 @@ cat > "$DIR/bin/systemctl" <<'MOCK'
 #!/usr/bin/env bash
 case "$*" in
   '--user cat org.gnome.Shell@user.service') exit 0 ;;
-  '--user show org.gnome.Shell@user.service -p Environment --value') printf '%s\n' "${MOCK_SYSTEMD_ENV:-}"; exit 0 ;;
+   '--user show org.gnome.Shell@user.service -p Environment --value')
+    if [[ ${MOCK_SHOW_FAIL:-0} == 1 ]]; then exit 1; fi
+    if [[ ${MOCK_SYSTEMD_ENV+x} ]]; then printf '%s\n' "$MOCK_SYSTEMD_ENV"; exit 0; fi
+    # Last drop-in wins, just as systemd's Environment= assignment does.
+    for file in "$XDG_CONFIG_HOME"/systemd/user/org.gnome.Shell@user.service.d/*.conf; do
+      [[ -f "$file" ]] || continue
+      value=$(sed -n 's/^Environment="LD_PRELOAD=\(.*\)"$/\1/p' "$file")
+      [[ -z "$value" ]] || preload=$value
+    done
+    [[ -z ${preload:-} ]] || printf 'LD_PRELOAD=%s\n' "$preload"
+    exit 0 ;;
   '--user show org.gnome.Shell@user.service -p MainPID --value') echo 0; exit 0 ;;
-  '--user daemon-reload') exit 0 ;;
+  '--user daemon-reload') [[ ${MOCK_RELOAD_FAIL:-0} != 1 ]] ;;
   *) echo "Unexpected mock systemctl: $*" >&2; exit 2 ;;
 esac
 MOCK
@@ -46,9 +56,51 @@ if MOCK_SYSTEMD_ENV='LD_PRELOAD=/another/foreign.so' bash "$SCRIPT" check > "$DI
   echo 'Foreign preload accepted' >&2; exit 1
 fi
 grep -Fq 'Another Shell LD_PRELOAD' "$DIR/error"
+# A list containing our library AND a foreign library is not our preload.
+if MOCK_SYSTEMD_ENV="LD_PRELOAD=$LIB:/another/foreign.so" bash "$SCRIPT" check > "$DIR/error" 2>&1; then
+  echo 'Mixed preload accepted' >&2; exit 1
+fi
+if MOCK_SHOW_FAIL=1 bash "$SCRIPT" check > "$DIR/error" 2>&1; then
+  echo 'Unreadable service environment accepted' >&2; exit 1
+fi
 bash "$SCRIPT" uninstall
 [[ ! -e "$DROPIN" && ! -e "$LIB" ]]
 bash "$SCRIPT" uninstall
+# Reproduce the old install using its actual emitted configuration.
+OLD_LIB="$XDG_DATA_HOME/tokyoadwaita-night/libaccent-hook.so"
+OLD_DROPIN="$(dirname "$DROPIN")/80-tokyoadwaita-accent.conf"
+mkdir -p "$(dirname "$OLD_LIB")" "$(dirname "$OLD_DROPIN")"
+touch "$OLD_LIB"
+printf '%s\n' '# Managed by TokyoAdwaita Night native accent hook' '[Service]' \
+  "Environment=\"LD_PRELOAD=$OLD_LIB\"" 'Environment="TOKYOADWAITA_ACCENT_COLOR=#7aa2f7"' \
+  'Environment="TOKYOADWAITA_ACCENT_LOG=1"' > "$OLD_DROPIN"
+cp "$OLD_DROPIN" "$DIR/original-dropin"
+bash "$SCRIPT" check
+cmp "$OLD_DROPIN" "$DIR/original-dropin"  # Preflight is read-only.
+if MOCK_RELOAD_FAIL=1 bash "$SCRIPT" install '#8fa9fd' > "$DIR/error" 2>&1; then
+  echo 'Reload failure accepted' >&2; exit 1
+fi
+cmp "$OLD_DROPIN" "$DIR/original-dropin"
+[[ ! -e "$DROPIN" && ! -e "$LIB" ]]
+# A modified old drop-in is not ours to remove.
+printf 'Environment="OTHER=1"\n' >> "$OLD_DROPIN"
+if bash "$SCRIPT" check > "$DIR/error" 2>&1; then
+  echo 'Modified legacy drop-in accepted' >&2; exit 1
+fi
+cp "$DIR/original-dropin" "$OLD_DROPIN"
+if MOCK_SYSTEMD_ENV="LD_PRELOAD=$OLD_LIB:/another/foreign.so" bash "$SCRIPT" check > "$DIR/error" 2>&1; then
+  echo 'Mixed legacy preload accepted' >&2; exit 1
+fi
+bash "$SCRIPT" install '#8fa9fd'
+[[ ! -e "$OLD_DROPIN" && -f "$OLD_LIB" && -f "$DROPIN" && -f "$LIB" ]]
+[[ $(systemctl --user show org.gnome.Shell@user.service -p Environment --value) == "LD_PRELOAD=$LIB" ]]
+bash "$SCRIPT" install '#ef9369'
+bash "$SCRIPT" uninstall
+[[ ! -e "$DROPIN" && ! -e "$LIB" ]]
+# A legacy path without its authentic drop-in is still foreign.
+if MOCK_SYSTEMD_ENV="LD_PRELOAD=$OLD_LIB" bash "$SCRIPT" check > "$DIR/error" 2>&1; then
+  echo 'Unowned legacy preload accepted' >&2; exit 1
+fi
 # Refuse to overwrite files without the ownership marker.
 mkdir -p "$(dirname "$DROPIN")"
 printf '[Service]\n' > "$DROPIN"

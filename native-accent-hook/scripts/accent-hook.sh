@@ -10,12 +10,36 @@ DATA="${XDG_DATA_HOME:-$HOME/.local/share}/ashtadala-night"
 LIB="$DATA/libaccent-hook.so"
 DROPIN_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user/$UNIT.d"
 DROPIN="$DROPIN_DIR/80-ashtadala-accent.conf"
+LEGACY_DROPIN="$DROPIN_DIR/80-tokyoadwaita-accent.conf"
+LEGACY_LIB="${XDG_DATA_HOME:-$HOME/.local/share}/tokyoadwaita-night/libaccent-hook.so"
 LIBST="${ASHTADALA_LIBST:-/usr/lib64/gnome-shell/libst-51.so}"
 SYSTEMCTL="${ASHTADALA_SYSTEMCTL:-systemctl}"
 
 fail() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 need() { command -v "$1" >/dev/null 2>&1 || fail "Missing command: $1"; }
 owned() { [[ -f "$DROPIN" && ! -L "$DROPIN" ]] && grep -Fxq -- "$MARKER" "$DROPIN"; }
+# Recognize only the exact configuration emitted by the previous installer.
+legacy_owned() {
+  [[ -f "$LEGACY_DROPIN" && ! -L "$LEGACY_DROPIN" ]] || return 1
+  python3 - "$LEGACY_DROPIN" "$LEGACY_LIB" <<'PYTHON'
+import re, sys
+from pathlib import Path
+lines = Path(sys.argv[1]).read_text().splitlines()
+valid = (len(lines) == 5 and lines[:3] == [
+    '# Managed by TokyoAdwaita Night native accent hook', '[Service]',
+    f'Environment="LD_PRELOAD={sys.argv[2]}"']
+    and re.fullmatch(r'Environment="TOKYOADWAITA_ACCENT_COLOR=#[0-9a-fA-F]{6}"', lines[3])
+    and lines[4] == 'Environment="TOKYOADWAITA_ACCENT_LOG=1"')
+sys.exit(0 if valid else 1)
+PYTHON
+}
+preload_value() {
+  python3 -c 'import shlex, sys
+values = [v.split("=", 1)[1] for v in shlex.split(sys.stdin.read()) if v.startswith("LD_PRELOAD=")]
+if len(values) > 1:
+    sys.exit(1)
+print(values[0] if values else "")'
+}
 paths_ok() {
   # LD_PRELOAD treats space/colon as separators; systemd parses % and quotes.
   case "$LIB" in *' '*|*$'\t'*|*$'\n'*|*$'\r'*|*':'*|*'%'*|*'"'*|*'\'* ) fail 'Unsafe path for LD_PRELOAD';; esac
@@ -33,10 +57,16 @@ check() {
   if [[ -e "$DROPIN" || -L "$DROPIN" ]] && ! owned; then
       fail "Refusing to replace unmanaged drop-in: $DROPIN"
   fi
-  local env
-  env="$("$SYSTEMCTL" --user show "$UNIT" -p Environment --value 2>/dev/null || true)"
-  if [[ "$env" == *LD_PRELOAD=* && "$env" != *"LD_PRELOAD=$LIB"* ]]; then
-      fail 'Another Shell LD_PRELOAD is active; remove it first (including older standalone hooks)'
+  local env preload
+  env="$("$SYSTEMCTL" --user show "$UNIT" -p Environment --value)" || fail 'Cannot read Shell service environment'
+  preload="$(printf '%s' "$env" | preload_value)" || fail 'Cannot parse Shell service environment'
+  if [[ -e "$LEGACY_DROPIN" || -L "$LEGACY_DROPIN" ]] && ! legacy_owned; then
+      fail "Refusing to replace unmanaged legacy drop-in: $LEGACY_DROPIN"
+  fi
+  if [[ -n "$preload" && "$preload" != "$LIB" ]]; then
+      if [[ "$preload" != "$LEGACY_LIB" ]] || ! legacy_owned; then
+          fail 'Another Shell LD_PRELOAD is active; remove it first (including older standalone hooks)'
+      fi
   fi
 }
 install_hook() {
@@ -53,7 +83,6 @@ install_hook() {
       fail 'Hook does not export cogl_color_from_string'
   mkdir -p -- "$DATA" "$DROPIN_DIR"
   install -m 0755 "$tmp/libaccent-hook.so" "$tmp/library"
-  mv -f -- "$tmp/library" "$LIB"
   {
     printf '%s\n[Service]\n' "$MARKER"
     printf 'Environment="LD_PRELOAD=%s"\n' "$LIB"
@@ -61,8 +90,38 @@ install_hook() {
     printf 'Environment="ASHTADALA_ACCENT_LOG=1"\n'
   } > "$tmp/config"
   install -m 0644 "$tmp/config" "$tmp/dropin"
+  # The old filename sorts after the new one and would override LD_PRELOAD.
+  if owned; then cp -- "$DROPIN" "$tmp/previous-dropin"; fi
+  if [[ -e "$LIB" || -L "$LIB" ]]; then cp -P -- "$LIB" "$tmp/previous-library"; fi
+  mv -f -- "$tmp/library" "$LIB"
   mv -f -- "$tmp/dropin" "$DROPIN"
-  "$SYSTEMCTL" --user daemon-reload || fail 'daemon-reload failed; remove the drop-in from TTY if GNOME fails to start'
+  if legacy_owned; then
+    mv -- "$LEGACY_DROPIN" "$tmp/legacy-dropin"
+  fi
+  local effective
+  if ! "$SYSTEMCTL" --user daemon-reload ||
+     ! effective="$("$SYSTEMCTL" --user show "$UNIT" -p Environment --value | preload_value)" ||
+     [[ "$effective" != "$LIB" ]]; then
+    if [[ -f "$tmp/previous-dropin" ]]; then
+      mv -f -- "$tmp/previous-dropin" "$DROPIN"
+    else
+      rm -f -- "$DROPIN"
+    fi
+    if [[ -f "$tmp/legacy-dropin" ]]; then
+      mv -- "$tmp/legacy-dropin" "$LEGACY_DROPIN"
+    fi
+    if [[ -e "$tmp/previous-library" || -L "$tmp/previous-library" ]]; then
+      mv -f -- "$tmp/previous-library" "$LIB"
+    else
+      rm -f -- "$LIB"
+    fi
+    "$SYSTEMCTL" --user daemon-reload || true
+    fail 'Cannot activate native hook; previous configuration restored'
+  fi
+  if [[ -f "$tmp/legacy-dropin" ]]; then
+    printf 'Migrated previous TokyoAdwaita native accent hook (takes effect next login)\n'
+  fi
+  rm -rf -- "$tmp"
   printf 'Native accent hook: %s -> %s (takes effect next login)\n' "$SLATE" "$color"
 }
 uninstall_hook() {
