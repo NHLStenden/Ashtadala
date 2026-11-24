@@ -27,8 +27,14 @@ ACCENTS = {name: oklch(ACCENT_L, ACCENT_C, hue) for name, hue in HUES.items()}
 DEFAULT = 'blue'
 
 
+# Original surface roles have different tint strengths; the main background
+# anchors the ramp. Do not turn the deeper neutral surfaces blue or flatten
+# the richer blue panels and borders into gray.
+SURFACE_CHROMA = {-1: .018, 0: SURFACE_C, 1: .040, 2: .041, 3: .043, 6: .064}
+
+
 def surface(step: int) -> str:
-    return oklch(SURFACE_L + SURFACE_STEP*step, SURFACE_C, SURFACE_H)
+    return oklch(SURFACE_L + SURFACE_STEP*step, SURFACE_CHROMA.get(step, SURFACE_C), SURFACE_H)
 
 
 def accent_shade(name: str, lightness: float) -> str:

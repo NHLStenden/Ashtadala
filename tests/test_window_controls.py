@@ -24,10 +24,10 @@ class WindowControlTests(unittest.TestCase):
                 rest = block.split(prefix + 'close:not(:disabled)' + suffix + ' {', 1)[1].split('}', 1)[0]
                 self.assertIn('background-color: #cdaa45;', rest)
                 self.assertIn('background-image: none;', rest)
-                self.assertIn('color: #0b0f1a;', rest)
+                self.assertIn('color: #13161e;', rest)
                 for color in ('#cdaa45', '#ddba56', '#b6942a'):
                     self.assertIn('background-color: ' + color + ';', block)
-                self.assertIn('background-color: #2e3240;', block)
+                self.assertIn('background-color: #2a3249;', block)
                 self.assertIn('background-color: #8fa9fd;', block)
                 self.assertNotIn('@ERROR@', block)
             shell = files['gnome-shell/gnome-shell.css'].decode()
@@ -37,6 +37,6 @@ class WindowControlTests(unittest.TestCase):
 
     def test_control_contrast(self):
         v = t.tokens('#ef9369')
-        for fg, bg in (('#c7cddf', v['HOVER']), (v['LINK_HOVER'], v['BORDER']),
+        for fg, bg in (('#becdf6', v['HOVER']), (v['LINK_HOVER'], v['BORDER']),
                        (v['DEEP'], v['LINK']), *((v['DEEP'], v[k]) for k in ('CLOSE', 'CLOSE_HOVER', 'CLOSE_ACTIVE'))):
             self.assertGreaterEqual(t.contrast(fg, bg), 4.5)

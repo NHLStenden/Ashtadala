@@ -32,12 +32,12 @@ SECONDARY_DEFAULT = 'purple'  # Object identity (Papirus folders), not a GTK/She
 # Replace dark surfaces without changing Adwaita's light foregrounds.
 PALETTE = {
     'BG': surface(0),
-    'DEEP': surface(-2),
+    'DEEP': surface(-1),
     'PANEL': surface(1),
     'SURFACE': surface(2),
     'HOVER': surface(3),
-    'BORDER': surface(5),
-    'CONTROL_FG': oklch(.85, .025, 270),
+    'BORDER': surface(6),
+    'CONTROL_FG': oklch(.85, .06, 270),
     # Fixed perceptual semantic roles, independent of user accents.
     'SUCCESS': ACCENTS['green'],
     'WARNING': ACCENTS['yellow'],

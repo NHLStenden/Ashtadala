@@ -23,7 +23,7 @@ class WidgetRoleTests(unittest.TestCase):
     def test_gtk4_sidebar_is_opaque_and_has_matching_ink(self):
         css = t.gtk4_override('#ef9369', '#cc95e4')
         self.assertIn('.navigation-sidebar > row:selected:not(:disabled)', css)
-        self.assertIn('background-color: #ee8bab;\n  color: #0b0f1a;', css)
+        self.assertIn('background-color: #ee8bab;\n  color: #13161e;', css)
         self.assertIn('.navigation-sidebar > row:selected:not(:disabled) label', css)
         self.assertNotIn('--window-fg-color:', css)
         self.assertIn('--accent-bg-color: #ef9369;', css)
@@ -35,7 +35,7 @@ class WidgetRoleTests(unittest.TestCase):
         self.assertIn('.navigation-sidebar > flowboxchild:selected:not(:disabled)', css)
         self.assertIn('color-mix(in srgb, #ee8bab 92%, white)', css)
         self.assertIn('color-mix(in srgb, #ee8bab 90%, black)', css)
-        self.assertIn('--accent-fg-color: #0b0f1a;', css)
+        self.assertIn('--accent-fg-color: #13161e;', css)
 
     def test_stock_gtk4_fallbacks_are_not_in_libadwaita_user_overlay(self):
         files, _ = t.theme_files('#ef9369', SHELL_SOURCE, '#cc95e4')

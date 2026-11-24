@@ -25,19 +25,19 @@ class ColorTests(unittest.TestCase):
         self.assertEqual(t.PALETTE['BG'], '#181c29')
         for color in ['#ef9369', '#ffffff', '#000000', '#8fa9fd', '#ff0000', '#0000ff']:
             self.assertGreaterEqual(t.contrast(color, t.accent_foreground(color)), 4.49)
-        self.assertEqual(t.accent_foreground('#ef9369'), '#0b0f1a')
+        self.assertEqual(t.accent_foreground('#ef9369'), '#13161e')
 
     def test_mid_brightness_custom_accent_is_accessible(self):
         # Dark ink must meet the contrast target even near the crossover.
         for color in ('#7e69dd', '#7d7d7d', '#808080', '#ef9369'):
             self.assertGreaterEqual(t.contrast(color, t.accent_foreground(color)), 4.5)
-        self.assertEqual(t.accent_foreground('#7e69dd'), t.PALETTE['DEEP'])
-        self.assertEqual(t.accent_foreground('#ef9369'), '#0b0f1a')
+        self.assertEqual(t.accent_foreground('#7e69dd'), '#000000')
+        self.assertEqual(t.accent_foreground('#ef9369'), '#13161e')
 
     def test_gtk4_user_overlay_does_not_inject_light_mode_aliases(self):
         user_css = t.gtk4_override('#ef9369')
         self.assertIn('@media (prefers-color-scheme: dark)', user_css)
-        self.assertIn('--accent-fg-color: #0b0f1a;', user_css)
+        self.assertIn('--accent-fg-color: #13161e;', user_css)
         self.assertNotIn('@define-color', user_css)
         # Legacy aliases are kept in the explicit dark GTK4 theme layer.
         theme_css = t.theme_files('#ef9369', SHELL_SOURCE)[0]['gtk-4.0/gtk.css'].decode()
@@ -48,7 +48,7 @@ class ColorTests(unittest.TestCase):
         self.assertIn('button.suggested-action:active', gtk3)
         self.assertIn('button.suggested-action:hover', gtk3)
         self.assertIn('background-image: none;', gtk3)
-        self.assertIn('color: #0b0f1a;', gtk3)
+        self.assertIn('color: #13161e;', gtk3)
 
     def test_gtk3_filechooser_focus_and_sidebar_selection(self):
         # GTK3 Adwaita's focused treeview rules can otherwise keep its blue.
@@ -107,9 +107,9 @@ class ColorTests(unittest.TestCase):
     def test_shell_reuses_original_selectors_and_color_functions(self):
         css, changes = t.shell_recolor(SHELL_SOURCE, '#bc83ff')
         self.assertIn('st-mix(#bc83ff, #181c29, 9%)', css)
-        self.assertIn('background-color: #262b38', css)
+        self.assertIn('background-color: #232a40', css)
         self.assertIn('color: #ffffff;', css)  # Blur My Shell contrast must stay white
-        self.assertNotIn('color: #c7cddf', css)
+        self.assertNotIn('color: #becdf6', css)
         self.assertNotIn('-st-accent-color', css)
         self.assertNotIn('-st-accent-fg-color', css)
         self.assertEqual(changes['-st-accent-color'], 84)
@@ -126,7 +126,7 @@ class ColorTests(unittest.TestCase):
             self.assertNotIn('#6f8396', quick)
             self.assertNotIn('#ed5b00', quick)
             self.assertNotIn('!important', quick)
-            self.assertNotIn('#c7cddf', quick)
+            self.assertNotIn('#becdf6', quick)
             # Each selected button must have readable text, not white on peach.
             self.assertGreaterEqual(t.contrast(accent, t.accent_foreground(accent)), 4.5)
             self.assertLess(t.contrast(accent, '#ffffff'), 4.5) if accent == '#ef9369' else None

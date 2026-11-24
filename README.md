@@ -22,7 +22,8 @@ Colors: `blue`, `cyan`, `purple`, `green`, `teal`, `yellow`, `peach`,
 `red`, or any `#RRGGBB`.
 
 Eight accents use OKLCH(0.75, 0.125, 45° × n); dark surfaces use
-OKLCH(0.23 + 0.03 × n, 0.025, 270°).
+OKLCH(0.23 + 0.03 × n, C, 270°), with the main background at C = 0.025
+and role-specific chroma preserving the original dark-surface hierarchy.
 
 GTK 3, GTK 4 and GNOME Shell are themed together. A small `LD_PRELOAD` hook
 handles Shell's native accent without patching system libraries. Papirus folder

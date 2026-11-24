@@ -22,9 +22,25 @@ class PaletteTests(unittest.TestCase):
             p.oklch(.75, .13, 270)
 
     def test_surface_ramp(self):
-        for role, step in [('DEEP', -2), ('BG', 0), ('PANEL', 1), ('SURFACE', 2), ('HOVER', 3), ('BORDER', 5)]:
-            self.assertEqual(t.PALETTE[role], p.oklch(.23 + .03*step, .025, 270))
+        for role, step, chroma in [('DEEP', -1, .018), ('BG', 0, .025), ('PANEL', 1, .040), ('SURFACE', 2, .041), ('HOVER', 3, .043), ('BORDER', 6, .064)]:
+            self.assertEqual(t.PALETTE[role], p.oklch(.23 + .03*step, chroma, 270))
 
     def test_native_default(self):
         source = (t.ROOT / 'native-accent-hook/src/accent_hook.c').read_text()
         self.assertIn(f'#define DEFAULT_ACCENT "{p.ACCENTS[p.DEFAULT]}"', source)
+
+    def test_preview_color_roles(self):
+        from xml.etree import ElementTree as ET
+        preview = ET.parse(t.ROOT / 'assets/Ashtadala-Night-preview.svg')
+        by_id = {element.get('id'): element for element in preview.iter()}
+        v = t.tokens(p.ACCENTS['peach'], p.ACCENTS['purple'])
+        for ident, role in [('rect83', 'DEEP'), ('rect195', 'PANEL'),
+                            ('rect196', 'BG'), ('rect208', 'SELECTION'),
+                            ('circle207', 'CLOSE'), ('rect271', 'ACCENT'),
+                            ('text274', 'ACCENT_FG'), ('path1856', 'SECONDARY_ACCENT')]:
+            self.assertEqual(by_id[ident].get('fill'), v[role])
+        for ident, color in [('rect227', '#2c2d37'), ('rect233', '#2c2d37'),
+                             ('rect235', '#2c2d37'), ('rect234', '#4b4c55'),
+                             ('rect90', '#262730'), ('rect278', '#4a4355')]:
+            self.assertEqual(by_id[ident].get('fill'), color)
+        self.assertIn('fill:' + v['LEVEL'] + ';', by_id['rect268'].get('style'))

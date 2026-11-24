@@ -70,8 +70,8 @@ class SecondaryRoleTests(unittest.TestCase):
             self.assertIn('--destructive-bg-color: #ee8bab', gtk)
 
     def test_custom_secondary_stays_exact_for_folder_icons(self):
-        data = t.tokens('#8fa9fd', '#2e3240')
-        self.assertEqual(data['SECONDARY_ACCENT'], '#2e3240')
+        data = t.tokens('#8fa9fd', '#2a3249')
+        self.assertEqual(data['SECONDARY_ACCENT'], '#2a3249')
         self.assertNotEqual(data['LINK'], data['SECONDARY_ACCENT'])
 
 
