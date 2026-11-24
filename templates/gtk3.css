@@ -94,3 +94,69 @@ notebook > header.left > tabs > tab:checked:not(:disabled) {
 notebook > header.right > tabs > tab:checked:not(:disabled) {
   box-shadow: inset 4px 0 @TAB@;
 }
+
+/* Window controls: native geometry and symbolic icons, TokyoNight surfaces.
+ * Close stays solid golden yellow even in inactive windows; disabled states remain native. */
+button.titlebutton.minimize:not(:disabled):not(:backdrop),
+button.titlebutton.maximize:not(:disabled):not(:backdrop) {
+  background-color: @HOVER@;
+  color: #c0caf5;
+  background-image: none;
+  border-color: transparent;
+  box-shadow: none;
+  border-radius: 999px;
+  text-shadow: none;
+  -gtk-icon-shadow: none;
+}
+button.titlebutton.minimize:not(:disabled):hover:not(:backdrop),
+button.titlebutton.maximize:not(:disabled):hover:not(:backdrop) {
+  background-color: @BORDER@;
+  color: @LINK_HOVER@;
+  background-image: none;
+  border-color: transparent;
+  box-shadow: none;
+  border-radius: 999px;
+  text-shadow: none;
+  -gtk-icon-shadow: none;
+}
+button.titlebutton.minimize:not(:disabled):active:not(:backdrop),
+button.titlebutton.maximize:not(:disabled):active:not(:backdrop) {
+  background-color: @LINK@;
+  color: @DEEP@;
+  background-image: none;
+  border-color: transparent;
+  box-shadow: none;
+  border-radius: 999px;
+  text-shadow: none;
+  -gtk-icon-shadow: none;
+}
+button.titlebutton.close:not(:disabled) {
+  background-color: @CLOSE@;
+  color: @DEEP@;
+  background-image: none;
+  border-color: transparent;
+  box-shadow: none;
+  border-radius: 999px;
+  text-shadow: none;
+  -gtk-icon-shadow: none;
+}
+button.titlebutton.close:not(:disabled):hover {
+  background-color: @CLOSE_HOVER@;
+  color: @DEEP@;
+  background-image: none;
+  border-color: transparent;
+  box-shadow: none;
+  border-radius: 999px;
+  text-shadow: none;
+  -gtk-icon-shadow: none;
+}
+button.titlebutton.close:not(:disabled):active {
+  background-color: @CLOSE_ACTIVE@;
+  color: @DEEP@;
+  background-image: none;
+  border-color: transparent;
+  box-shadow: none;
+  border-radius: 999px;
+  text-shadow: none;
+  -gtk-icon-shadow: none;
+}

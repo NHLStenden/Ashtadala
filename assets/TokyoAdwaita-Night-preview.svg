@@ -9336,13 +9336,13 @@
        cx="1458"
        cy="338"
        r="13"
-       fill="#363845"
+       fill="#292e42"
        id="circle205"
        transform="translate(-14.6667 4.0) " />
     <path
        d="M1453 338 L1463 338"
        fill="none"
-       stroke="#e1e5fa"
+       stroke="#c0caf5"
        stroke-width="2"
        stroke-linecap="round"
        stroke-linejoin="round"
@@ -9352,13 +9352,13 @@
        cx="1498"
        cy="338"
        r="13"
-       fill="#363845"
+       fill="#292e42"
        id="circle206"
        transform="translate(-16.0 4.0) " />
     <path
        d="M1493 340 L1493 333 L1500 333"
        fill="none"
-       stroke="#e1e5fa"
+       stroke="#c0caf5"
        stroke-width="2"
        stroke-linecap="round"
        stroke-linejoin="round"
@@ -9367,7 +9367,7 @@
     <path
        d="M1503 336 L1503 343 L1496 343"
        fill="none"
-       stroke="#e1e5fa"
+       stroke="#c0caf5"
        stroke-width="2"
        stroke-linecap="round"
        stroke-linejoin="round"
@@ -9377,13 +9377,13 @@
        cx="1531"
        cy="338"
        r="13"
-       fill="#363845"
+       fill="#e0af68"
        id="circle207"
        transform="translate(-9.3333 4.0) " />
     <path
        d="M1527 334 l8 8 M1535 334 l-8 8"
        fill="none"
-       stroke="#e1e5fa"
+       stroke="#16161e"
        stroke-width="2"
        stroke-linecap="round"
        stroke-linejoin="round"

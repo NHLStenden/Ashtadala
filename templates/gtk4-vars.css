@@ -116,3 +116,39 @@ notebook > header > tabs > tab {
 tabbar tabbox:not(.single-tab) tab:selected:not(:disabled) {
   background-image: linear-gradient(to top, @TAB@ 3px, transparent 3px);
 }
+
+/* Window controls: native geometry and symbolic icons, TokyoNight surfaces.
+ * Close stays solid golden yellow even in inactive windows; disabled states remain native. */
+windowcontrols > button.minimize:not(:disabled):not(:backdrop) > image,
+windowcontrols > button.maximize:not(:disabled):not(:backdrop) > image {
+  background-color: @HOVER@;
+  color: #c0caf5;
+}
+windowcontrols > button.minimize:not(:disabled):hover:not(:backdrop) > image,
+windowcontrols > button.maximize:not(:disabled):hover:not(:backdrop) > image {
+  background-color: @BORDER@;
+  color: @LINK_HOVER@;
+}
+windowcontrols > button.minimize:not(:disabled):active:not(:backdrop) > image,
+windowcontrols > button.maximize:not(:disabled):active:not(:backdrop) > image {
+  background-color: @LINK@;
+  color: @DEEP@;
+}
+windowcontrols > button.close:not(:disabled) > image {
+  background-image: none;
+  opacity: 1;
+  background-color: @CLOSE@;
+  color: @DEEP@;
+}
+windowcontrols > button.close:not(:disabled):hover > image {
+  background-image: none;
+  opacity: 1;
+  background-color: @CLOSE_HOVER@;
+  color: @DEEP@;
+}
+windowcontrols > button.close:not(:disabled):active > image {
+  background-image: none;
+  opacity: 1;
+  background-color: @CLOSE_ACTIVE@;
+  color: @DEEP@;
+}

@@ -41,6 +41,10 @@ PALETTE = {
     'SUCCESS': '#9ece6a',
     'WARNING': '#e0af68',
     'ERROR': '#f7768e',
+    # Decorative window action, separate from destructive/error semantics.
+    'CLOSE': TOKYONIGHT_ACCENTS['yellow'],
+    'CLOSE_HOVER': '#edc58d',
+    'CLOSE_ACTIVE': '#be9558',
 }
 
 # Known dark grays in GNOME 51 Shell CSS. Leave light colors and alpha values alone.

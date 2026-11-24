@@ -57,3 +57,8 @@
 .shell-link {color: @LINK@;}
 .shell-link:hover {color: @LINK_HOVER@;}
 .url-highlighter {link-color: @LINK@;}
+
+/* Overview close: same golden window-control role, native Shell geometry. */
+.window-close {background-color: @CLOSE@; color: @DEEP@;}
+.window-close:hover {background-color: @CLOSE_HOVER@; color: @DEEP@;}
+.window-close:active {background-color: @CLOSE_ACTIVE@; color: @DEEP@;}
