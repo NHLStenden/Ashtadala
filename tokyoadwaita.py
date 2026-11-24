@@ -17,7 +17,7 @@ import sys
 import tempfile
 from typing import Any
 
-from tokyonight_colors import ACCENTS as TOKYONIGHT_ACCENTS, DEFAULT as DEFAULT_ACCENT_NAME, resolve as resolve_tokyonight_accent
+from tokyonight_colors import ACCENTS, DEFAULT as DEFAULT_ACCENT_NAME, resolve as resolve_accent, surface, accent_shade, oklch
 import papirus_icons
 
 ROOT = Path(__file__).resolve().parent
@@ -27,24 +27,25 @@ STATE_NAME = 'tokyoadwaita-night'
 START = '/* BEGIN TOKYOADWAITA-NIGHT: managed GTK4 import */'
 END = '/* END TOKYOADWAITA-NIGHT */'
 IMPORT = '@import url("tokyoadwaita-night.css");'
-ACCENT_DEFAULT = TOKYONIGHT_ACCENTS[DEFAULT_ACCENT_NAME]
+ACCENT_DEFAULT = ACCENTS[DEFAULT_ACCENT_NAME]
 SECONDARY_DEFAULT = 'purple'  # Object identity (Papirus folders), not a GTK/Shell control accent.
 # Replace dark surfaces without changing Adwaita's light foregrounds.
 PALETTE = {
-    'BG': '#1a1b26',
-    'DEEP': '#16161e',
-    'PANEL': '#1f2335',
-    'SURFACE': '#24283b',
-    'HOVER': '#292e42',
-    'BORDER': '#414868',
-    # Fixed TokyoNight semantic roles, independent of user accents.
-    'SUCCESS': '#9ece6a',
-    'WARNING': '#e0af68',
-    'ERROR': '#f7768e',
+    'BG': surface(0),
+    'DEEP': surface(-2),
+    'PANEL': surface(1),
+    'SURFACE': surface(2),
+    'HOVER': surface(3),
+    'BORDER': surface(5),
+    'CONTROL_FG': oklch(.85, .025, 270),
+    # Fixed perceptual semantic roles, independent of user accents.
+    'SUCCESS': ACCENTS['green'],
+    'WARNING': ACCENTS['yellow'],
+    'ERROR': ACCENTS['red'],
     # Decorative window action, separate from destructive/error semantics.
-    'CLOSE': TOKYONIGHT_ACCENTS['yellow'],
-    'CLOSE_HOVER': '#edc58d',
-    'CLOSE_ACTIVE': '#be9558',
+    'CLOSE': ACCENTS['yellow'],
+    'CLOSE_HOVER': accent_shade('yellow', .80),
+    'CLOSE_ACTIVE': accent_shade('yellow', .68),
 }
 
 # Known dark grays in GNOME 51 Shell CSS. Leave light colors and alpha values alone.
@@ -88,9 +89,9 @@ def accent_valid(value: str) -> str:
 
 
 def accent_choice(value: str) -> str:
-    """Accept official TokyoNight color names or a custom #RRGGBB."""
+    """Accept generated palette color names or a custom #RRGGBB."""
     try:
-        return resolve_tokyonight_accent(value)
+        return resolve_accent(value)
     except ValueError as e:
         raise ThemeError(str(e)) from e
 
@@ -141,26 +142,26 @@ def secondary_choice(accent: str, requested: str | None = None, previous: str | 
         return accent_choice(requested)
     if previous is not None:
         return accent_choice(previous)
-    default = TOKYONIGHT_ACCENTS[SECONDARY_DEFAULT]
-    return default if default != accent else TOKYONIGHT_ACCENTS['cyan']
+    default = ACCENTS[SECONDARY_DEFAULT]
+    return default if default != accent else ACCENTS['cyan']
 
 
 def tokens(accent: str, secondary: str | None = None) -> dict[str, str]:
     if secondary is None:
         secondary = secondary_choice(accent)
     # Fixed widget roles are independent of the primary and folder accents.
-    selection = TOKYONIGHT_ACCENTS['red']
+    selection = ACCENTS['red']
     return dict(PALETTE, ACCENT=accent, ACCENT_FG=accent_foreground(accent),
                 SELECTION=selection, SELECTION_FG=accent_foreground(selection),
-                LEVEL=TOKYONIGHT_ACCENTS['green'],
-                LEVEL_FG=accent_foreground(TOKYONIGHT_ACCENTS['green']),
-                PROGRESS=TOKYONIGHT_ACCENTS['green'],
-                PROGRESS_FG=accent_foreground(TOKYONIGHT_ACCENTS['green']),
-                TAB=TOKYONIGHT_ACCENTS['magenta'],
+                LEVEL=ACCENTS['green'],
+                LEVEL_FG=accent_foreground(ACCENTS['green']),
+                PROGRESS=ACCENTS['green'],
+                PROGRESS_FG=accent_foreground(ACCENTS['green']),
+                TAB=ACCENTS['purple'],
                 SECONDARY_ACCENT=secondary,
-                LINK=TOKYONIGHT_ACCENTS['blue'],
-                LINK_VISITED='#8baaf7',  # Visited links stay blue, not neutral gray.
-                LINK_HOVER='#a0b9fa',  # Lighter blue for pointer feedback.
+                LINK=ACCENTS['blue'],
+                LINK_VISITED=oklch(.78, .10, 270),  # Visited links stay blue, not neutral gray.
+                LINK_HOVER=oklch(.81, .09, 270),  # Lighter blue for pointer feedback.
                 SUCCESS_FG=accent_foreground(PALETTE['SUCCESS']),
                 WARNING_FG=accent_foreground(PALETTE['WARNING']),
                 ERROR_FG=accent_foreground(PALETTE['ERROR']))
@@ -240,7 +241,7 @@ def theme_files(accent: str, shell_original: str, secondary: str | None = None) 
             + '@media (prefers-color-scheme: dark) {\n'
             + expand('gtk4-vars.css', values) + '}\n'
             + expand('gtk4-legacy.css', values))
-    meta = f'''[Desktop Entry]\nType=X-GNOME-Metatheme\nName=TokyoAdwaita Night\nComment=GTK3, GTK4, GNOME Shell: Adwaita design with TokyoNight Night palette\n[X-GNOME-Metatheme]\nGtkTheme={THEME}\nMetacityTheme=Adwaita\nIconTheme=Adwaita\nCursorTheme=Adwaita\n'''
+    meta = f'''[Desktop Entry]\nType=X-GNOME-Metatheme\nName=TokyoAdwaita Night\nComment=GTK3, GTK4, GNOME Shell: Adwaita design with generated OKLCH palette\n[X-GNOME-Metatheme]\nGtkTheme={THEME}\nMetacityTheme=Adwaita\nIconTheme=Adwaita\nCursorTheme=Adwaita\n'''
     files = {
         'index.theme': meta.encode(),
         'gtk-3.0/gtk.css': gtk3.encode(),
@@ -800,13 +801,13 @@ def parse_args():
     cmd = parser.add_subparsers(dest='command', required=True)
     install_cmd = cmd.add_parser('install', help='Install GTK, Shell, Flatpak and native accent hook')
     install_cmd.add_argument('accent', nargs='?', default=None,
-                             help='TokyoNight color name or #RRGGBB; default blue')
+                             help='Palette color name or #RRGGBB; default blue')
     install_cmd.add_argument('papirus_color', nargs='?', default=None,
                              help='Secondary accent / Papirus folder color; preserved when omitted')
     install_cmd.add_argument('--random-folders', action='store_true',
                              help='Explicitly select a new random secondary accent')
     configure_cmd = cmd.add_parser('configure', help='Change the installed accent')
-    configure_cmd.add_argument('accent', help='TokyoNight color name or #RRGGBB')
+    configure_cmd.add_argument('accent', help='Palette color name or #RRGGBB')
     configure_cmd.add_argument('papirus_color', nargs='?', default=None,
                                help='Secondary accent / Papirus folder color; preserved when omitted')
     configure_cmd.add_argument('--random-folders', action='store_true',

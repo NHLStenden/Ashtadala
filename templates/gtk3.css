@@ -95,12 +95,12 @@ notebook > header.right > tabs > tab:checked:not(:disabled) {
   box-shadow: inset 4px 0 @TAB@;
 }
 
-/* Window controls: native geometry and symbolic icons, TokyoNight surfaces.
+/* Window controls: native geometry and symbolic icons, generated dark surfaces.
  * Close stays solid golden yellow even in inactive windows; disabled states remain native. */
 button.titlebutton.minimize:not(:disabled):not(:backdrop),
 button.titlebutton.maximize:not(:disabled):not(:backdrop) {
   background-color: @HOVER@;
-  color: #c0caf5;
+  color: @CONTROL_FG@;
   background-image: none;
   border-color: transparent;
   box-shadow: none;

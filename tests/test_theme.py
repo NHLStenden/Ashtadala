@@ -21,39 +21,39 @@ SHELL_SOURCE = ('#panel { background-color: #36363a; color: #ffffff; }\n'
 
 class ColorTests(unittest.TestCase):
     def test_palette_and_accent(self):
-        self.assertEqual(t.accent_valid('#FF9E64'), '#ff9e64')
-        self.assertEqual(t.PALETTE['BG'], '#1a1b26')
-        for color in ['#ff9e64', '#ffffff', '#000000', '#7aa2f7', '#ff0000', '#0000ff']:
+        self.assertEqual(t.accent_valid('#EF9369'), '#ef9369')
+        self.assertEqual(t.PALETTE['BG'], '#181c29')
+        for color in ['#ef9369', '#ffffff', '#000000', '#8fa9fd', '#ff0000', '#0000ff']:
             self.assertGreaterEqual(t.contrast(color, t.accent_foreground(color)), 4.49)
-        self.assertEqual(t.accent_foreground('#ff9e64'), '#16161e')
+        self.assertEqual(t.accent_foreground('#ef9369'), '#0b0f1a')
 
     def test_mid_brightness_custom_accent_is_accessible(self):
-        # Old chooser returned #16161e at just 4.24:1 for this accent.
-        for color in ('#7e69dd', '#7d7d7d', '#808080', '#ff9e64'):
+        # Dark ink must meet the contrast target even near the crossover.
+        for color in ('#7e69dd', '#7d7d7d', '#808080', '#ef9369'):
             self.assertGreaterEqual(t.contrast(color, t.accent_foreground(color)), 4.5)
-        self.assertEqual(t.accent_foreground('#7e69dd'), '#000000')
-        self.assertEqual(t.accent_foreground('#ff9e64'), '#16161e')
+        self.assertEqual(t.accent_foreground('#7e69dd'), t.PALETTE['DEEP'])
+        self.assertEqual(t.accent_foreground('#ef9369'), '#0b0f1a')
 
     def test_gtk4_user_overlay_does_not_inject_light_mode_aliases(self):
-        user_css = t.gtk4_override('#ff9e64')
+        user_css = t.gtk4_override('#ef9369')
         self.assertIn('@media (prefers-color-scheme: dark)', user_css)
-        self.assertIn('--accent-fg-color: #16161e;', user_css)
+        self.assertIn('--accent-fg-color: #0b0f1a;', user_css)
         self.assertNotIn('@define-color', user_css)
         # Legacy aliases are kept in the explicit dark GTK4 theme layer.
-        theme_css = t.theme_files('#ff9e64', SHELL_SOURCE)[0]['gtk-4.0/gtk.css'].decode()
-        self.assertIn('@define-color accent_bg_color #ff9e64;', theme_css)
+        theme_css = t.theme_files('#ef9369', SHELL_SOURCE)[0]['gtk-4.0/gtk.css'].decode()
+        self.assertIn('@define-color accent_bg_color #ef9369;', theme_css)
 
     def test_gtk3_suggested_buttons_do_not_show_adwaita_blue_gradient(self):
-        gtk3 = t.expand('gtk3.css', t.tokens('#ff9e64'))
+        gtk3 = t.expand('gtk3.css', t.tokens('#ef9369'))
         self.assertIn('button.suggested-action:active', gtk3)
         self.assertIn('button.suggested-action:hover', gtk3)
         self.assertIn('background-image: none;', gtk3)
-        self.assertIn('color: #16161e;', gtk3)
+        self.assertIn('color: #0b0f1a;', gtk3)
 
     def test_gtk3_filechooser_focus_and_sidebar_selection(self):
         # GTK3 Adwaita's focused treeview rules can otherwise keep its blue.
         # PlacesSidebar child labels and images can separately force white.
-        for accent in ('#ff9e64', '#bc83ff', '#7e69dd'):
+        for accent in ('#ef9369', '#bc83ff', '#7e69dd'):
             gtk3 = t.expand('gtk3.css', t.tokens(accent))
             self.assertIn('treeview.view:selected:focus,', gtk3)
             self.assertIn('iconview.view:selected:focus,', gtk3)
@@ -84,7 +84,7 @@ class ColorTests(unittest.TestCase):
                 t.accent_valid(color)
 
     def test_gtk_css_layers(self):
-        files, m = t.theme_files('#ff9e64', SHELL_SOURCE)
+        files, m = t.theme_files('#ef9369', SHELL_SOURCE)
         self.assertEqual(set(files), {'gtk-3.0/gtk.css', 'gtk-3.0/gtk-dark.css',
                            'gtk-4.0/gtk.css', 'gtk-4.0/gtk-dark.css',
                            'gnome-shell/gnome-shell.css', 'index.theme', 'palette.json'})
@@ -92,30 +92,30 @@ class ColorTests(unittest.TestCase):
         gtk4 = files['gtk-4.0/gtk.css'].decode()
         self.assertIn('resource:///org/gtk/libgtk/theme/Adwaita/gtk-dark.css', gtk3)
         self.assertIn('resource:///org/gtk/libgtk/theme/Default/gtk-dark.css', gtk4)
-        self.assertIn('--accent-bg-color: #ff9e64', gtk4)
-        self.assertIn('--window-bg-color: #1a1b26', gtk4)
+        self.assertIn('--accent-bg-color: #ef9369', gtk4)
+        self.assertIn('--window-bg-color: #181c29', gtk4)
         self.assertIn('window, dialog, popover {', gtk4)
         self.assertNotIn('--window-fg-color:', gtk4)
         self.assertNotIn('rgba(22, 22, 30, 0.96)', files['gnome-shell/gnome-shell.css'].decode())
         self.assertEqual(files['gtk-3.0/gtk.css'], files['gtk-3.0/gtk-dark.css'])
         self.assertEqual(files['gtk-4.0/gtk.css'], files['gtk-4.0/gtk-dark.css'])
-        self.assertEqual(json.loads(files['palette.json'])['ACCENT'], '#ff9e64')
-        self.assertIn('@media (prefers-color-scheme: dark)', t.gtk4_override('#ff9e64'))
-        self.assertNotIn('userChrome', t.gtk4_override('#ff9e64'))
+        self.assertEqual(json.loads(files['palette.json'])['ACCENT'], '#ef9369')
+        self.assertIn('@media (prefers-color-scheme: dark)', t.gtk4_override('#ef9369'))
+        self.assertNotIn('userChrome', t.gtk4_override('#ef9369'))
         self.assertGreater(m['shell_replacements']['-st-accent-color'], 0)
 
     def test_shell_reuses_original_selectors_and_color_functions(self):
         css, changes = t.shell_recolor(SHELL_SOURCE, '#bc83ff')
-        self.assertIn('st-mix(#bc83ff, #1a1b26, 9%)', css)
-        self.assertIn('background-color: #24283b', css)
+        self.assertIn('st-mix(#bc83ff, #181c29, 9%)', css)
+        self.assertIn('background-color: #262b38', css)
         self.assertIn('color: #ffffff;', css)  # Blur My Shell contrast must stay white
-        self.assertNotIn('color: #c0caf5', css)
+        self.assertNotIn('color: #c7cddf', css)
         self.assertNotIn('-st-accent-color', css)
         self.assertNotIn('-st-accent-fg-color', css)
         self.assertEqual(changes['-st-accent-color'], 84)
 
     def test_quick_settings_checked_tiles_use_custom_accent_and_readable_fg(self):
-        for accent in ('#ff9e64', '#bc83ff', '#7aa2f7'):
+        for accent in ('#ef9369', '#bc83ff', '#8fa9fd'):
             css, _ = t.shell_recolor(SHELL_SOURCE, accent)
             quick = css.split('TokyoAdwaita Night managed Quick Settings')[1]
             self.assertIn('background-color: ' + accent + ';', quick)
@@ -126,34 +126,34 @@ class ColorTests(unittest.TestCase):
             self.assertNotIn('#6f8396', quick)
             self.assertNotIn('#ed5b00', quick)
             self.assertNotIn('!important', quick)
-            self.assertNotIn('#c0caf5', quick)
+            self.assertNotIn('#c7cddf', quick)
             # Each selected button must have readable text, not white on peach.
             self.assertGreaterEqual(t.contrast(accent, t.accent_foreground(accent)), 4.5)
-            self.assertLess(t.contrast(accent, '#ffffff'), 4.5) if accent == '#ff9e64' else None
+            self.assertLess(t.contrast(accent, '#ffffff'), 4.5) if accent == '#ef9369' else None
 
     def test_quick_settings_installed_css_structural_check(self):
-        css, _ = t.shell_recolor(SHELL_SOURCE, '#ff9e64')
-        t.check_quick_settings_css(css, '#ff9e64')
+        css, _ = t.shell_recolor(SHELL_SOURCE, '#ef9369')
+        t.check_quick_settings_css(css, '#ef9369')
         with self.assertRaisesRegex(t.ThemeError, 'missing expected CSS'):
             t.check_quick_settings_css(css, '#bc83ff')
         with self.assertRaisesRegex(t.ThemeError, 'lacks the managed'):
-            t.check_quick_settings_css(SHELL_SOURCE, '#ff9e64')
+            t.check_quick_settings_css(SHELL_SOURCE, '#ef9369')
 
     def test_quick_settings_refuses_nonmatching_shell_source(self):
         source = SHELL_SOURCE.replace('quick-toggle-menu-button', 'other-button')
         with self.assertRaisesRegex(t.ThemeError, 'Quick Settings selectors'):
-            t.shell_recolor(source, '#ff9e64')
+            t.shell_recolor(source, '#ef9369')
 
     def test_reconfigure_updates_shell_tiles_not_only_gtk(self):
-        first, _ = t.theme_files('#ff9e64', SHELL_SOURCE)
+        first, _ = t.theme_files('#ef9369', SHELL_SOURCE)
         second, _ = t.theme_files('#bc83ff', SHELL_SOURCE)
         s1 = first['gnome-shell/gnome-shell.css'].decode().split('TokyoAdwaita Night managed Quick Settings')[1]
         s2 = second['gnome-shell/gnome-shell.css'].decode().split('TokyoAdwaita Night managed Quick Settings')[1]
-        self.assertIn('background-color: #ff9e64;', s1)
+        self.assertIn('background-color: #ef9369;', s1)
         self.assertIn('background-color: #bc83ff;', s2)
-        self.assertNotIn('#ff9e64', s2)
+        self.assertNotIn('#ef9369', s2)
         self.assertNotEqual(s1, s2)
-        self.assertEqual(first['gtk-4.0/gtk.css'].decode().count('--accent-bg-color: #ff9e64'), 1)
+        self.assertEqual(first['gtk-4.0/gtk.css'].decode().count('--accent-bg-color: #ef9369'), 1)
         self.assertEqual(second['gtk-4.0/gtk.css'].decode().count('--accent-bg-color: #bc83ff'), 1)
 
     def test_empty_gvariant_array(self):
@@ -163,7 +163,7 @@ class ColorTests(unittest.TestCase):
     def test_bad_shell_resource_fails_closed(self):
         for source in ['', '#panel { color: pink; }', 'a' * 3000]:
             with self.assertRaises(t.ThemeError):
-                t.theme_files('#ff9e64', source)
+                t.theme_files('#ef9369', source)
 
     def test_marked_import_preserves_user_data(self):
         original = '@import url("other.css");\nbutton { border-radius: 20px; }\n'
@@ -209,7 +209,7 @@ class InstallationTests(unittest.TestCase):
             p.start()
             self.addCleanup(p.stop)
 
-    def install(self, accent='#ff9e64'):
+    def install(self, accent='#ef9369'):
         t.install(argparse.Namespace(accent=accent))
 
     def test_user_install_and_uninstall_exact_restore(self):
@@ -219,7 +219,7 @@ class InstallationTests(unittest.TestCase):
         self.assertTrue((self.paths['user_theme']/'gnome-shell/gnome-shell.css').is_file())
         self.assertEqual(self.settings[('org.gnome.desktop.interface', 'accent-color')], "'slate'")
         self.assertIn(t.EXTENSION, ast.literal_eval(self.settings[('org.gnome.shell','enabled-extensions')]))
-        self.assertIn(b'--accent-bg-color: #ff9e64', self.paths['gtk_override'].read_bytes())
+        self.assertIn(b'--accent-bg-color: #ef9369', self.paths['gtk_override'].read_bytes())
         self.assertEqual(t.remove_import(self.paths['gtk_css'].read_text()).encode(), self.prior_css)
         # User tweaks AFTER installation must survive uninstallation.
         with self.paths['gtk_css'].open('a') as f: f.write('button { outline-width: 9px; }\n')
@@ -246,9 +246,9 @@ class InstallationTests(unittest.TestCase):
         self.assertEqual(self.settings[('org.gnome.shell','enabled-extensions')], repr(['example@test.org', 'newuser@extension']))
 
     def test_platform_accent_remains_slate_when_reconfiguring(self):
-        self.install('#ff9e64')
+        self.install('#ef9369')
         state = t.read_state(self.paths['state'])
-        self.assertEqual(state['accent'], '#ff9e64')
+        self.assertEqual(state['accent'], '#ef9369')
         self.install('#9141ac')
         new = t.read_state(self.paths['state'])
         self.assertEqual(new['accent'], '#9141ac')
@@ -256,7 +256,7 @@ class InstallationTests(unittest.TestCase):
         t.uninstall(argparse.Namespace())
 
     def test_reconfigure_and_upgrade_preserves_original_settings(self):
-        self.install('#ff9e64')
+        self.install('#ef9369')
         self.install('#bc83ff')
         state = t.read_state(self.paths['state'])
         self.assertEqual(state['settings']['org.gnome.desktop.interface/accent-color']['old'], "'blue'")
@@ -266,7 +266,7 @@ class InstallationTests(unittest.TestCase):
         self.assertEqual(self.settings[('org.gnome.desktop.interface','gtk-theme')], "'Adwaita'")
 
     def test_in_place_rebuild_and_rollback_state(self):
-        self.install('#ff9e64')
+        self.install('#ef9369')
         old = t.read_state(self.paths['state'])
         old_theme = (self.paths['user_theme'] / 'gnome-shell/gnome-shell.css').read_text()
         self.install('#bc83ff')
@@ -321,7 +321,7 @@ class InstallationTests(unittest.TestCase):
         def fake_apply():
             self.paths['flatpak_fake'].write_bytes(b'[Context]\nfilesystems=xdg-download;xdg-config/gtk-4.0:ro;xdg-data/themes:ro;\n')
         with mock.patch.object(t, 'flatpak_present', return_value=True), mock.patch.object(t, 'flatpak_preflight'), mock.patch.object(t, 'flatpak_path', return_value=self.paths['flatpak_fake']), mock.patch.object(t, 'flatpak_apply', side_effect=fake_apply):
-            args = argparse.Namespace(accent='#ff9e64')
+            args = argparse.Namespace(accent='#ef9369')
             t.install(args)
             self.assertTrue(t.read_state(self.paths['state'])['flatpak_enabled'])
             t.uninstall(argparse.Namespace())
@@ -333,7 +333,7 @@ class InstallationTests(unittest.TestCase):
         def fake_apply():
             fp.write_text('[Context]\nfilesystems=xdg-config/gtk-4.0:ro;\n')
         with mock.patch.object(t, 'flatpak_present', return_value=True), mock.patch.object(t, 'flatpak_preflight'), mock.patch.object(t, 'flatpak_path', return_value=fp), mock.patch.object(t, 'flatpak_apply', side_effect=fake_apply):
-            t.install(argparse.Namespace(accent='#ff9e64'))
+            t.install(argparse.Namespace(accent='#ef9369'))
             fp.write_text('[Context]\nfilesystems=xdg-config/gtk-4.0:ro;xdg-download;\n')
             t.uninstall(argparse.Namespace())
         self.assertIn('xdg-download', fp.read_text())
@@ -348,7 +348,7 @@ class InstallationTests(unittest.TestCase):
             raise t.ThemeError('Simulated Flatpak command failing after write')
         with mock.patch.object(t, 'flatpak_present', return_value=True), mock.patch.object(t, 'flatpak_preflight'), mock.patch.object(t, 'flatpak_path', return_value=fp), mock.patch.object(t, 'flatpak_apply', side_effect=partial_fail):
             with self.assertRaises(t.ThemeError):
-                t.install(argparse.Namespace(accent='#ff9e64'))
+                t.install(argparse.Namespace(accent='#ef9369'))
         self.assertEqual(fp.read_bytes(), before)
         self.assertEqual(self.paths['gtk_css'].read_bytes(), self.prior_css)
         self.assertFalse(self.paths['user_theme'].exists())
@@ -361,7 +361,7 @@ class InstallationTests(unittest.TestCase):
         def apply():
             fp.write_text('[Context]\nfilesystems=xdg-config/gtk-4.0:ro;xdg-download;\n')
         with mock.patch.object(t, 'flatpak_present', return_value=True), mock.patch.object(t, 'flatpak_preflight'), mock.patch.object(t, 'flatpak_path', return_value=fp), mock.patch.object(t, 'flatpak_apply', side_effect=apply):
-            t.install(argparse.Namespace(accent='#ff9e64'))
+            t.install(argparse.Namespace(accent='#ef9369'))
             t.install(argparse.Namespace(accent='#bc83ff'))
             self.assertTrue(t.read_state(self.paths['state'])['flatpak_enabled'])
             t.uninstall(argparse.Namespace())

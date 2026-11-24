@@ -32,13 +32,13 @@ LIB="$XDG_DATA_HOME/tokyoadwaita-night/libaccent-hook.so"
 DROPIN="$XDG_CONFIG_HOME/systemd/user/org.gnome.Shell@user.service.d/80-tokyoadwaita-accent.conf"
 
 bash "$SCRIPT" check
-bash "$SCRIPT" install '#ff9e64'
+bash "$SCRIPT" install '#ef9369'
 [[ -f "$LIB" && -f "$DROPIN" ]]
 grep -Fxq '# Managed by TokyoAdwaita Night native accent hook' "$DROPIN"
-grep -Fq 'TOKYOADWAITA_ACCENT_COLOR=#ff9e64' "$DROPIN"
+grep -Fq 'TOKYOADWAITA_ACCENT_COLOR=#ef9369' "$DROPIN"
 grep -Fq 'LD_PRELOAD=' "$DROPIN"
-bash "$SCRIPT" install '#7aa2f7'
-grep -Fq 'TOKYOADWAITA_ACCENT_COLOR=#7aa2f7' "$DROPIN"
+bash "$SCRIPT" install '#8fa9fd'
+grep -Fq 'TOKYOADWAITA_ACCENT_COLOR=#8fa9fd' "$DROPIN"
 if bash "$SCRIPT" install orange > "$DIR/error" 2>&1; then
   echo 'Invalid accent accepted' >&2; exit 1
 fi
@@ -52,7 +52,7 @@ bash "$SCRIPT" uninstall
 # Refuse to overwrite files without the ownership marker.
 mkdir -p "$(dirname "$DROPIN")"
 printf '[Service]\n' > "$DROPIN"
-if bash "$SCRIPT" install '#ff9e64' > "$DIR/error" 2>&1; then
+if bash "$SCRIPT" install '#ef9369' > "$DIR/error" 2>&1; then
   echo 'Unmanaged drop-in overwritten' >&2; exit 1
 fi
 grep -Fq 'unmanaged drop-in' "$DIR/error"
@@ -62,7 +62,7 @@ python3 - "$DIR/libst-51.so" <<'PYTEST'
 from pathlib import Path
 import sys
 p=Path(sys.argv[1]); data=p.read_bytes(); assert data.count(b'#6f8396')==1
-p.write_bytes(data.replace(b'#6f8396',b'#ff9e64'))
+p.write_bytes(data.replace(b'#6f8396',b'#ef9369'))
 PYTEST
 if bash "$SCRIPT" check > "$DIR/error" 2>&1; then
   echo 'Patched binary accepted' >&2; exit 1

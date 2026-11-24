@@ -15,7 +15,7 @@
 #include <unistd.h>
 
 #define SLATE "#6f8396"
-#define DEFAULT_ACCENT "#7aa2f7"
+#define DEFAULT_ACCENT "#8fa9fd"
 #define COLOR_ENV "TOKYOADWAITA_ACCENT_COLOR"
 #define LOG_ENV "TOKYOADWAITA_ACCENT_LOG"
 

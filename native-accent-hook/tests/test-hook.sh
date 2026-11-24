@@ -20,16 +20,16 @@ assert_eq() {
 }
 
 assert_eq "$("$DIR/driver" '#6f8396')" '#6f8396' 'without hook original unchanged'
-assert_eq "$(LD_PRELOAD="$DIR/libaccent-hook.so" "$DIR/driver" '#6f8396')" '#7aa2f7' 'TokyoNight default substitution'
+assert_eq "$(LD_PRELOAD="$DIR/libaccent-hook.so" "$DIR/driver" '#6f8396')" '#8fa9fd' 'generated default substitution'
 assert_eq "$(LD_PRELOAD="$DIR/libaccent-hook.so" "$DIR/driver" '#abcdef')" '#abcdef' 'unrelated color unchanged'
 assert_eq "$(TOKYOADWAITA_ACCENT_COLOR='#AABBCC' LD_PRELOAD="$DIR/libaccent-hook.so" "$DIR/driver" '#6f8396')" '#AABBCC' 'custom color override'
-assert_eq "$(TOKYOADWAITA_ACCENT_COLOR='not-a-color' LD_PRELOAD="$DIR/libaccent-hook.so" "$DIR/driver" '#6f8396')" '#7aa2f7' 'invalid color falls back to TokyoNight'
-assert_eq "$(TOKYOADWAITA_ACCENT_COLOR='#' LD_PRELOAD="$DIR/libaccent-hook.so" "$DIR/driver" '#6f8396')" '#7aa2f7' 'short invalid color safely falls back'
-assert_eq "$(TOKYOADWAITA_ACCENT_COLOR='' LD_PRELOAD="$DIR/libaccent-hook.so" "$DIR/driver" '#6f8396')" '#7aa2f7' 'empty color safely falls back'
+assert_eq "$(TOKYOADWAITA_ACCENT_COLOR='not-a-color' LD_PRELOAD="$DIR/libaccent-hook.so" "$DIR/driver" '#6f8396')" '#8fa9fd' 'invalid color falls back to generated default'
+assert_eq "$(TOKYOADWAITA_ACCENT_COLOR='#' LD_PRELOAD="$DIR/libaccent-hook.so" "$DIR/driver" '#6f8396')" '#8fa9fd' 'short invalid color safely falls back'
+assert_eq "$(TOKYOADWAITA_ACCENT_COLOR='' LD_PRELOAD="$DIR/libaccent-hook.so" "$DIR/driver" '#6f8396')" '#8fa9fd' 'empty color safely falls back'
 assert_eq "$(LD_PRELOAD="$DIR/libaccent-hook.so" "$DIR/driver" '#6f8397')" '#6f8397' 'nearby but different color unchanged'
 
 LOG_OUT="$DIR/log.txt"
 TOKYOADWAITA_ACCENT_LOG=1 LD_PRELOAD="$DIR/libaccent-hook.so" "$DIR/driver" '#6f8396' > /dev/null 2> "$LOG_OUT"
 grep -Fq 'loaded' "$LOG_OUT"
-grep -Fq 'replaced native slate with #7aa2f7' "$LOG_OUT"
+grep -Fq 'replaced native slate with #8fa9fd' "$LOG_OUT"
 printf 'PASS: runtime load and replacement diagnostics\n'
