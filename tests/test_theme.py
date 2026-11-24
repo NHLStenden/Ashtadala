@@ -168,8 +168,8 @@ class ColorTests(unittest.TestCase):
         self.assertIn('background-color: #bc83ff;', s2)
         self.assertNotIn('#ef9369', s2)
         self.assertNotEqual(s1, s2)
-        self.assertEqual(first['gtk-4.0/gtk.css'].decode().count('--accent-bg-color: #ef9369'), 1)
-        self.assertEqual(second['gtk-4.0/gtk.css'].decode().count('--accent-bg-color: #bc83ff'), 1)
+        self.assertEqual(first['gtk-4.0/gtk.css'].decode().count('--accent-bg-color: #ef9369'), 2)
+        self.assertEqual(second['gtk-4.0/gtk.css'].decode().count('--accent-bg-color: #bc83ff'), 2)
 
     def test_empty_gvariant_array(self):
         self.assertEqual(t.parse_gvariant_array('@as []'), [])

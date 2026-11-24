@@ -8,8 +8,9 @@
 @define-color accent_bg_color @ACCENT@;
 @define-color accent_fg_color @ACCENT_FG@;
 @define-color accent_color @ACCENT@;
-@define-color theme_selected_bg_color @SELECTION@;
-@define-color theme_selected_fg_color @SELECTION_FG@;
+/* GTK also uses these compatibility aliases for suggested actions. */
+@define-color theme_selected_bg_color @ACCENT@;
+@define-color theme_selected_fg_color @ACCENT_FG@;
 @define-color theme_bg_color @BG@;
 @define-color theme_base_color @DEEP@;
 
@@ -30,16 +31,6 @@
   headerbar {background-color: @PANEL@;}
   headerbar:backdrop {background-color: @BG@;}
   .view:not(:selected):not(:disabled) {background-color: @DEEP@;}
-  button.suggested-action:not(.flat):not(:disabled),
-  button.suggested-action:not(.flat):not(:disabled):hover,
-  button.suggested-action:not(.flat):not(:disabled):active {
-    background-image: none;
-    background-color: @ACCENT@;
-    border-color: @ACCENT@;
-    color: @ACCENT_FG@;
-    text-shadow: none;
-    -gtk-icon-shadow: none;
-  }
   switch:checked:not(:disabled),
   check:checked:not(:disabled), radio:checked:not(:disabled),
   check:indeterminate:not(:disabled), radio:indeterminate:not(:disabled) {

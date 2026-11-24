@@ -36,6 +36,29 @@ window, dialog, popover {
   --destructive-color: @ERROR@;
 }
 
+/* Suggested actions must use the primary accent even in application-local
+ * selection scopes and in stock GTK file choosers. Keep flat, destructive
+ * and disabled buttons native. Both installed GTK4 layers share this rule. */
+button.suggested-action:not(.flat):not(.destructive-action):not(:disabled),
+button.default:not(.flat):not(.destructive-action):not(:disabled) {
+  --accent-bg-color: @ACCENT@;
+  --accent-fg-color: @ACCENT_FG@;
+  background-image: none;
+  background-color: @ACCENT@;
+  border-color: @ACCENT@;
+  color: @ACCENT_FG@;
+  text-shadow: none;
+  -gtk-icon-shadow: none;
+}
+button.suggested-action:not(.flat):not(.destructive-action):not(:disabled):hover,
+button.default:not(.flat):not(.destructive-action):not(:disabled):hover {
+  background-image: image(color-mix(in srgb, @ACCENT_FG@ 10%, transparent));
+}
+button.suggested-action:not(.flat):not(.destructive-action):not(:disabled):active,
+button.default:not(.flat):not(.destructive-action):not(:disabled):active {
+  background-image: image(color-mix(in srgb, @ACCENT_FG@ 20%, transparent));
+}
+
 /* Dim the text rather than compositing the whole label: markup links in
  * preferences descriptions must keep their own full-opacity foreground.
  * Retain the native dim factor, including its high-contrast value. */

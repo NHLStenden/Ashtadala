@@ -31,17 +31,17 @@ class PaletteTests(unittest.TestCase):
 
     def test_preview_color_roles(self):
         from xml.etree import ElementTree as ET
-        preview = ET.parse(t.ROOT / 'assets/Ashtadala-Night-preview.svg')
+        preview = ET.parse(t.ROOT / 'assets/Ashtadala-preview.svg')
         by_id = {element.get('id'): element for element in preview.iter()}
         v = t.tokens(p.ACCENTS['peach'], p.ACCENTS['purple'])
         for ident, role in [('rect83', 'DEEP'), ('rect195', 'PANEL'),
                             ('rect196', 'BG'), ('rect208', 'SELECTION'),
                             ('circle207', 'CLOSE'), ('rect271', 'ACCENT'),
-                            ('text274', 'ACCENT_FG'), ('path1856', 'SECONDARY_ACCENT'),
+                            ('path1856', 'SECONDARY_ACCENT'),
                             ('rect227', 'SURFACE'), ('rect233', 'SURFACE'),
                             ('rect235', 'SURFACE')]:
             self.assertEqual(by_id[ident].get('fill'), v[role])
         for ident, color in [('rect234', '#4b4c55'),
-                             ('rect90', '#262730'), ('rect278', '#4a4355')]:
+                             ('rect90', '#262730'), ('rect278', '#4a4b67'), ('text274', '#e1e5fa')]:
             self.assertEqual(by_id[ident].get('fill'), color)
         self.assertIn('fill:' + v['LEVEL'] + ';', by_id['rect268'].get('style'))

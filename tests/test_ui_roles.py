@@ -37,15 +37,29 @@ class WidgetRoleTests(unittest.TestCase):
         self.assertIn('color-mix(in srgb, #ee8bab 90%, black)', css)
         self.assertIn('--accent-fg-color: #13161e;', css)
 
-    def test_stock_gtk4_fallbacks_are_not_in_libadwaita_user_overlay(self):
+    def test_stock_gtk4_surface_fallbacks_are_not_in_libadwaita_user_overlay(self):
         files, _ = t.theme_files('#ef9369', SHELL_SOURCE, '#cc95e4')
         stock = files['gtk-4.0/gtk.css'].decode()
         user = t.gtk4_override('#ef9369', '#cc95e4')
         for rule in ('window.background {background-color: #181c29;}',
-                     'button.suggested-action:not(.flat):not(:disabled)',
                      'switch:checked:not(:disabled),'):
             self.assertIn(rule, stock)
             self.assertNotIn(rule, user)
+
+    def test_gtk4_action_roles_in_both_layers(self):
+        for primary in [*t.ACCENTS.values(), '#7e69dd']:
+            values = t.tokens(primary, '#cc95e4')
+            files, _ = t.theme_files(primary, SHELL_SOURCE, '#cc95e4')
+            for css in (t.gtk4_override(primary), files['gtk-4.0/gtk.css'].decode()):
+                for cls in ('suggested-action', 'default'):
+                    self.assertIn(f'button.{cls}:not(.flat):not(.destructive-action):not(:disabled)', css)
+                self.assertIn(f'background-color: {primary};\n  border-color: {primary};\n  color: {values["ACCENT_FG"]};', css)
+                self.assertIn('background-color: #ee8bab;\n  color: #13161e;', css)
+                self.assertIn(':not(:disabled):hover', css)
+                self.assertIn(':not(:disabled):active', css)
+            stock = files['gtk-4.0/gtk.css'].decode()
+            self.assertIn(f'@define-color theme_selected_bg_color {primary};', stock)
+            self.assertIn(f'@define-color theme_selected_fg_color {values["ACCENT_FG"]};', stock)
 
     def test_gtk3_and_shell_roles(self):
         files, _ = t.theme_files('#ef9369', SHELL_SOURCE, '#cc95e4')
