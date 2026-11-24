@@ -7,21 +7,21 @@ import unittest
 from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-import tokyoadwaita as t
-from tokyonight_colors import ACCENTS, resolve
+import ashtadala as t
+from ashtadala_colors import ACCENTS, resolve
 from test_theme import SHELL_SOURCE
 
 
 class NativeAccentTests(unittest.TestCase):
     def setUp(self):
-        temp = tempfile.TemporaryDirectory(prefix='tokyo-hook-')
+        temp = tempfile.TemporaryDirectory(prefix='ashtadala-hook-')
         self.addCleanup(temp.cleanup)
         root = Path(temp.name)
         self.p = {
             'user_theme': root / 'themes' / t.THEME,
             'icon_theme': root / 'icons' / t.papirus_icons.ICON_THEME,
             'gtk_css': root / 'gtk-4.0/gtk.css',
-            'gtk_override': root / 'gtk-4.0/tokyoadwaita-night.css',
+            'gtk_override': root / 'gtk-4.0/ashtadala-night.css',
             'state': root / 'state/state.json',
         }
         self.p['gtk_css'].parent.mkdir(parents=True)

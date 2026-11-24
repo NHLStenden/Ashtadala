@@ -7,7 +7,7 @@ from pathlib import Path
 from unittest import mock
 
 import papirus_icons as pi
-import tokyoadwaita as t
+import ashtadala as t
 from test_theme import InstallationTests
 
 

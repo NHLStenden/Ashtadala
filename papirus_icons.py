@@ -7,9 +7,9 @@ from pathlib import Path
 import re
 import secrets
 
-from tokyonight_colors import ACCENTS, resolve
+from ashtadala_colors import ACCENTS, resolve
 
-ICON_THEME = 'TokyoAdwaita-Night-Papirus'
+ICON_THEME = 'Ashtadala-Night-Papirus'
 PAPIRUS = ('Papirus-Dark', 'Papirus', 'Papirus-Light')
 SIZES = ('16x16', '22x22', '24x24', '32x32', '48x48', '64x64')
 ANCHOR_SIZES = ('48x48', '64x64', '32x32', '24x24', '22x22', '16x16')
@@ -144,7 +144,7 @@ def build_overlay(theme_name: str, theme: Path, color: str) -> dict[str, bytes]:
             dirs.append(folder)
     if not changed or not any(name.endswith('/places/folder.svg') for name in rendered):
         raise IconError('Papirus folder source has no usable blue fills or standard folder icon')
-    index = ('[Icon Theme]\nName=TokyoAdwaita Night Papirus\n'
+    index = ('[Icon Theme]\nName=Ashtadala Night Papirus\n'
              f'Inherits={theme_name}\nDirectories={",".join(dirs)}\n\n')
     for folder in dirs:
         size = int(folder.split('x', 1)[0])

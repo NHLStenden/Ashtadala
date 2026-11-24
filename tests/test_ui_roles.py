@@ -4,7 +4,7 @@ from pathlib import Path
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-import tokyoadwaita as t
+import ashtadala as t
 from test_theme import SHELL_SOURCE
 
 

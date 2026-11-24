@@ -4,14 +4,14 @@ set -Eeuo pipefail
 
 UNIT='org.gnome.Shell@user.service'
 SLATE='#6f8396'
-MARKER='# Managed by TokyoAdwaita Night native accent hook'
+MARKER='# Managed by Ashtadala Night native accent hook'
 DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
-DATA="${XDG_DATA_HOME:-$HOME/.local/share}/tokyoadwaita-night"
+DATA="${XDG_DATA_HOME:-$HOME/.local/share}/ashtadala-night"
 LIB="$DATA/libaccent-hook.so"
 DROPIN_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user/$UNIT.d"
-DROPIN="$DROPIN_DIR/80-tokyoadwaita-accent.conf"
-LIBST="${TOKYOADWAITA_LIBST:-/usr/lib64/gnome-shell/libst-51.so}"
-SYSTEMCTL="${TOKYOADWAITA_SYSTEMCTL:-systemctl}"
+DROPIN="$DROPIN_DIR/80-ashtadala-accent.conf"
+LIBST="${ASHTADALA_LIBST:-/usr/lib64/gnome-shell/libst-51.so}"
+SYSTEMCTL="${ASHTADALA_SYSTEMCTL:-systemctl}"
 
 fail() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 need() { command -v "$1" >/dev/null 2>&1 || fail "Missing command: $1"; }
@@ -57,8 +57,8 @@ install_hook() {
   {
     printf '%s\n[Service]\n' "$MARKER"
     printf 'Environment="LD_PRELOAD=%s"\n' "$LIB"
-    printf 'Environment="TOKYOADWAITA_ACCENT_COLOR=%s"\n' "$color"
-    printf 'Environment="TOKYOADWAITA_ACCENT_LOG=1"\n'
+    printf 'Environment="ASHTADALA_ACCENT_COLOR=%s"\n' "$color"
+    printf 'Environment="ASHTADALA_ACCENT_LOG=1"\n'
   } > "$tmp/config"
   install -m 0644 "$tmp/config" "$tmp/dropin"
   mv -f -- "$tmp/dropin" "$DROPIN"
@@ -91,7 +91,7 @@ uninstall_hook() {
 status() {
   printf 'Hook: %s\n' "$LIB"
   if owned; then
-    sed -n '/TOKYOADWAITA_ACCENT_COLOR=/p' "$DROPIN"
+    sed -n '/ASHTADALA_ACCENT_COLOR=/p' "$DROPIN"
   else
     printf 'Not installed\n'
   fi

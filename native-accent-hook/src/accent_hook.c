@@ -1,5 +1,5 @@
 /*
- * TokyoAdwaita native accent hook — ELF symbol interposition for GNOME Shell 51.
+ * Ashtadala native accent hook — ELF symbol interposition for GNOME Shell 51.
  *
  * Intercepts Cogl's gboolean cogl_color_from_string(CoglColor *, const char *)
  * and changes only the exact built-in slate hex before its Cogl conversion.
@@ -16,8 +16,8 @@
 
 #define SLATE "#6f8396"
 #define DEFAULT_ACCENT "#8fa9fd"
-#define COLOR_ENV "TOKYOADWAITA_ACCENT_COLOR"
-#define LOG_ENV "TOKYOADWAITA_ACCENT_LOG"
+#define COLOR_ENV "ASHTADALA_ACCENT_COLOR"
+#define LOG_ENV "ASHTADALA_ACCENT_LOG"
 
 typedef int (*parse_fn)(void *color, const char *str);
 static parse_fn original;
@@ -37,7 +37,7 @@ static void emit_log(const char *action, const char *color)
         return;
     char line[256];
     int len = snprintf(line, sizeof(line),
-                       "[tokyoadwaita-accent] pid=%ld %s%s%s\n",
+                       "[ashtadala-accent] pid=%ld %s%s%s\n",
                        (long)getpid(), action, color ? " " : "",
                        color ? color : "");
     if (len > 0 && (size_t)len < sizeof(line))

@@ -76,7 +76,7 @@ row:selected label link:not(:disabled), row:selected button.link:not(:disabled),
 row:selected button.link:not(:disabled) > label,
 label:selected link:not(:disabled) {color: @SELECTION_FG@;}
 
-/* TokyoNight diagnostic colors retain their meanings across accents. */
+/* Ashtadala diagnostic colors retain their meanings across accents. */
 @define-color success_color @SUCCESS@;
 @define-color warning_color @WARNING@;
 @define-color error_color @ERROR@;

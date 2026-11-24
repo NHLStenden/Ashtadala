@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: MIT */
-/* TokyoAdwaita Night managed Quick Settings checked states.
+/* Ashtadala Night managed Quick Settings checked states.
  * The menu-arrow segment mixes the accent toward white, matching GNOME's
  * split-toggle treatment. Other states use the installed Shell stylesheet. */
 .quick-settings .quick-toggle:checked {

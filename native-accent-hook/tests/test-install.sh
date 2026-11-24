@@ -24,21 +24,21 @@ chmod +x "$DIR/bin/systemctl"
 export HOME="$DIR/home"
 export XDG_DATA_HOME="$DIR/data"
 export XDG_CONFIG_HOME="$DIR/config"
-export TOKYOADWAITA_LIBST="$DIR/libst-51.so"
-export TOKYOADWAITA_SYSTEMCTL=systemctl
+export ASHTADALA_LIBST="$DIR/libst-51.so"
+export ASHTADALA_SYSTEMCTL=systemctl
 export PATH="$DIR/bin:$PATH"
 SCRIPT="$ROOT/scripts/accent-hook.sh"
-LIB="$XDG_DATA_HOME/tokyoadwaita-night/libaccent-hook.so"
-DROPIN="$XDG_CONFIG_HOME/systemd/user/org.gnome.Shell@user.service.d/80-tokyoadwaita-accent.conf"
+LIB="$XDG_DATA_HOME/ashtadala-night/libaccent-hook.so"
+DROPIN="$XDG_CONFIG_HOME/systemd/user/org.gnome.Shell@user.service.d/80-ashtadala-accent.conf"
 
 bash "$SCRIPT" check
 bash "$SCRIPT" install '#ef9369'
 [[ -f "$LIB" && -f "$DROPIN" ]]
-grep -Fxq '# Managed by TokyoAdwaita Night native accent hook' "$DROPIN"
-grep -Fq 'TOKYOADWAITA_ACCENT_COLOR=#ef9369' "$DROPIN"
+grep -Fxq '# Managed by Ashtadala Night native accent hook' "$DROPIN"
+grep -Fq 'ASHTADALA_ACCENT_COLOR=#ef9369' "$DROPIN"
 grep -Fq 'LD_PRELOAD=' "$DROPIN"
 bash "$SCRIPT" install '#8fa9fd'
-grep -Fq 'TOKYOADWAITA_ACCENT_COLOR=#8fa9fd' "$DROPIN"
+grep -Fq 'ASHTADALA_ACCENT_COLOR=#8fa9fd' "$DROPIN"
 if bash "$SCRIPT" install orange > "$DIR/error" 2>&1; then
   echo 'Invalid accent accepted' >&2; exit 1
 fi

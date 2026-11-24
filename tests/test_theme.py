@@ -8,7 +8,7 @@ import unittest
 from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-import tokyoadwaita as t
+import ashtadala as t
 
 
 SHELL_SOURCE = ('#panel { background-color: #36363a; color: #ffffff; }\n'
@@ -117,7 +117,7 @@ class ColorTests(unittest.TestCase):
     def test_quick_settings_checked_tiles_use_custom_accent_and_readable_fg(self):
         for accent in ('#ef9369', '#bc83ff', '#8fa9fd'):
             css, _ = t.shell_recolor(SHELL_SOURCE, accent)
-            quick = css.split('TokyoAdwaita Night managed Quick Settings')[1]
+            quick = css.split('Ashtadala Night managed Quick Settings')[1]
             self.assertIn('background-color: ' + accent + ';', quick)
             self.assertIn('color: ' + t.accent_foreground(accent) + ';', quick)
             self.assertIn('st-mix(' + accent + ', #ffffff, 85%)', quick)
@@ -147,8 +147,8 @@ class ColorTests(unittest.TestCase):
     def test_reconfigure_updates_shell_tiles_not_only_gtk(self):
         first, _ = t.theme_files('#ef9369', SHELL_SOURCE)
         second, _ = t.theme_files('#bc83ff', SHELL_SOURCE)
-        s1 = first['gnome-shell/gnome-shell.css'].decode().split('TokyoAdwaita Night managed Quick Settings')[1]
-        s2 = second['gnome-shell/gnome-shell.css'].decode().split('TokyoAdwaita Night managed Quick Settings')[1]
+        s1 = first['gnome-shell/gnome-shell.css'].decode().split('Ashtadala Night managed Quick Settings')[1]
+        s2 = second['gnome-shell/gnome-shell.css'].decode().split('Ashtadala Night managed Quick Settings')[1]
         self.assertIn('background-color: #ef9369;', s1)
         self.assertIn('background-color: #bc83ff;', s2)
         self.assertNotIn('#ef9369', s2)
@@ -177,14 +177,14 @@ class ColorTests(unittest.TestCase):
 
 class InstallationTests(unittest.TestCase):
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory(prefix='tokyo-tests-')
+        self.tmp = tempfile.TemporaryDirectory(prefix='ashtadala-tests-')
         self.addCleanup(self.tmp.cleanup)
         base = Path(self.tmp.name)
         self.paths = {'user_theme': base / 'data/themes' / t.THEME,
                       'icon_theme': base / 'data/icons' / t.papirus_icons.ICON_THEME,
                       'gtk_css': base / 'config/gtk-4.0/gtk.css',
-                      'gtk_override': base / 'config/gtk-4.0/tokyoadwaita-night.css',
-                      'state': base / 'state/tokyoadwaita/state.json'}
+                      'gtk_override': base / 'config/gtk-4.0/ashtadala-night.css',
+                      'state': base / 'state/ashtadala/state.json'}
         self.paths['gtk_css'].parent.mkdir(parents=True)
         self.prior_css = ('@import url("not-ours.css");\n'
                           ':root { --custom-user-var: #abcdef; }\n').encode()

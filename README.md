@@ -1,8 +1,8 @@
-# TokyoAdwaita Night
+# Ashtadala
 
-Adwaita, in a generated perceptual Night palette. For Fedora 45 and GNOME 51.
+Ashtadala is a user theme for Fedora 45 and GNOME 51.
 
-![TokyoAdwaita Night preview](assets/TokyoAdwaita-Night-preview.svg)
+![Ashtadala Night preview](assets/Ashtadala-Night-preview.svg)
 
 ## Install
 
@@ -22,8 +22,7 @@ Colors: `blue`, `cyan`, `purple`, `green`, `teal`, `yellow`, `peach`,
 `red`, or any `#RRGGBB`.
 
 Eight accents use OKLCH(0.75, 0.125, 45° × n); dark surfaces use
-OKLCH(0.23 + 0.03 × n, 0.025, 270°). The former magenta and purple
-roles now share the single purple accent.
+OKLCH(0.23 + 0.03 × n, 0.025, 270°).
 
 GTK 3, GTK 4 and GNOME Shell are themed together. A small `LD_PRELOAD` hook
 handles Shell's native accent without patching system libraries. Papirus folder

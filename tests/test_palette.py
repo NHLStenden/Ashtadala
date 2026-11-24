@@ -4,8 +4,8 @@ from pathlib import Path
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-import tokyonight_colors as p
-import tokyoadwaita as t
+import ashtadala_colors as p
+import ashtadala as t
 
 
 class PaletteTests(unittest.TestCase):

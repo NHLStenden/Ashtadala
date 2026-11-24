@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: MIT
-"""TokyoAdwaita Night theme builder and installer for Fedora 45 / GNOME 51."""
+"""Ashtadala Night theme builder and installer for Fedora 45 / GNOME 51."""
 from __future__ import annotations
 
 import argparse
@@ -17,16 +17,16 @@ import sys
 import tempfile
 from typing import Any
 
-from tokyonight_colors import ACCENTS, DEFAULT as DEFAULT_ACCENT_NAME, resolve as resolve_accent, surface, accent_shade, oklch
+from ashtadala_colors import ACCENTS, DEFAULT as DEFAULT_ACCENT_NAME, resolve as resolve_accent, surface, accent_shade, oklch
 import papirus_icons
 
 ROOT = Path(__file__).resolve().parent
-THEME = 'TokyoAdwaita-Night'
+THEME = 'Ashtadala-Night'
 EXTENSION = 'user-theme@gnome-shell-extensions.gcampax.github.com'
-STATE_NAME = 'tokyoadwaita-night'
-START = '/* BEGIN TOKYOADWAITA-NIGHT: managed GTK4 import */'
-END = '/* END TOKYOADWAITA-NIGHT */'
-IMPORT = '@import url("tokyoadwaita-night.css");'
+STATE_NAME = 'ashtadala-night'
+START = '/* BEGIN ASHTADALA-NIGHT: managed GTK4 import */'
+END = '/* END ASHTADALA-NIGHT */'
+IMPORT = '@import url("ashtadala-night.css");'
 ACCENT_DEFAULT = ACCENTS[DEFAULT_ACCENT_NAME]
 SECONDARY_DEFAULT = 'purple'  # Object identity (Papirus folders), not a GTK/Shell control accent.
 # Replace dark surfaces without changing Adwaita's light foregrounds.
@@ -198,7 +198,7 @@ def shell_recolor(css: str, accent: str, secondary: str | None = None) -> tuple[
     css = re.sub(r'(?<![\w-])#[0-9a-fA-F]{6}(?![\da-fA-F])', replace, css)
     if counts['-st-accent-color'] == 0:
         raise ThemeError('GNOME Shell stylesheet has no native -st-accent-color tokens; release mismatch')
-    css += '\n/* TokyoAdwaita Night: original native foreground/alpha preserved. */\n'
+    css += '\n/* Ashtadala Night: original native foreground/alpha preserved. */\n'
     css += expand('shell-extra.css', values)
     # Deliberately leave calendar text alone: an existing selector does not
     # guarantee a safe foreground over today's/selected calendar backgrounds.
@@ -207,7 +207,7 @@ def shell_recolor(css: str, accent: str, secondary: str | None = None) -> tuple[
 
 def check_quick_settings_css(shell_css: str, accent: str) -> None:
     """Check expected selectors and colors in the generated Shell CSS."""
-    marker = 'TokyoAdwaita Night managed Quick Settings'
+    marker = 'Ashtadala Night managed Quick Settings'
     if marker not in shell_css:
         raise ThemeError('Installed Shell CSS lacks the managed Quick Settings accent patch')
     extra = shell_css.split(marker, 1)[1]
@@ -227,7 +227,7 @@ def gtk4_override(accent: str, secondary: str | None = None) -> str:
     values = tokens(accent, secondary)
     # Named color aliases belong in the installed dark theme; here they could
     # affect libadwaita windows forced into light mode.
-    return ('/* TokyoAdwaita Night: dark-only libadwaita palette. */\n'
+    return ('/* Ashtadala Night: dark-only libadwaita palette. */\n'
             '@media (prefers-color-scheme: dark) {\n'
             + expand('gtk4-vars.css', values) + '\n}\n')
 
@@ -241,7 +241,7 @@ def theme_files(accent: str, shell_original: str, secondary: str | None = None) 
             + '@media (prefers-color-scheme: dark) {\n'
             + expand('gtk4-vars.css', values) + '}\n'
             + expand('gtk4-legacy.css', values))
-    meta = f'''[Desktop Entry]\nType=X-GNOME-Metatheme\nName=TokyoAdwaita Night\nComment=GTK3, GTK4, GNOME Shell: Adwaita design with generated OKLCH palette\n[X-GNOME-Metatheme]\nGtkTheme={THEME}\nMetacityTheme=Adwaita\nIconTheme=Adwaita\nCursorTheme=Adwaita\n'''
+    meta = f'''[Desktop Entry]\nType=X-GNOME-Metatheme\nName=Ashtadala Night\nComment=GTK3, GTK4, GNOME Shell: Adwaita design with generated OKLCH palette\n[X-GNOME-Metatheme]\nGtkTheme={THEME}\nMetacityTheme=Adwaita\nIconTheme=Adwaita\nCursorTheme=Adwaita\n'''
     files = {
         'index.theme': meta.encode(),
         'gtk-3.0/gtk.css': gtk3.encode(),
@@ -357,7 +357,7 @@ def paths() -> dict[str, Path]:
     return {'user_theme': data / 'themes' / THEME,
             'icon_theme': data / 'icons' / papirus_icons.ICON_THEME,
             'gtk_css': config / 'gtk-4.0/gtk.css',
-            'gtk_override': config / 'gtk-4.0/tokyoadwaita-night.css',
+            'gtk_override': config / 'gtk-4.0/ashtadala-night.css',
             'state': state / STATE_NAME / 'state.json'}
 
 
@@ -372,7 +372,7 @@ def read_state(statefile: Path) -> dict[str, Any] | None:
 
 def atomic_write(path: Path, content: bytes, mode=0o644) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    fd, temporary = tempfile.mkstemp(prefix='.tokyoadwaita-', dir=path.parent)
+    fd, temporary = tempfile.mkstemp(prefix='.ashtadala-', dir=path.parent)
     try:
         with os.fdopen(fd, 'wb') as f:
             f.write(content)
@@ -451,7 +451,7 @@ def stage_theme(directory: Path, files: dict[str, bytes], expected: dict[str, st
         assert_owned_theme(directory, expected)
     elif expected is not None:
         raise ThemeError('Previously installed theme directory disappeared; refusing overwrite')
-    with tempfile.TemporaryDirectory(prefix='.tokyoadwaita-', dir=directory.parent) as temp:
+    with tempfile.TemporaryDirectory(prefix='.ashtadala-', dir=directory.parent) as temp:
         generated = Path(temp) / THEME
         create_tree(files, generated)
         if directory.exists():
@@ -749,7 +749,7 @@ def uninstall(args):
         except Exception as err:
             print('Warning restoring setting:', schema, key, err, file=sys.stderr)
     p['state'].unlink()
-    print('Uninstalled TokyoAdwaita Night. Existing CSS outside our import preserved.')
+    print('Uninstalled Ashtadala Night. Existing CSS outside our import preserved.')
     print('Log out and back in to fully return to the previous GNOME Shell style.')
 
 
@@ -763,7 +763,7 @@ def do_validate() -> None:
 
 
 def diagnose() -> None:
-    print('TokyoAdwaita Night diagnostics')
+    print('Ashtadala Night diagnostics')
     for schema, key in [*[(s, k) for s, k, _ in SCHEMAS],
                         ('org.gnome.desktop.interface', 'accent-color')]:
         try:
@@ -797,7 +797,7 @@ def diagnose() -> None:
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='TokyoAdwaita Night theme installer')
+    parser = argparse.ArgumentParser(description='Ashtadala Night theme installer')
     cmd = parser.add_subparsers(dest='command', required=True)
     install_cmd = cmd.add_parser('install', help='Install GTK, Shell, Flatpak and native accent hook')
     install_cmd.add_argument('accent', nargs='?', default=None,

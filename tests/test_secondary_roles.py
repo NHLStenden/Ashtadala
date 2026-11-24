@@ -1,11 +1,11 @@
-"""Verify that TokyoNight's folder identity is independent of semantic and link colors."""
+"""Verify that Ashtadala's folder identity is independent of semantic and link colors."""
 import json
 import sys
 from pathlib import Path
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-import tokyoadwaita as t
+import ashtadala as t
 from test_theme import SHELL_SOURCE
 
 
@@ -57,7 +57,7 @@ class SecondaryRoleTests(unittest.TestCase):
                 self.assertGreaterEqual(t.contrast(values[role], values[surface]), 4.5)
         self.assertGreaterEqual(t.contrast(values['SELECTION'], values['SELECTION_FG']), 4.5)
 
-    def test_tokyonight_semantic_roles_are_fixed_and_contrast_safe(self):
+    def test_ashtadala_semantic_roles_are_fixed_and_contrast_safe(self):
         first, _ = t.theme_files('#ef9369', SHELL_SOURCE, '#cc95e4')
         second, _ = t.theme_files('#8fa9fd', SHELL_SOURCE, '#3dbee9')
         for item in (first, second):
