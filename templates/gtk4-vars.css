@@ -215,6 +215,18 @@ windowcontrols > button.close:not(:disabled):active > image {
   color: @DEEP@;
 }
 
+/* GtkInfoBar's informational type only. An inset edge also works with
+ * libadwaita's native shadow-based separator, without changing layout. */
+@media (prefers-contrast: no-preference) {
+  infobar.info:not(:disabled):not(:backdrop) > revealer > box {
+    background-color: color-mix(in srgb, @INFO@ 25%, @BG@);
+    box-shadow: inset 0 -1px @INFO@;
+  }
+  infobar.info.action:hover:not(:disabled):not(:backdrop) > revealer > box {
+    background-color: color-mix(in srgb, @INFO@ 30%, @BG@);
+  }
+}
+
 /* Fixed cyan keyboard focus; keep native widths, radii and transitions.
  * Both GTK4 layers use this block only in dark, normal-contrast mode. */
 @media (prefers-contrast: no-preference) {

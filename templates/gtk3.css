@@ -90,6 +90,13 @@ label:selected link:not(:disabled) {color: @SELECTION_FG@;}
 @define-color warning_color @WARNING@;
 @define-color error_color @ERROR@;
 
+/* Informational infobars: fixed blue tint and existing lower edge.
+ * Keep native text, buttons and other message types. */
+infobar.info:not(:disabled):not(:backdrop) > revealer > box {
+  background-color: mix(@BG@, @INFO@, 0.25);
+  border-bottom-color: @INFO@;
+}
+
 /* Recolor Adwaita's existing active-page edge on every tab orientation. */
 notebook > header.top > tabs > tab:checked:not(:disabled) {
   box-shadow: inset 0 -4px @TAB@;

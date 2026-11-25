@@ -60,6 +60,49 @@ class SecondaryRoleTests(unittest.TestCase):
                 self.assertGreaterEqual(t.contrast(color, t.accent_foreground(color)), 4.5)
             self.assertIn('--destructive-bg-color: #ee8dac', gtk)
 
+    def test_information_is_fixed_and_contrast_safe(self):
+        for accent in (*t.ACCENTS.values(), '#000000', '#ffffff', '#777777'):
+            with self.subTest(accent=accent):
+                v = t.tokens(accent)
+                self.assertEqual(v['INFO'], t.ACCENTS['blue'])
+                self.assertEqual(v['LINK'], v['INFO'])
+                self.assertEqual(v['ACCENT'], accent)
+                for role in ('BG', 'DEEP', 'PANEL', 'SURFACE', 'HOVER', 'BORDER'):
+                    self.assertGreaterEqual(t.contrast(v['INFO'], v[role]), 3)
+                for amount in (.25, .30):
+                    tint = '#' + ''.join(f"{round(int(v['INFO'][i:i+2], 16)*amount + int(v['BG'][i:i+2], 16)*(1-amount)):02x}" for i in (1, 3, 5))
+                    self.assertGreaterEqual(t.contrast(v['INFO'], tint), 3)
+                    self.assertGreaterEqual(t.contrast('#eeeeec', tint), 4.5)
+
+    def test_information_gtk_rules_are_scoped_to_explicit_info_type(self):
+        for accent in (*t.ACCENTS.values(), '#000000', '#ffffff', '#777777'):
+            with self.subTest(accent=accent):
+                files, _ = t.theme_files(accent, SHELL_SOURCE)
+                selector = 'infobar.info:not(:disabled):not(:backdrop) > revealer > box'
+                gtk3 = files['gtk-3.0/gtk.css'].decode()
+                self.assertIn(selector + ' {\n  background-color: mix(#181c29, #90aafa, 0.25);\n  border-bottom-color: #90aafa;\n}', gtk3)
+                for gtk4 in (files['gtk-4.0/gtk.css'].decode(), t.gtk4_override(accent)):
+                    self.assertIn('@media (prefers-color-scheme: dark)', gtk4)
+                    self.assertIn('@media (prefers-contrast: no-preference) {\n  ' + selector, gtk4)
+                    self.assertIn('background-color: color-mix(in srgb, #90aafa 25%, #181c29);', gtk4)
+                    self.assertIn('box-shadow: inset 0 -1px #90aafa;', gtk4)
+                    self.assertIn('infobar.info.action:hover:not(:disabled):not(:backdrop)', gtk4)
+                for css in (gtk3, gtk4):
+                    for other in ('infobar.warning', 'infobar.error', 'infobar.question', 'banner {', 'toast {'):
+                        self.assertNotIn(other, css)
+
+    def test_shell_unseen_indicator_only_and_transparent_panel_fallback(self):
+        selector = '.panel-button.clock-display .messages-indicator'
+        for accent in (*t.ACCENTS.values(), '#000000', '#ffffff', '#777777'):
+            with self.subTest(accent=accent):
+                css, _ = t.shell_recolor(SHELL_SOURCE, accent)
+                self.assertIn('#panel ' + selector + ' {color: #90aafa;}', css)
+                for state in ('overview', 'unlock-screen', 'login-screen'):
+                    self.assertIn('#panel:' + state + ' ' + selector, css)
+                self.assertIn('#panel:login-screen ' + selector + ' {color: inherit;}', css)
+                self.assertNotIn('.message-source-icon', css)
+                self.assertNotIn('.privacy-indicator', css)
+
     def test_folder_color_is_fixed(self):
         data = t.tokens('#90aafa')
         self.assertEqual(data['SECONDARY_ACCENT'], '#cb96e2')

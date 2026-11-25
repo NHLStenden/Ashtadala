@@ -38,6 +38,7 @@ PALETTE = {
     'HOVER': surface(3),
     'BORDER': surface(6),
     'WINDOW_CONTROL': ACCENTS['teal'],
+    'INFO': ACCENTS['blue'],
     'SUCCESS': ACCENTS['green'],
     'WARNING': ACCENTS['yellow'],
     'ERROR': ACCENTS['red'],

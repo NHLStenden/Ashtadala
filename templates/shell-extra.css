@@ -58,6 +58,13 @@
 .shell-link:hover {color: @LINK_HOVER@;}
 .url-highlighter {link-color: @LINK@;}
 
+/* Native unseen-message indicator, not the clock or Do Not Disturb icon.
+ * On transparent panels keep native inherited ink for contrast. */
+#panel .panel-button.clock-display .messages-indicator {color: @INFO@;}
+#panel:overview .panel-button.clock-display .messages-indicator,
+#panel:unlock-screen .panel-button.clock-display .messages-indicator,
+#panel:login-screen .panel-button.clock-display .messages-indicator {color: inherit;}
+
 /* Overview close: same golden window-control role, native Shell geometry. */
 .window-close {background-color: @CLOSE@; color: @DEEP@;}
 .window-close:hover {background-color: @CLOSE_HOVER@; color: @DEEP@;}
