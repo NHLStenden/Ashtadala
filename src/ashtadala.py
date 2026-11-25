@@ -40,9 +40,10 @@ PALETTE = {
     'SUCCESS': ACCENTS['green'],
     'WARNING': ACCENTS['yellow'],
     'ERROR': ACCENTS['red'],
-    'CLOSE': ACCENTS['yellow'],
-    'CLOSE_HOVER': accent_shade('yellow', .05),
-    'CLOSE_ACTIVE': accent_shade('yellow', -.07),
+    # A small, persistent control needs a brighter gold than the warning accent.
+    'CLOSE': accent_shade('yellow', .05),
+    'CLOSE_HOVER': accent_shade('yellow', .08),
+    'CLOSE_ACTIVE': accent_shade('yellow', .02),
 }
 
 # Known dark grays in GNOME 51 Shell CSS. Leave light colors and alpha values alone.

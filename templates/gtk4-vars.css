@@ -136,6 +136,21 @@ tabbar tabbox:not(.single-tab) tab:selected:not(:disabled) {
 
 /* Window controls: native geometry and symbolic icons, generated dark surfaces.
  * Close stays solid golden yellow even in inactive windows; disabled states remain native. */
+/* Libadwaita dims the entire inactive windowhandle. Move that filter to
+ * its ordinary children, leaving enabled close buttons at full strength.
+ * The three widget wrappers are AdwHeaderBar's start, title and end bins.
+ * Flat/inline headerbars retain their own backdrop treatment. */
+headerbar:not(.flat):not(.inline):backdrop > windowhandle {
+  filter: none;
+}
+headerbar:not(.flat):not(.inline):backdrop > windowhandle > box > widget:nth-child(2),
+headerbar:not(.flat):not(.inline):backdrop > windowhandle > box > widget > box.start > :not(windowcontrols),
+headerbar:not(.flat):not(.inline):backdrop > windowhandle > box > widget > box.end > :not(windowcontrols),
+headerbar:not(.flat):not(.inline):backdrop > windowhandle > box > widget > box > windowcontrols > button:not(.close),
+headerbar:not(.flat):not(.inline):backdrop > windowhandle > box > widget > box > windowcontrols > button.close:disabled,
+headerbar:not(.flat):not(.inline):backdrop > windowhandle > box > widget > box > windowcontrols > image {
+  filter: opacity(0.5);
+}
 windowcontrols > button.minimize:not(:disabled):not(:backdrop) > image,
 windowcontrols > button.maximize:not(:disabled):not(:backdrop) > image {
   background-color: @HOVER@;

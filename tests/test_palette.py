@@ -65,12 +65,20 @@ class PaletteTests(unittest.TestCase):
         v = t.tokens(p.ACCENTS['peach'])
         for ident, role in [('rect83', 'DEEP'), ('rect195', 'PANEL'),
                             ('rect196', 'BG'), ('rect208', 'SELECTION'),
-                            ('circle207', 'CLOSE'), ('rect271', 'ACCENT'),
+                            ('circle207', 'CLOSE'), ('circle116', 'CLOSE'), ('rect271', 'ACCENT'),
                             ('path1856', 'SECONDARY_ACCENT'),
                             ('rect227', 'SURFACE'), ('rect233', 'SURFACE'),
                             ('rect235', 'SURFACE')]:
             self.assertEqual(by_id[ident].get('fill'), v[role])
         for ident, color in [('rect234', '#4b4c55'),
-                             ('rect90', '#262730'), ('rect278', '#4a4b67'), ('text274', '#e1e5fa')]:
+                             ('rect90', '#262730'), ('rect278', '#4a4b67')]:
             self.assertEqual(by_id[ident].get('fill'), color)
-        self.assertIn('fill:' + v['LEVEL'] + ';', by_id['rect268'].get('style'))
+        for ident in ('rect268', 'rect270'):
+            self.assertEqual(by_id[ident].get('fill'), v['LEVEL'])
+            self.assertIn('fill:' + v['LEVEL'] + ';', by_id[ident].get('style'))
+        for ident in ('text274', 'text275', 'text278', 'text284', 'text290',
+                      'path1940', 'path1943', 'path1950', 'circle283',
+                      'ref-icon-1600-228', 'ref-icon-1825-225', 'ref-icon-1599-439'):
+            self.assertEqual(by_id[ident].get('fill'), v['ACCENT_FG'])
+        for ident in ('path1906', 'path117'):
+            self.assertEqual(by_id[ident].get('stroke'), v['DEEP'])

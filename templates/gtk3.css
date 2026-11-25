@@ -140,6 +140,7 @@ button.titlebutton.maximize:not(:disabled):active:not(:backdrop) {
   -gtk-icon-shadow: none;
 }
 button.titlebutton.close:not(:disabled) {
+  opacity: 1;
   background-color: @CLOSE@;
   color: @DEEP@;
   background-image: none;
@@ -150,6 +151,7 @@ button.titlebutton.close:not(:disabled) {
   -gtk-icon-shadow: none;
 }
 button.titlebutton.close:not(:disabled):hover {
+  opacity: 1;
   background-color: @CLOSE_HOVER@;
   color: @DEEP@;
   background-image: none;
@@ -160,6 +162,7 @@ button.titlebutton.close:not(:disabled):hover {
   -gtk-icon-shadow: none;
 }
 button.titlebutton.close:not(:disabled):active {
+  opacity: 1;
   background-color: @CLOSE_ACTIVE@;
   color: @DEEP@;
   background-image: none;
