@@ -19,14 +19,23 @@ headerbar, .titlebar {background-color: @PANEL@;}
 headerbar:backdrop, .titlebar:backdrop {background-color: @BG@;}
 entry, textview text, treeview.view, iconview.view {background-color: @DEEP@;}
 /* Clear Adwaita's blue gradient on enabled suggested buttons. */
-button.suggested-action:not(:disabled), button.default:not(:disabled),
-button.suggested-action:hover:not(:disabled), button.default:hover:not(:disabled),
-button.suggested-action:active:not(:disabled), button.default:active:not(:disabled) {
+button.suggested-action:not(.flat):not(.destructive-action):not(:disabled),
+button.default:not(.flat):not(.destructive-action):not(:disabled) {
   background-image: none;
   background-color: @ACCENT@;
   color: @ACCENT_FG@;
   text-shadow: none;
   -gtk-icon-shadow: none;
+}
+button.suggested-action:not(.flat):not(.destructive-action):not(:disabled):hover,
+button.default:not(.flat):not(.destructive-action):not(:disabled):hover {
+  background-color: @ACCENT_HOVER@;
+  color: @ACCENT_HOVER_FG@;
+}
+button.suggested-action:not(.flat):not(.destructive-action):not(:disabled):active,
+button.default:not(.flat):not(.destructive-action):not(:disabled):active {
+  background-color: @ACCENT_ACTIVE@;
+  color: @ACCENT_ACTIVE_FG@;
 }
 /* Focused GTK3 file chooser rows need a more specific selection rule. */
 selection,

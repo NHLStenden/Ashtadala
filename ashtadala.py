@@ -124,7 +124,14 @@ def accent_foreground(accent: str) -> str:
 
 def tokens(accent: str) -> dict[str, str]:
     selection = ACCENTS['red']
-    return dict(PALETTE, ACCENT=accent, ACCENT_FG=accent_foreground(accent),
+    fg = accent_foreground(accent)
+    def tint(amount: float) -> str:
+        return '#' + ''.join(f'{round(int(accent[i:i + 2], 16) * (1 - amount) + int(fg[i:i + 2], 16) * amount):02x}'
+                             for i in (1, 3, 5))
+    hover, active = tint(.10), tint(.20)
+    return dict(PALETTE, ACCENT=accent, ACCENT_FG=fg,
+                ACCENT_HOVER=hover, ACCENT_HOVER_FG=accent_foreground(hover),
+                ACCENT_ACTIVE=active, ACCENT_ACTIVE_FG=accent_foreground(active),
                 SELECTION=selection, SELECTION_FG=accent_foreground(selection),
                 LEVEL=ACCENTS['green'],
                 LEVEL_FG=accent_foreground(ACCENTS['green']),

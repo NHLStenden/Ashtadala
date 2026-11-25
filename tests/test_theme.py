@@ -59,11 +59,21 @@ class ColorTests(unittest.TestCase):
         self.assertGreater(t.relative_luminance(surface), t.relative_luminance(t.PALETTE['PANEL']))
 
     def test_gtk3_suggested_buttons_do_not_show_adwaita_blue_gradient(self):
-        gtk3 = t.expand('gtk3.css', t.tokens('#ef9369'))
-        self.assertIn('button.suggested-action:active', gtk3)
-        self.assertIn('button.suggested-action:hover', gtk3)
-        self.assertIn('background-image: none;', gtk3)
-        self.assertIn('color: #13161e;', gtk3)
+        for accent in (*t.ACCENTS.values(), '#7e69dd', '#808080', '#ffffff', '#000000'):
+            values = t.tokens(accent)
+            gtk3 = t.expand('gtk3.css', values)
+            selector = ':not(.flat):not(.destructive-action):not(:disabled)'
+            for state, token in (('', 'ACCENT'), (':hover', 'ACCENT_HOVER'),
+                                 (':active', 'ACCENT_ACTIVE')):
+                for cls in ('suggested-action', 'default'):
+                    self.assertIn(f'button.{cls}{selector}{state}', gtk3)
+                self.assertIn(f'background-color: {values[token]};\n  color: {values[token + "_FG"]};', gtk3)
+                self.assertGreaterEqual(t.contrast(values[token], values[token + '_FG']), 4.5)
+            self.assertEqual(len({accent, values['ACCENT_HOVER'], values['ACCENT_ACTIVE']}), 3)
+            self.assertIn('background-image: none;', gtk3)
+        values = t.tokens('#ef9369')
+        self.assertEqual(values['ACCENT_HOVER'], '#d98662')
+        self.assertEqual(values['ACCENT_ACTIVE'], '#c37a5a')
 
     def test_gtk3_filechooser_focus_and_sidebar_selection(self):
         # GTK3 Adwaita's focused treeview rules can otherwise keep its blue.
