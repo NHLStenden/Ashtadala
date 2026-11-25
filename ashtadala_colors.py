@@ -21,15 +21,11 @@ def oklch(L: float, C: float, H: float) -> str:
     return '#' + ''.join(f'{round(255*(12.92*v if v <= .0031308 else 1.055*v**(1/2.4)-.055)):02x}' for v in rgb)
 
 
-# Eight distinct names, retaining the existing semantic vocabulary where possible.
 HUES = dict(zip(('red', 'peach', 'yellow', 'green', 'teal', 'cyan', 'blue', 'purple'), range(0, 360, 45)))
 ACCENTS = {name: oklch(ACCENT_L, ACCENT_C, hue) for name, hue in HUES.items()}
 DEFAULT = 'blue'
 
 
-# Original surface roles have different tint strengths; the main background
-# anchors the ramp. Do not turn the deeper neutral surfaces blue or flatten
-# the richer blue panels and borders into gray.
 SURFACE_CHROMA = {-1: .018, 0: SURFACE_C, 1: .040, 2: .041, 3: .043, 6: .064}
 
 

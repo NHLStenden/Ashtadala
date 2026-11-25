@@ -5,9 +5,8 @@ import colorsys
 import os
 from pathlib import Path
 import re
-import secrets
 
-from ashtadala_colors import ACCENTS, resolve
+from ashtadala_colors import resolve
 
 ICON_THEME = 'Ashtadala-Night-Papirus'
 PAPIRUS = ('Papirus-Dark', 'Papirus', 'Papirus-Light')
@@ -50,15 +49,6 @@ def find_papirus(preferred: str | None = None) -> tuple[str, Path] | None:
             if (theme / 'index.theme').is_file() and sources(theme):
                 return name, theme
     return None
-
-
-def pick_color(accent: str, previous: str | None = None) -> str:
-    previous_hex = resolve(previous) if previous else None
-    options = [name for name, value in ACCENTS.items()
-               if value != accent.lower() and value != previous_hex]
-    if not options:
-        raise IconError('No folder colors available')
-    return secrets.choice(options)
 
 
 def parse_rgb(value: str) -> tuple[float, float, float]:

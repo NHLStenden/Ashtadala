@@ -16,12 +16,10 @@ window, dialog, popover {
   --dialog-bg-color: @BG@;
   --popover-bg-color: @PANEL@;
 
-  /* Keep Adwaita's native foregrounds and card interactions. */
   --accent-bg-color: @ACCENT@;
   --accent-fg-color: @ACCENT_FG@;
   --accent-color: oklab(from @ACCENT@ max(l, 0.85) a b);
 
-  /* Success/warning/error are semantic, not additional accents. */
   --success-bg-color: @SUCCESS@;
   --success-fg-color: @SUCCESS_FG@;
   --success-color: @SUCCESS@;
@@ -67,8 +65,7 @@ label.dimmed:not(:disabled), label.dim-label:not(:disabled) {
   color: color-mix(in srgb, currentColor var(--dim-opacity, 55%), transparent);
 }
 
-/* Links are independent of the primary accent and Papirus folder hue.
- * Keep native decoration, focus and disabled treatments. */
+/* Link colors */
 label link:not(:disabled), button.link:not(:disabled) {color: @LINK@;}
 label link:visited:not(:disabled), button.link:visited:not(:disabled) {color: @LINK_VISITED@;}
 label link:hover:not(:disabled), button.link:hover:not(:disabled) {color: @LINK_HOVER@;}
@@ -83,8 +80,7 @@ label link:active:not(:disabled), button.link:active:not(:disabled) {color: @LIN
   color: @SELECTION_FG@;
 }
 
-/* Navigation sidebars normally use a translucent neutral selection. Use an
- * opaque pink selection with contrasting ink; leave unselected rows alone. */
+/* Opaque sidebar selection */
 .navigation-sidebar > row:selected:not(:disabled),
 .navigation-sidebar > child:selected:not(:disabled),
 .navigation-sidebar > flowboxchild:selected:not(:disabled) {
@@ -100,7 +96,6 @@ label link:active:not(:disabled), button.link:active:not(:disabled) {color: @LIN
   color: @SELECTION_FG@;
 }
 
-/* Keep the selected row visibly distinct during pointer interaction. */
 .navigation-sidebar > row:selected:not(:disabled):hover,
 .navigation-sidebar > child:selected:not(:disabled):hover,
 .navigation-sidebar > flowboxchild:selected:not(:disabled):hover {
@@ -112,7 +107,6 @@ label link:active:not(:disabled), button.link:active:not(:disabled) {color: @LIN
   background-color: color-mix(in srgb, @SELECTION@ 90%, black);
 }
 
-/* Text selection uses the same hue without changing the application accent. */
 entry:not(:disabled) text selection,
 textview:not(:disabled) text selection, label:not(:disabled) selection {
   background-color: @SELECTION@;
@@ -132,7 +126,6 @@ progressbar {
   --accent-fg-color: @PROGRESS_FG@;
 }
 
-/* Recolor the notebook's native indicator, including vertical tabs. */
 notebook > header > tabs > tab {
   --accent-bg-color: @TAB@;
 }

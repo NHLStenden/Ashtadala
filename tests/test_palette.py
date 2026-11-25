@@ -33,7 +33,7 @@ class PaletteTests(unittest.TestCase):
         from xml.etree import ElementTree as ET
         preview = ET.parse(t.ROOT / 'assets/Ashtadala-preview.svg')
         by_id = {element.get('id'): element for element in preview.iter()}
-        v = t.tokens(p.ACCENTS['peach'], p.ACCENTS['purple'])
+        v = t.tokens(p.ACCENTS['peach'])
         for ident, role in [('rect83', 'DEEP'), ('rect195', 'PANEL'),
                             ('rect196', 'BG'), ('rect208', 'SELECTION'),
                             ('circle207', 'CLOSE'), ('rect271', 'ACCENT'),

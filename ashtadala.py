@@ -27,8 +27,7 @@ STATE_NAME = 'ashtadala-night'
 START = '/* BEGIN ASHTADALA-NIGHT: managed GTK4 import */'
 END = '/* END ASHTADALA-NIGHT */'
 IMPORT = '@import url("ashtadala-night.css");'
-ACCENT_DEFAULT = ACCENTS[DEFAULT_ACCENT_NAME]
-SECONDARY_DEFAULT = 'purple'  # Object identity (Papirus folders), not a GTK/Shell control accent.
+FOLDER_COLOR = ACCENTS['purple']
 # Replace dark surfaces without changing Adwaita's light foregrounds.
 PALETTE = {
     'BG': surface(0),
@@ -38,11 +37,9 @@ PALETTE = {
     'HOVER': surface(3),
     'BORDER': surface(6),
     'CONTROL_FG': oklch(.85, .06, 270),
-    # Fixed perceptual semantic roles, independent of user accents.
     'SUCCESS': ACCENTS['green'],
     'WARNING': ACCENTS['yellow'],
     'ERROR': ACCENTS['red'],
-    # Decorative window action, separate from destructive/error semantics.
     'CLOSE': ACCENTS['yellow'],
     'CLOSE_HOVER': accent_shade('yellow', .80),
     'CLOSE_ACTIVE': accent_shade('yellow', .68),
@@ -80,12 +77,6 @@ def run(args: list[str], *, check=True, capture=True) -> subprocess.CompletedPro
         tail = (p.stderr or b'').decode(errors='replace').strip()
         raise ThemeError(f'{args[0]} failed ({p.returncode}): {tail}')
     return p
-
-
-def accent_valid(value: str) -> str:
-    if not re.fullmatch(r'#[0-9a-fA-F]{6}', value):
-        raise ThemeError('The accent must be a six-digit #RRGGBB hexadecimal color')
-    return value.lower()
 
 
 def accent_choice(value: str) -> str:
@@ -131,25 +122,7 @@ def accent_foreground(accent: str) -> str:
     return preferred if contrast(accent, preferred) >= 4.5 else '#000000'
 
 
-def secondary_choice(accent: str, requested: str | None = None, previous: str | None = None,
-                     randomize: bool = False) -> str:
-    """Keep the decorative color stable; randomize only on explicit request."""
-    if randomize and requested is not None:
-        raise ThemeError('Specify either a folder color or --random-folders, not both')
-    if randomize:
-        return accent_choice(papirus_icons.pick_color(accent, previous))
-    if requested is not None:
-        return accent_choice(requested)
-    if previous is not None:
-        return accent_choice(previous)
-    default = ACCENTS[SECONDARY_DEFAULT]
-    return default if default != accent else ACCENTS['cyan']
-
-
-def tokens(accent: str, secondary: str | None = None) -> dict[str, str]:
-    if secondary is None:
-        secondary = secondary_choice(accent)
-    # Fixed widget roles are independent of the primary and folder accents.
+def tokens(accent: str) -> dict[str, str]:
     selection = ACCENTS['red']
     return dict(PALETTE, ACCENT=accent, ACCENT_FG=accent_foreground(accent),
                 SELECTION=selection, SELECTION_FG=accent_foreground(selection),
@@ -158,7 +131,7 @@ def tokens(accent: str, secondary: str | None = None) -> dict[str, str]:
                 PROGRESS=ACCENTS['green'],
                 PROGRESS_FG=accent_foreground(ACCENTS['green']),
                 TAB=ACCENTS['purple'],
-                SECONDARY_ACCENT=secondary,
+                SECONDARY_ACCENT=FOLDER_COLOR,
                 LINK=ACCENTS['blue'],
                 LINK_VISITED=oklch(.78, .10, 270),  # Visited links stay blue, not neutral gray.
                 LINK_HOVER=oklch(.81, .09, 270),  # Lighter blue for pointer feedback.
@@ -175,13 +148,13 @@ def expand(name: str, values: dict[str, str]) -> str:
     return result
 
 
-def shell_recolor(css: str, accent: str, secondary: str | None = None) -> tuple[str, dict[str, int]]:
+def shell_recolor(css: str, accent: str) -> tuple[str, dict[str, int]]:
     """Recolor the installed GNOME Shell stylesheet, retaining its selectors and assets."""
     if len(css) < 2000 or '#panel' not in css:
         raise ThemeError('Shell resource is not a recognizable full GNOME dark stylesheet')
     if '.quick-toggle:checked' not in css or '.quick-toggle-menu-button:checked' not in css:
         raise ThemeError('GNOME Shell stylesheet lacks expected Quick Settings selectors; do not apply an unverified accent patch')
-    values = tokens(accent, secondary)
+    values = tokens(accent)
     counts = {}
     # Replace whole accent tokens, including those inside Shell color functions.
     for key, replacement in [('-st-accent-fg-color', values['ACCENT_FG']),
@@ -200,8 +173,7 @@ def shell_recolor(css: str, accent: str, secondary: str | None = None) -> tuple[
         raise ThemeError('GNOME Shell stylesheet has no native -st-accent-color tokens; release mismatch')
     css += '\n/* Ashtadala Night: original native foreground/alpha preserved. */\n'
     css += expand('shell-extra.css', values)
-    # Deliberately leave calendar text alone: an existing selector does not
-    # guarantee a safe foreground over today's/selected calendar backgrounds.
+    # Calendar foregrounds depend on selection state.
     return css, counts
 
 
@@ -223,8 +195,8 @@ def check_quick_settings_css(shell_css: str, accent: str) -> None:
         raise ThemeError('Quick Settings accent patch missing expected CSS: ' + ', '.join(missing))
 
 
-def gtk4_override(accent: str, secondary: str | None = None) -> str:
-    values = tokens(accent, secondary)
+def gtk4_override(accent: str) -> str:
+    values = tokens(accent)
     # Named color aliases belong in the installed dark theme; here they could
     # affect libadwaita windows forced into light mode.
     return ('/* Ashtadala Night: dark-only libadwaita palette. */\n'
@@ -232,9 +204,9 @@ def gtk4_override(accent: str, secondary: str | None = None) -> str:
             + expand('gtk4-vars.css', values) + '\n}\n')
 
 
-def theme_files(accent: str, shell_original: str, secondary: str | None = None) -> tuple[dict[str, bytes], dict[str, Any]]:
-    values = tokens(accent, secondary)
-    shell, counts = shell_recolor(shell_original, accent, secondary)
+def theme_files(accent: str, shell_original: str) -> tuple[dict[str, bytes], dict[str, Any]]:
+    values = tokens(accent)
+    shell, counts = shell_recolor(shell_original, accent)
     check_quick_settings_css(shell, accent)
     gtk3 = expand('gtk3.css', values)
     gtk4 = ('@import url("resource:///org/gtk/libgtk/theme/Default/gtk-dark.css");\n'
@@ -545,12 +517,6 @@ def check_conflicts(state: dict[str, Any] | None, p: dict[str, Path], directory:
 def install(args):
     state, p = get_last_state()
     accent = accent_choice(args.accent or (state['accent'] if state else DEFAULT_ACCENT_NAME))
-    requested = getattr(args, 'papirus_color', None)
-    previous_secondary = (state.get('secondary_accent') or
-                          (state.get('papirus') or {}).get('hex') or
-                          (state.get('papirus') or {}).get('color')) if state else None
-    secondary = secondary_choice(accent, requested, previous_secondary,
-                                 getattr(args, 'random_folders', False))
     directory = p['user_theme']
     check_conflicts(state, p, directory)
     previous_icons = state.get('papirus') if state else None
@@ -562,11 +528,9 @@ def install(args):
     if previous_icons and not papirus:
         raise ThemeError('Previously used Papirus theme is missing; cannot safely reconfigure icons')
     icon_files = None
-    icon_color = None
     if papirus:
-        icon_color = secondary
         try:
-            icon_files = papirus_icons.build_overlay(papirus[0], papirus[1], secondary)
+            icon_files = papirus_icons.build_overlay(papirus[0], papirus[1], FOLDER_COLOR)
         except (papirus_icons.IconError, ValueError, OSError, UnicodeError) as e:
             raise ThemeError(f'Papirus: {e}') from e
         icon_dir = p['icon_theme']
@@ -574,15 +538,13 @@ def install(args):
             assert_owned_theme(icon_dir, previous_icons['files'])
         elif icon_dir.exists() or icon_dir.is_symlink():
             raise ThemeError('Icon theme directory already exists: ' + str(icon_dir))
-    elif getattr(args, 'papirus_color', None):
-        print('Papirus is not installed; skipping folder recoloring.')
     flatpak_enabled = flatpak_present() or bool(state and state['flatpak_enabled'])
     if flatpak_enabled:
         flatpak_preflight()
     native_preflight()
     hook_run('check')  # Refuse competing preloads or an old binary patch.
     source, _ = stock_shell_resource()
-    files, metrics = theme_files(accent, source, secondary)
+    files, metrics = theme_files(accent, source)
     previous_gtk = file_snapshot(p['gtk_css'])
     previous_override = file_snapshot(p['gtk_override'])
     old_settings = copy.deepcopy(state['settings']) if state else {}
@@ -590,17 +552,16 @@ def install(args):
         'format': 4,
         'theme_path': directory.as_posix(),
         'accent': accent,
-        'secondary_accent': secondary,
         'files': {name: sha(data) for name, data in files.items()},
-        'gtk_override_sha': sha(gtk4_override(accent, secondary)),
+        'gtk_override_sha': sha(gtk4_override(accent)),
         'shell_source_sha': metrics['source_sha256'],
         'gtk_css_existed': state['gtk_css_existed'] if state else previous_gtk is not None,
         'flatpak_enabled': flatpak_enabled,
         'flatpak_old': state['flatpak_old'] if state else None,
         'flatpak_written_sha': state['flatpak_written_sha'] if state else None,
         'settings': old_settings,
-        'papirus': ({'base': papirus[0], 'color': icon_color,
-                     'hex': accent_choice(icon_color),
+        'papirus': ({'base': papirus[0], 'color': FOLDER_COLOR,
+                     'hex': FOLDER_COLOR,
                      'files': {name: sha(data) for name, data in icon_files.items()}}
                     if icon_files is not None else None),
     }
@@ -621,7 +582,7 @@ def install(args):
         if icon_files is not None:
             stage_theme(p['icon_theme'], icon_files, previous_icons['files'] if previous_icons else None)
             icons_applied = True
-        atomic_write(p['gtk_override'], gtk4_override(accent, secondary).encode('utf-8'))
+        atomic_write(p['gtk_override'], gtk4_override(accent).encode('utf-8'))
         atomic_write(p['gtk_css'], new_css.encode('utf-8'))
         if flatpak_enabled:
             if state and state['flatpak_enabled']:
@@ -687,7 +648,7 @@ def install(args):
     if flatpak_enabled:
         print('Flatpak: GTK theme directories shared read-only')
     if icon_files is not None:
-        print(f'Papirus folders: {icon_color} ({accent_choice(icon_color)})')
+        print(f'Papirus folders: {FOLDER_COLOR}')
     print('Log out and back in to load the native accent hook.')
 
 
@@ -775,8 +736,6 @@ def diagnose() -> None:
         print('Theme: not installed')
         return
     print('Primary accent:', state['accent'])
-    print('Secondary accent:', state.get('secondary_accent') or
-          (state.get('papirus') or {}).get('hex') or '(not recorded)')
     if state.get('papirus'):
         try:
             assert_owned_theme(p['icon_theme'], state['papirus']['files'])
@@ -802,16 +761,8 @@ def parse_args():
     install_cmd = cmd.add_parser('install', help='Install GTK, Shell, Flatpak and native accent hook')
     install_cmd.add_argument('accent', nargs='?', default=None,
                              help='Palette color name or #RRGGBB; default blue')
-    install_cmd.add_argument('papirus_color', nargs='?', default=None,
-                             help='Secondary accent / Papirus folder color; preserved when omitted')
-    install_cmd.add_argument('--random-folders', action='store_true',
-                             help='Explicitly select a new random secondary accent')
     configure_cmd = cmd.add_parser('configure', help='Change the installed accent')
     configure_cmd.add_argument('accent', help='Palette color name or #RRGGBB')
-    configure_cmd.add_argument('papirus_color', nargs='?', default=None,
-                               help='Secondary accent / Papirus folder color; preserved when omitted')
-    configure_cmd.add_argument('--random-folders', action='store_true',
-                               help='Explicitly select a new random secondary accent')
     cmd.add_parser('uninstall', help='Remove the theme and restore the previous settings')
     cmd.add_parser('diagnose', help='Inspect the installed theme and hook')
     cmd.add_parser('validate', help='Run automated tests')

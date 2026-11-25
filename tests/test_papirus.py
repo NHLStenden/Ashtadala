@@ -60,17 +60,6 @@ class GeneratorTests(unittest.TestCase):
         self.assertIn('fill="#ef9369aa"', files['48x48/places/user.svg'].decode())
         self.assertNotIn('folder-blue.svg', files)
 
-    def test_random_excludes_theme_accent_and_previous_color(self):
-        with mock.patch.object(pi.secrets, 'choice', side_effect=lambda items: items[0]) as chooser:
-            chosen = pi.pick_color('#8fa9fd', 'peach')
-        options = chooser.call_args.args[0]
-        self.assertNotIn('blue', options)
-        self.assertNotIn('peach', options)
-        self.assertEqual(chosen, options[0])
-        with mock.patch.object(pi.secrets, 'choice') as chooser:
-            pi.pick_color('#8fa9fd', '#ef9369')
-        self.assertNotIn('peach', chooser.call_args.args[0])
-
     def test_missing_and_bad_sources(self):
         with self.assertRaises(pi.IconError):
             pi.build_overlay('Papirus', self.root, 'peach')
@@ -97,13 +86,11 @@ class IntegrationTests(unittest.TestCase):
         self.find_papirus.start()
         self.addCleanup(self.find_papirus.stop)
 
-    def test_random_install_and_uninstall(self):
-        with mock.patch.object(pi.secrets, 'choice', return_value='purple') as chooser:
-            t.install(argparse.Namespace(accent='blue', papirus_color=None, random_folders=True))
+    def test_purple_install_and_uninstall(self):
+        t.install(argparse.Namespace(accent='blue'))
         state = t.read_state(self.paths['state'])
         self.assertEqual(state['papirus']['color'], '#cc95e4')
         self.assertEqual(state['papirus']['hex'], '#cc95e4')
-        self.assertTrue(chooser.called)
         self.assertEqual(self.settings[('org.gnome.desktop.interface', 'icon-theme')], repr(pi.ICON_THEME))
         self.assertIn('Inherits=Papirus-Dark', (self.paths['icon_theme']/'index.theme').read_text())
         self.assertIn('#cc95e4', (self.paths['icon_theme']/'48x48/places/folder.svg').read_text())
@@ -113,54 +100,34 @@ class IntegrationTests(unittest.TestCase):
         self.assertEqual(self.settings[('org.gnome.desktop.interface','icon-theme')], "'Papirus-Dark'")
         self.assertEqual((self.papirus_base/'48x48/places/folder-blue.svg').read_text(), NORMAL)
 
-    def test_explicit_color_and_random_reconfigure(self):
-        t.install(argparse.Namespace(accent='blue', papirus_color='peach'))
-        first = t.read_state(self.paths['state'])['papirus']['color']
-        with mock.patch.object(pi.secrets, 'choice', return_value='cyan') as chooser:
-            t.install(argparse.Namespace(accent='purple', papirus_color=None, random_folders=True))
-        self.assertTrue(chooser.called)
-        self.assertNotIn('peach', chooser.call_args.args[0])
-        self.assertNotIn('purple', chooser.call_args.args[0])
-        self.assertEqual(t.read_state(self.paths['state'])['papirus']['color'], '#3dbee9')
-        self.assertNotEqual(first, '#3dbee9')
-        t.install(argparse.Namespace(accent='green', papirus_color='purple'))
-        self.assertEqual(t.read_state(self.paths['state'])['papirus']['color'], '#cc95e4')
-        self.assertIn('#cc95e4', (self.paths['icon_theme']/'48x48/places/folder.svg').read_text())
-        t.uninstall(argparse.Namespace())
-
-    def test_secondary_defaults_to_purple_and_persists_across_primary_changes(self):
-        t.install(argparse.Namespace(accent='blue', papirus_color=None))
+    def test_purple_folders_persist_across_primary_changes(self):
+        t.install(argparse.Namespace(accent='blue'))
         state = t.read_state(self.paths['state'])
-        self.assertEqual(state['secondary_accent'], '#cc95e4')
         self.assertEqual(state['papirus']['hex'], '#cc95e4')
-        self.assertEqual(__import__('json').loads((self.paths['user_theme'] / 'palette.json').read_text())['SECONDARY_ACCENT'], '#cc95e4')
-        with mock.patch.object(pi, 'pick_color', side_effect=AssertionError('unexpected random color')):
-            t.install(argparse.Namespace(accent='green', papirus_color=None))
-        self.assertEqual(t.read_state(self.paths['state'])['secondary_accent'], '#cc95e4')
+        self.assertEqual(json.loads((self.paths['user_theme'] / 'palette.json').read_text())['SECONDARY_ACCENT'], '#cc95e4')
+        t.install(argparse.Namespace(accent='green'))
+        self.assertEqual(t.read_state(self.paths['state'])['papirus']['hex'], '#cc95e4')
         t.uninstall(argparse.Namespace())
 
-    def test_explicit_secondary_persists_as_hex_and_old_state_migrates(self):
-        t.install(argparse.Namespace(accent='peach', papirus_color='cyan'))
+    def test_primary_purple_keeps_purple_folders(self):
+        t.install(argparse.Namespace(accent='purple'))
+        self.assertEqual(t.read_state(self.paths['state'])['papirus']['hex'], '#cc95e4')
+        t.uninstall(argparse.Namespace())
+
+    def test_old_secondary_setting_is_ignored_on_reconfigure(self):
+        t.install(argparse.Namespace(accent='blue'))
         state = t.read_state(self.paths['state'])
-        self.assertEqual(state['secondary_accent'], '#3dbee9')
-        state.pop('secondary_accent')
-        self.paths['state'].write_text(__import__('json').dumps(state))
-        t.install(argparse.Namespace(accent='blue', papirus_color=None))
-        self.assertEqual(t.read_state(self.paths['state'])['secondary_accent'], '#3dbee9')
+        state['secondary_accent'] = '#3dbee9'
+        state['papirus']['color'] = state['papirus']['hex'] = '#3dbee9'
+        self.paths['state'].write_text(json.dumps(state))
+        t.install(argparse.Namespace(accent='purple'))
+        state = t.read_state(self.paths['state'])
+        self.assertNotIn('secondary_accent', state)
+        self.assertEqual(state['papirus']['hex'], '#cc95e4')
         t.uninstall(argparse.Namespace())
-
-    def test_primary_purple_uses_cyan_secondary_by_default(self):
-        t.install(argparse.Namespace(accent='purple', papirus_color=None))
-        self.assertEqual(t.read_state(self.paths['state'])['secondary_accent'], '#3dbee9')
-        t.uninstall(argparse.Namespace())
-
-    def test_randomization_conflicts_with_explicit_folder_color(self):
-        with self.assertRaisesRegex(t.ThemeError, 'either a folder color'):
-            t.install(argparse.Namespace(accent='blue', papirus_color='peach', random_folders=True))
-        self.assertFalse(self.paths['state'].exists())
 
     def test_modified_overlay_refuses_uninstall(self):
-        t.install(argparse.Namespace(accent='peach', papirus_color='blue'))
+        t.install(argparse.Namespace(accent='peach'))
         (self.paths['icon_theme'] / '48x48/places/folder.svg').write_text('modified')
         with self.assertRaisesRegex(t.ThemeError, 'changed outside this tool'):
             t.uninstall(argparse.Namespace())
@@ -173,7 +140,7 @@ class IntegrationTests(unittest.TestCase):
                 raise t.ThemeError('hook failed')
         with mock.patch.object(t, 'hook_run', side_effect=fail_hook):
             with self.assertRaisesRegex(t.ThemeError, 'hook failed'):
-                t.install(argparse.Namespace(accent='blue', papirus_color='peach'))
+                t.install(argparse.Namespace(accent='blue'))
         self.assertFalse(self.paths['icon_theme'].exists())
         self.assertFalse(self.paths['user_theme'].exists())
         self.assertFalse(self.paths['state'].exists())
@@ -181,64 +148,57 @@ class IntegrationTests(unittest.TestCase):
 
     def test_upgrade_existing_install_without_icons(self):
         with mock.patch.object(pi, 'find_papirus', return_value=None):
-            t.install(argparse.Namespace(accent='blue', papirus_color=None))
+            t.install(argparse.Namespace(accent='blue'))
         old_state = t.read_state(self.paths['state'])
         self.assertIsNone(old_state['papirus'])
         old_state.pop('papirus')  # State file from the previous release.
         self.paths['state'].write_text(json.dumps(old_state))
-        t.install(argparse.Namespace(accent='purple', papirus_color='purple'))
+        t.install(argparse.Namespace(accent='purple'))
         self.assertTrue(self.paths['icon_theme'].exists())
         t.uninstall(argparse.Namespace())
         self.assertFalse(self.paths['icon_theme'].exists())
 
     def test_missing_papirus_before_reconfigure_keeps_install(self):
-        t.install(argparse.Namespace(accent='purple', papirus_color='peach'))
+        t.install(argparse.Namespace(accent='purple'))
         with mock.patch.object(pi, 'find_papirus', return_value=None):
             with self.assertRaisesRegex(t.ThemeError, 'Papirus theme is missing'):
-                t.install(argparse.Namespace(accent='green', papirus_color=None))
+                t.install(argparse.Namespace(accent='green'))
         self.assertEqual(t.read_state(self.paths['state'])['accent'], '#cc95e4')
 
-    def test_unknown_icon_color_fails_before_any_change(self):
-        for invalid in ('orange', 'random'):
-            with self.assertRaises(t.ThemeError):
-                t.install(argparse.Namespace(accent='blue', papirus_color=invalid))
-        self.assertFalse(self.paths['user_theme'].exists())
-        self.assertFalse(self.paths['icon_theme'].exists())
-
     def test_icon_file_change_blocks_reconfigure(self):
-        t.install(argparse.Namespace(accent='blue', papirus_color='peach'))
+        t.install(argparse.Namespace(accent='blue'))
         file = self.paths['icon_theme'] / '48x48/places/folder.svg'
         file.write_text('custom')
         with self.assertRaisesRegex(t.ThemeError, 'changed outside this tool'):
-            t.install(argparse.Namespace(accent='purple', papirus_color='green'))
+            t.install(argparse.Namespace(accent='purple'))
         self.assertEqual(file.read_text(), 'custom')
         self.assertEqual(t.read_state(self.paths['state'])['accent'], '#8fa9fd')
 
     def test_overlay_build_failure_does_not_change_settings(self):
         with mock.patch.object(pi, 'build_overlay', side_effect=pi.IconError('invalid SVG')):
             with self.assertRaisesRegex(t.ThemeError, 'invalid SVG'):
-                t.install(argparse.Namespace(accent='blue', papirus_color='peach'))
+                t.install(argparse.Namespace(accent='blue'))
         self.assertEqual(self.settings[('org.gnome.desktop.interface', 'icon-theme')], "'Papirus-Dark'")
         self.assertFalse(self.paths['state'].exists())
         self.assertFalse(self.paths['user_theme'].exists())
 
     def test_adding_papirus_after_initial_install(self):
         with mock.patch.object(pi, 'find_papirus', return_value=None):
-            t.install(argparse.Namespace(accent='blue', papirus_color=None))
+            t.install(argparse.Namespace(accent='blue'))
         self.assertIsNone(t.read_state(self.paths['state'])['papirus'])
-        t.install(argparse.Namespace(accent='purple', papirus_color='green'))
+        t.install(argparse.Namespace(accent='purple'))
         self.assertTrue(self.paths['icon_theme'].exists())
         self.assertEqual(self.settings[('org.gnome.desktop.interface', 'icon-theme')], repr(pi.ICON_THEME))
         t.uninstall(argparse.Namespace())
 
     def test_source_variant_restored_after_uninstall(self):
-        t.install(argparse.Namespace(accent='blue', papirus_color='peach'))
-        t.install(argparse.Namespace(accent='purple', papirus_color='green'))
+        t.install(argparse.Namespace(accent='blue'))
+        t.install(argparse.Namespace(accent='purple'))
         t.uninstall(argparse.Namespace())
         self.assertEqual(self.settings[('org.gnome.desktop.interface', 'icon-theme')], "'Papirus-Dark'")
 
     def test_previous_icon_setting_edited_by_user_is_not_overwritten_on_uninstall(self):
-        t.install(argparse.Namespace(accent='blue', papirus_color='peach'))
+        t.install(argparse.Namespace(accent='blue'))
         self.settings[('org.gnome.desktop.interface', 'icon-theme')] = "'Adwaita'"
         t.uninstall(argparse.Namespace())
         self.assertEqual(self.settings[('org.gnome.desktop.interface', 'icon-theme')], "'Adwaita'")

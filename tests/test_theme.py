@@ -21,7 +21,7 @@ SHELL_SOURCE = ('#panel { background-color: #36363a; color: #ffffff; }\n'
 
 class ColorTests(unittest.TestCase):
     def test_palette_and_accent(self):
-        self.assertEqual(t.accent_valid('#EF9369'), '#ef9369')
+        self.assertEqual(t.accent_choice('#EF9369'), '#ef9369')
         self.assertEqual(t.PALETTE['BG'], '#181c29')
         for color in ['#ef9369', '#ffffff', '#000000', '#8fa9fd', '#ff0000', '#0000ff']:
             self.assertGreaterEqual(t.contrast(color, t.accent_foreground(color)), 4.49)
@@ -94,9 +94,9 @@ class ColorTests(unittest.TestCase):
             self.assertGreaterEqual(t.contrast(t.PALETTE[key], '#ffffff'), 7.0)
 
     def test_invalid_accents_rejected(self):
-        for color in ['red', '#123', '#12345678', 'ffffff', '#abcdef;/*bad*/', '#g0abba']:
+        for color in ['orange', '#123', '#12345678', 'ffffff', '#abcdef;/*bad*/', '#g0abba']:
             with self.assertRaises(t.ThemeError):
-                t.accent_valid(color)
+                t.accent_choice(color)
 
     def test_gtk_css_layers(self):
         files, m = t.theme_files('#ef9369', SHELL_SOURCE)

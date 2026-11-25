@@ -13,29 +13,24 @@ Ashtadala is a user theme for Fedora 45 and GNOME 51.
 Run as your desktop user:
 
 ```sh
-./install.sh                # blue accent, purple Papirus folders
-./install.sh peach cyan     # peach accent, cyan folders
-./configure.sh purple       # change accent, preserve folder color
+./install.sh                # blue accent
+./install.sh peach          # peach accent
+./configure.sh purple       # change accent
 ./uninstall.sh
 ```
 
-The first color sets the desktop accent; the second sets Papirus folders. Omit
-it to preserve the previous folder color (purple by default; cyan when the
-primary is purple). Use `--random-folders` to explicitly pick a new color.
-Colors: `blue`, `cyan`, `purple`, `green`, `teal`, `yellow`, `peach`,
+The color sets the desktop accent. Colors: `blue`, `cyan`, `purple`, `green`, `teal`, `yellow`, `peach`,
 `red`, or any `#RRGGBB`.
-
-Eight accents use OKLCH(0.75, 0.125, 45° × n); dark surfaces use
-OKLCH(0.23 + 0.03 × n, C, 270°), with the main background at C = 0.025
-and role-specific chroma preserving the original dark-surface hierarchy.
-
-GTK 3, GTK 4 and GNOME Shell are themed together. A small `LD_PRELOAD` hook
-handles Shell's native accent without patching system libraries. Papirus folder
-colors and Flatpak GTK access are set up only if those apps are installed.
 
 Missing Fedora packages (`gcc`, `binutils`, User Themes) can be installed with
 `sudo dnf` after you confirm. Log out and back in to load Shell changes;
 restart Files if folder icons stay cached.
+
+## Design
+
+The eight accents use OKLCH(0.75, 0.125, 45° × n); dark surfaces use
+OKLCH(0.23 + 0.03 × n, C, 270°), with the main background at C = 0.025
+and role-specific chroma preserving the original dark-surface hierarchy.
 
 ## License
 

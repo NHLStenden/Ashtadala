@@ -10,10 +10,10 @@ from test_theme import SHELL_SOURCE
 
 class WidgetRoleTests(unittest.TestCase):
     def test_roles_are_independent_of_user_accents(self):
-        for primary, secondary in [('#ef9369', '#cc95e4'), ('#8fa9fd', '#33c7b1')]:
-            values = t.tokens(primary, secondary)
+        for primary in ('#ef9369', '#8fa9fd', '#cc95e4'):
+            values = t.tokens(primary)
             self.assertEqual(values['ACCENT'], primary)
-            self.assertEqual(values['SECONDARY_ACCENT'], secondary)
+            self.assertEqual(values['SECONDARY_ACCENT'], '#cc95e4')
             for name, color in [('SELECTION', '#ee8bab'), ('LEVEL', '#8bc06d'),
                                 ('PROGRESS', '#8bc06d'), ('TAB', '#cc95e4')]:
                 self.assertEqual(values[name], color)
@@ -21,7 +21,7 @@ class WidgetRoleTests(unittest.TestCase):
             self.assertGreaterEqual(t.contrast(values['SELECTION'], values['SELECTION_FG']), 4.5)
 
     def test_gtk4_sidebar_is_opaque_and_has_matching_ink(self):
-        css = t.gtk4_override('#ef9369', '#cc95e4')
+        css = t.gtk4_override('#ef9369')
         self.assertIn('.navigation-sidebar > row:selected:not(:disabled)', css)
         self.assertIn('background-color: #ee8bab;\n  color: #13161e;', css)
         self.assertIn('.navigation-sidebar > row:selected:not(:disabled) label', css)
@@ -38,9 +38,9 @@ class WidgetRoleTests(unittest.TestCase):
         self.assertIn('--accent-fg-color: #13161e;', css)
 
     def test_stock_gtk4_surface_fallbacks_are_not_in_libadwaita_user_overlay(self):
-        files, _ = t.theme_files('#ef9369', SHELL_SOURCE, '#cc95e4')
+        files, _ = t.theme_files('#ef9369', SHELL_SOURCE)
         stock = files['gtk-4.0/gtk.css'].decode()
-        user = t.gtk4_override('#ef9369', '#cc95e4')
+        user = t.gtk4_override('#ef9369')
         for rule in ('window.background {background-color: #181c29;}',
                      'switch:checked:not(:disabled),'):
             self.assertIn(rule, stock)
@@ -48,8 +48,8 @@ class WidgetRoleTests(unittest.TestCase):
 
     def test_gtk4_action_roles_in_both_layers(self):
         for primary in [*t.ACCENTS.values(), '#7e69dd']:
-            values = t.tokens(primary, '#cc95e4')
-            files, _ = t.theme_files(primary, SHELL_SOURCE, '#cc95e4')
+            values = t.tokens(primary)
+            files, _ = t.theme_files(primary, SHELL_SOURCE)
             for css in (t.gtk4_override(primary), files['gtk-4.0/gtk.css'].decode()):
                 for cls in ('suggested-action', 'default'):
                     self.assertIn(f'button.{cls}:not(.flat):not(.destructive-action):not(:disabled)', css)
@@ -62,7 +62,7 @@ class WidgetRoleTests(unittest.TestCase):
             self.assertIn(f'@define-color theme_selected_fg_color {values["ACCENT_FG"]};', stock)
 
     def test_gtk3_and_shell_roles(self):
-        files, _ = t.theme_files('#ef9369', SHELL_SOURCE, '#cc95e4')
+        files, _ = t.theme_files('#ef9369', SHELL_SOURCE)
         gtk = files['gtk-3.0/gtk.css'].decode()
         shell = files['gnome-shell/gnome-shell.css'].decode()
         gtk4 = files['gtk-4.0/gtk.css'].decode()
