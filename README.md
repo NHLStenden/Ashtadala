@@ -15,7 +15,6 @@ Run as your desktop user:
 ```sh
 ./install.sh                # peach accent
 ./install.sh blue           # blue accent
-./configure.sh purple       # change accent
 ./uninstall.sh
 ```
 
