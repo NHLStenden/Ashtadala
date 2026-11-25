@@ -23,7 +23,7 @@ def oklch(L: float, C: float, H: float) -> str:
 
 HUES = dict(zip(('red', 'peach', 'yellow', 'green', 'teal', 'cyan', 'blue', 'purple'), range(0, 360, 45)))
 ACCENTS = {name: oklch(ACCENT_L, ACCENT_C, hue) for name, hue in HUES.items()}
-DEFAULT = 'blue'
+DEFAULT = 'peach'
 
 
 SURFACE_CHROMA = {-1: .018, 0: SURFACE_C, 1: .040, 2: .041, 3: .043, 6: .064}

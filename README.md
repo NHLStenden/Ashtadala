@@ -13,8 +13,8 @@ Ashtadala is a user theme for Fedora 45 and GNOME 51.
 Run as your desktop user:
 
 ```sh
-./install.sh                # blue accent
-./install.sh peach          # peach accent
+./install.sh                # peach accent
+./install.sh blue           # blue accent
 ./configure.sh purple       # change accent
 ./uninstall.sh
 ```
