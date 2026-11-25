@@ -22,15 +22,15 @@
      inkscape:pageopacity="0.0"
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
-     inkscape:zoom="1.07"
-     inkscape:cx="1623.3645"
-     inkscape:cy="321.49533"
+     inkscape:zoom="2.67"
+     inkscape:cx="1623.221"
+     inkscape:cy="321.34831"
      inkscape:window-width="1920"
      inkscape:window-height="1127"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
-     inkscape:current-layer="g291" />
+     inkscape:current-layer="g247" />
   <title
      id="title">Ashtadala Night — Fedora GNOME desktop preview</title>
   <desc
@@ -9347,7 +9347,8 @@
        stroke-linecap="round"
        stroke-linejoin="round"
        id="path1903"
-       transform="translate(-14.6667 4.0) " />
+       transform="translate(-14.6667 4.0) "
+       style="stroke:#3bc9b2;stroke-opacity:1" />
     <circle
        cx="1498"
        cy="338"
@@ -9363,7 +9364,8 @@
        stroke-linecap="round"
        stroke-linejoin="round"
        id="path1904"
-       transform="translate(-16.0 4.0) " />
+       transform="translate(-16.0 4.0) "
+       style="stroke:#3bc9b2;stroke-opacity:1" />
     <path
        d="M1503 336 L1503 343 L1496 343"
        fill="none"
@@ -9372,7 +9374,8 @@
        stroke-linecap="round"
        stroke-linejoin="round"
        id="path1905"
-       transform="translate(-16.0 4.0) " />
+       transform="translate(-16.0 4.0) "
+       style="stroke:#3bc9b2;stroke-opacity:1" />
     <circle
        cx="1531"
        cy="338"
