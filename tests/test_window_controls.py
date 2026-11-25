@@ -56,12 +56,18 @@ class WindowControlTests(unittest.TestCase):
         files, _ = t.theme_files('#fb996c', SHELL_SOURCE)
         for css in (files['gtk-4.0/gtk.css'].decode(), t.gtk4_override('#fb996c')):
             parent = 'headerbar:not(.flat):not(.inline):backdrop > windowhandle'
-            self.assertIn(parent + ' {\n  filter: none;\n}', css)
-            # Ordinary AdwHeaderBar bins and controls retain the dim treatment;
-            # neither an enabled close button nor its ancestors may be dimmed.
-            selectors = css.split('filter: none;\n}', 1)[1].split('{\n  filter: opacity(0.5);', 1)[0]
-            for suffix in ('widget:nth-child(2)', 'box.start > :not(windowcontrols)',
+            block = css.split('/* Libadwaita dims both', 1)[1]
+            reset, remainder = block.split(' {\n  filter: none;\n}', 1)
+            self.assertIn(parent, reset)
+            for side in ('top', 'bottom'):
+                self.assertIn(f'toolbarview > .{side}-bar:backdrop > windowhandle', reset)
+            selectors = remainder.split('{\n  filter: opacity(0.5);', 1)[0]
+            for suffix in ('box > :nth-child(2)', 'box.start > :not(windowcontrols)',
                            'box.end > :not(windowcontrols)', 'windowcontrols > button:not(.close)',
                            'windowcontrols > button.close:disabled', 'windowcontrols > image'):
                 self.assertIn(suffix, selectors)
+            for side in ('start', 'end'):
+                for nesting in ('', 'widget > '):
+                    self.assertIn(parent + f' > box > {nesting}box.{side} > :not(windowcontrols)', selectors)
             self.assertNotIn('windowcontrols > button,', selectors)
+            self.assertNotIn('> box > :not(headerbar)', remainder)

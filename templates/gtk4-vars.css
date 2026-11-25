@@ -136,19 +136,38 @@ tabbar tabbox:not(.single-tab) tab:selected:not(:disabled) {
 
 /* Window controls: native geometry and symbolic icons, generated dark surfaces.
  * Close stays solid golden yellow even in inactive windows; disabled states remain native. */
-/* Libadwaita dims the entire inactive windowhandle. Move that filter to
- * its ordinary children, leaving enabled close buttons at full strength.
- * The three widget wrappers are AdwHeaderBar's start, title and end bins.
- * Flat/inline headerbars retain their own backdrop treatment. */
-headerbar:not(.flat):not(.inline):backdrop > windowhandle {
+/* Libadwaita dims both standalone headerbars and the outer windowhandle
+ * in AdwToolbarView (including wrapped headerbars, as in Files previews).
+ * Move the filter to ordinary controls, never an ancestor of a close button. */
+headerbar:not(.flat):not(.inline):backdrop > windowhandle,
+toolbarview > .top-bar:backdrop > windowhandle,
+toolbarview > .bottom-bar:backdrop > windowhandle {
   filter: none;
 }
-headerbar:not(.flat):not(.inline):backdrop > windowhandle > box > widget:nth-child(2),
+/* GtkHeaderBar has direct start/end boxes; AdwHeaderBar wraps them in bins.
+ * Explicitly flat/inline standalone headerbars keep their native treatment. */
+headerbar:not(.flat):not(.inline):backdrop > windowhandle > box > :nth-child(2),
+headerbar:not(.flat):not(.inline):backdrop > windowhandle > box > box.start > :not(windowcontrols),
+headerbar:not(.flat):not(.inline):backdrop > windowhandle > box > box.end > :not(windowcontrols),
 headerbar:not(.flat):not(.inline):backdrop > windowhandle > box > widget > box.start > :not(windowcontrols),
 headerbar:not(.flat):not(.inline):backdrop > windowhandle > box > widget > box.end > :not(windowcontrols),
-headerbar:not(.flat):not(.inline):backdrop > windowhandle > box > widget > box > windowcontrols > button:not(.close),
-headerbar:not(.flat):not(.inline):backdrop > windowhandle > box > widget > box > windowcontrols > button.close:disabled,
-headerbar:not(.flat):not(.inline):backdrop > windowhandle > box > widget > box > windowcontrols > image {
+headerbar:not(.flat):not(.inline):backdrop windowcontrols > button:not(.close),
+headerbar:not(.flat):not(.inline):backdrop windowcontrols > button.close:disabled,
+headerbar:not(.flat):not(.inline):backdrop windowcontrols > image {
+  filter: opacity(0.5);
+}
+/* Other standard toolbar children retain backdrop dimming. Do not dim
+ * arbitrary containers: a preview can wrap its headerbar in a widget. */
+toolbarview > .top-bar:backdrop > windowhandle > box > searchbar,
+toolbarview > .top-bar:backdrop > windowhandle > box > actionbar,
+toolbarview > .top-bar:backdrop > windowhandle > box > tabbar,
+toolbarview > .top-bar:backdrop > windowhandle > box > menubar,
+toolbarview > .top-bar:backdrop > windowhandle > box > .toolbar,
+toolbarview > .bottom-bar:backdrop > windowhandle > box > searchbar,
+toolbarview > .bottom-bar:backdrop > windowhandle > box > actionbar,
+toolbarview > .bottom-bar:backdrop > windowhandle > box > tabbar,
+toolbarview > .bottom-bar:backdrop > windowhandle > box > menubar,
+toolbarview > .bottom-bar:backdrop > windowhandle > box > .toolbar {
   filter: opacity(0.5);
 }
 windowcontrols > button.minimize:not(:disabled):not(:backdrop) > image,
