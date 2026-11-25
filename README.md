@@ -13,13 +13,9 @@ Ashtadala is a user theme for Fedora 45 and GNOME 51.
 Run as your desktop user:
 
 ```sh
-./install.sh                # peach accent
-./install.sh blue           # blue accent
-./uninstall.sh
+./install.sh              # install
+./iuninstall.sh           # uninstall
 ```
-
-The color sets the desktop accent. Colors: `blue`, `cyan`, `purple`, `green`, `teal`, `yellow`, `peach`,
-`red`, or any `#RRGGBB`.
 
 Missing Fedora packages (`gcc`, `binutils`, User Themes) can be installed with `sudo dnf`. Log out and back in after installation to reload GTK styles in all running apps, Shell changes, and the native accent hook.
 
