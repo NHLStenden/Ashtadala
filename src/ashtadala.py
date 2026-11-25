@@ -20,7 +20,7 @@ from typing import Any
 from ashtadala_colors import ACCENTS, DEFAULT as DEFAULT_ACCENT_NAME, resolve as resolve_accent, surface, accent_shade, oklch
 import papirus_icons
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parents[1]
 THEME = 'Ashtadala-Night'
 EXTENSION = 'user-theme@gnome-shell-extensions.gcampax.github.com'
 STATE_NAME = 'ashtadala-night'

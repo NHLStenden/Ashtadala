@@ -2,9 +2,12 @@
 import argparse
 import json
 import tempfile
+import sys
 import unittest
 from pathlib import Path
 from unittest import mock
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 import papirus_icons as pi
 import ashtadala as t

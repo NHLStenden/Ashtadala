@@ -26,6 +26,13 @@ Missing Fedora packages (`gcc`, `binutils`, User Themes) can be installed with
 `sudo dnf` after you confirm. Log out and back in to load Shell changes;
 restart Files if folder icons stay cached.
 
+## Troubleshooting and validation
+
+```sh
+./tools/diagnose.sh
+./tools/validate.sh
+```
+
 ## Design
 
 The eight accents use OKLCH(0.75, 0.125, 45° × n); dark surfaces use
