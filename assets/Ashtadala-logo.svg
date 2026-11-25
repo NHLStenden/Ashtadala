@@ -2,12 +2,12 @@
 <title id="title">Ashtadala</title><desc id="desc">Eight identical visible petal shapes, each overlapping one neighbor and overlapped by the other.</desc>
 <defs><path id="petal" d="M 0,0 Q -52,-55 0,-110 Q 22.781745931,-85.903922573 25.601647721,-61.807845147 Q 1.191947630,-42.512798804 0,0 Z"/><clipPath id="hole"><path clip-rule="evenodd" d="M -128,-128 H128 V128 H-128 Z M9,0 A9,9 0 1 0 -9,0 A9,9 0 1 0 9,0 Z"/></clipPath></defs>
 <g clip-path="url(#hole)" stroke="#181c29" stroke-width="2.5" stroke-linejoin="round">
-<use xlink:href="#petal" transform="rotate(0)" fill="#ee8bab"/>
-<use xlink:href="#petal" transform="rotate(45)" fill="#ef9369"/>
-<use xlink:href="#petal" transform="rotate(90)" fill="#cdaa45"/>
-<use xlink:href="#petal" transform="rotate(135)" fill="#8bc06d"/>
-<use xlink:href="#petal" transform="rotate(180)" fill="#33c7b1"/>
-<use xlink:href="#petal" transform="rotate(225)" fill="#3dbee9"/>
-<use xlink:href="#petal" transform="rotate(270)" fill="#8fa9fd"/>
-<use xlink:href="#petal" transform="rotate(315)" fill="#cc95e4"/>
+<use xlink:href="#petal" transform="rotate(0)" fill="#ee8dac"/>
+<use xlink:href="#petal" transform="rotate(45)" fill="#fb996c"/>
+<use xlink:href="#petal" transform="rotate(90)" fill="#ddb63e"/>
+<use xlink:href="#petal" transform="rotate(135)" fill="#90c970"/>
+<use xlink:href="#petal" transform="rotate(180)" fill="#3bc9b2"/>
+<use xlink:href="#petal" transform="rotate(225)" fill="#45bde7"/>
+<use xlink:href="#petal" transform="rotate(270)" fill="#90aafa"/>
+<use xlink:href="#petal" transform="rotate(315)" fill="#cb96e2"/>
 </g><circle r="10.25" fill="none" stroke="#181c29" stroke-width="2.5"/></svg>

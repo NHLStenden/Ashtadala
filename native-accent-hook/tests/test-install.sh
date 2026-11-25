@@ -42,13 +42,13 @@ LIB="$XDG_DATA_HOME/ashtadala-night/libaccent-hook.so"
 DROPIN="$XDG_CONFIG_HOME/systemd/user/org.gnome.Shell@user.service.d/80-ashtadala-accent.conf"
 
 bash "$SCRIPT" check
-bash "$SCRIPT" install '#ef9369'
+bash "$SCRIPT" install '#fb996c'
 [[ -f "$LIB" && -f "$DROPIN" ]]
 grep -Fxq '# Managed by Ashtadala Night native accent hook' "$DROPIN"
-grep -Fq 'ASHTADALA_ACCENT_COLOR=#ef9369' "$DROPIN"
+grep -Fq 'ASHTADALA_ACCENT_COLOR=#fb996c' "$DROPIN"
 grep -Fq 'LD_PRELOAD=' "$DROPIN"
-bash "$SCRIPT" install '#8fa9fd'
-grep -Fq 'ASHTADALA_ACCENT_COLOR=#8fa9fd' "$DROPIN"
+bash "$SCRIPT" install '#90aafa'
+grep -Fq 'ASHTADALA_ACCENT_COLOR=#90aafa' "$DROPIN"
 if bash "$SCRIPT" install orange > "$DIR/error" 2>&1; then
   echo 'Invalid accent accepted' >&2; exit 1
 fi
@@ -77,7 +77,7 @@ printf '%s\n' '# Managed by TokyoAdwaita Night native accent hook' '[Service]' \
 cp "$OLD_DROPIN" "$DIR/original-dropin"
 bash "$SCRIPT" check
 cmp "$OLD_DROPIN" "$DIR/original-dropin"  # Preflight is read-only.
-if MOCK_RELOAD_FAIL=1 bash "$SCRIPT" install '#8fa9fd' > "$DIR/error" 2>&1; then
+if MOCK_RELOAD_FAIL=1 bash "$SCRIPT" install '#90aafa' > "$DIR/error" 2>&1; then
   echo 'Reload failure accepted' >&2; exit 1
 fi
 cmp "$OLD_DROPIN" "$DIR/original-dropin"
@@ -91,10 +91,10 @@ cp "$DIR/original-dropin" "$OLD_DROPIN"
 if MOCK_SYSTEMD_ENV="LD_PRELOAD=$OLD_LIB:/another/foreign.so" bash "$SCRIPT" check > "$DIR/error" 2>&1; then
   echo 'Mixed legacy preload accepted' >&2; exit 1
 fi
-bash "$SCRIPT" install '#8fa9fd'
+bash "$SCRIPT" install '#90aafa'
 [[ ! -e "$OLD_DROPIN" && -f "$OLD_LIB" && -f "$DROPIN" && -f "$LIB" ]]
 [[ $(systemctl --user show org.gnome.Shell@user.service -p Environment --value) == "LD_PRELOAD=$LIB" ]]
-bash "$SCRIPT" install '#ef9369'
+bash "$SCRIPT" install '#fb996c'
 bash "$SCRIPT" uninstall
 [[ ! -e "$DROPIN" && ! -e "$LIB" ]]
 # A legacy path without its authentic drop-in is still foreign.
@@ -104,7 +104,7 @@ fi
 # Refuse to overwrite files without the ownership marker.
 mkdir -p "$(dirname "$DROPIN")"
 printf '[Service]\n' > "$DROPIN"
-if bash "$SCRIPT" install '#ef9369' > "$DIR/error" 2>&1; then
+if bash "$SCRIPT" install '#fb996c' > "$DIR/error" 2>&1; then
   echo 'Unmanaged drop-in overwritten' >&2; exit 1
 fi
 grep -Fq 'unmanaged drop-in' "$DIR/error"
@@ -114,7 +114,7 @@ python3 - "$DIR/libst-51.so" <<'PYTEST'
 from pathlib import Path
 import sys
 p=Path(sys.argv[1]); data=p.read_bytes(); assert data.count(b'#6f8396')==1
-p.write_bytes(data.replace(b'#6f8396',b'#ef9369'))
+p.write_bytes(data.replace(b'#6f8396',b'#fb996c'))
 PYTEST
 if bash "$SCRIPT" check > "$DIR/error" 2>&1; then
   echo 'Patched binary accepted' >&2; exit 1

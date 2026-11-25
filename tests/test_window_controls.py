@@ -10,7 +10,7 @@ from test_theme import SHELL_SOURCE
 
 class WindowControlTests(unittest.TestCase):
     def test_generated_styles(self):
-        for accent in ('#8fa9fd', '#ef9369'):
+        for accent in ('#90aafa', '#fb996c'):
             files, _ = t.theme_files(accent, SHELL_SOURCE)
             for css, prefix, suffix in (
                 (files['gtk-3.0/gtk.css'].decode(), 'button.titlebutton.', ''),
@@ -22,21 +22,21 @@ class WindowControlTests(unittest.TestCase):
                     for state in ('', ':hover', ':active'):
                         self.assertIn(prefix + role + ':not(:disabled)' + state + ('' if role == 'close' else ':not(:backdrop)') + suffix, block)
                 rest = block.split(prefix + 'close:not(:disabled)' + suffix + ' {', 1)[1].split('}', 1)[0]
-                self.assertIn('background-color: #cdaa45;', rest)
+                self.assertIn('background-color: #ddb63e;', rest)
                 self.assertIn('background-image: none;', rest)
                 self.assertIn('color: #13161e;', rest)
-                for color in ('#cdaa45', '#ddba56', '#b6942a'):
+                for color in ('#ddb63e', '#eec651', '#c7a01e'):
                     self.assertIn('background-color: ' + color + ';', block)
                 self.assertIn('background-color: #2a3249;', block)
-                self.assertIn('background-color: #8fa9fd;', block)
+                self.assertIn('background-color: #90aafa;', block)
                 self.assertNotIn('@ERROR@', block)
             shell = files['gnome-shell/gnome-shell.css'].decode()
-            for state, color in (('', '#cdaa45'), (':hover', '#ddba56'), (':active', '#b6942a')):
+            for state, color in (('', '#ddb63e'), (':hover', '#eec651'), (':active', '#c7a01e')):
                 self.assertIn('.window-close' + state + ' {background-color: ' + color, shell)
             self.assertIn('@media (prefers-color-scheme: dark)', t.gtk4_override(accent))
 
     def test_control_contrast(self):
-        v = t.tokens('#ef9369')
+        v = t.tokens('#fb996c')
         for fg, bg in (('#becdf6', v['HOVER']), (v['LINK_HOVER'], v['BORDER']),
                        (v['DEEP'], v['LINK']), *((v['DEEP'], v[k]) for k in ('CLOSE', 'CLOSE_HOVER', 'CLOSE_ACTIVE'))):
             self.assertGreaterEqual(t.contrast(fg, bg), 4.5)

@@ -49,8 +49,8 @@ class NativeAccentTests(unittest.TestCase):
         self.hook = started[-1]
 
     def test_palette_names_no_orange_alias(self):
-        self.assertEqual(ACCENTS['blue'], '#8fa9fd')
-        self.assertEqual(ACCENTS['peach'], '#ef9369')
+        self.assertEqual(ACCENTS['blue'], '#90aafa')
+        self.assertEqual(ACCENTS['peach'], '#fb996c')
         self.assertNotIn('orange', ACCENTS)
         with self.assertRaises(ValueError): resolve('orange')
         for name, hexcode in ACCENTS.items():
@@ -60,13 +60,13 @@ class NativeAccentTests(unittest.TestCase):
     def test_hook_installs_and_reconfigures_with_theme(self):
         t.install(argparse.Namespace(accent='blue'))
         self.hook.assert_any_call('check')
-        self.hook.assert_any_call('install', '#8fa9fd')
+        self.hook.assert_any_call('install', '#90aafa')
         self.assertEqual(t.read_state(self.p['state'])['format'], 4)
         self.assertEqual(self.settings[('org.gnome.desktop.interface','accent-color')], "'slate'")
         self.hook.reset_mock()
         t.install(argparse.Namespace(accent='peach'))
-        self.hook.assert_any_call('install', '#ef9369')
-        self.assertIn('background-color: #ef9369', (self.p['user_theme'] / 'gnome-shell/gnome-shell.css').read_text())
+        self.hook.assert_any_call('install', '#fb996c')
+        self.assertIn('background-color: #fb996c', (self.p['user_theme'] / 'gnome-shell/gnome-shell.css').read_text())
         self.hook.reset_mock()
         t.uninstall(argparse.Namespace())
         self.hook.assert_called_once_with('uninstall')
@@ -76,12 +76,12 @@ class NativeAccentTests(unittest.TestCase):
         t.install(argparse.Namespace(accent='peach'))
         self.hook.reset_mock()
         t.install(argparse.Namespace(accent=None))
-        self.assertEqual(t.read_state(self.p['state'])['accent'], '#ef9369')
-        self.hook.assert_any_call('install', '#ef9369')
+        self.assertEqual(t.read_state(self.p['state'])['accent'], '#fb996c')
+        self.hook.assert_any_call('install', '#fb996c')
 
     def test_hook_failure_rolls_back_all_managed_files(self):
         def fail(*args):
-            if args == ('install', '#8fa9fd'):
+            if args == ('install', '#90aafa'):
                 raise t.ThemeError('simulated hook failure')
         self.hook.side_effect = fail
         with self.assertRaisesRegex(t.ThemeError, 'simulated hook failure'):

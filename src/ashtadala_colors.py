@@ -4,7 +4,8 @@ from __future__ import annotations
 import math
 import re
 
-ACCENT_L, ACCENT_C = .75, .125
+ACCENT_L, ACCENT_C = .75, .12
+ACCENT_L_AMPLITUDE, ACCENT_C_AMPLITUDE = .04, .02
 SURFACE_L, SURFACE_C, SURFACE_H, SURFACE_STEP = .23, .025, 270, .03
 
 
@@ -22,7 +23,15 @@ def oklch(L: float, C: float, H: float) -> str:
 
 
 HUES = dict(zip(('red', 'peach', 'yellow', 'green', 'teal', 'cyan', 'blue', 'purple'), range(0, 360, 45)))
-ACCENTS = {name: oklch(ACCENT_L, ACCENT_C, hue) for name, hue in HUES.items()}
+
+
+def accent_coordinates(hue: float) -> tuple[float, float, float]:
+    """Smooth, symmetric warm-side correction of the eightfold hue ring."""
+    weight = ((1 + math.sin(math.radians(hue))) / 2)**3
+    return ACCENT_L + ACCENT_L_AMPLITUDE*weight, ACCENT_C + ACCENT_C_AMPLITUDE*weight, hue
+
+
+ACCENTS = {name: oklch(*accent_coordinates(hue)) for name, hue in HUES.items()}
 DEFAULT = 'peach'
 
 
@@ -33,8 +42,10 @@ def surface(step: int) -> str:
     return oklch(SURFACE_L + SURFACE_STEP*step, SURFACE_CHROMA.get(step, SURFACE_C), SURFACE_H)
 
 
-def accent_shade(name: str, lightness: float) -> str:
-    return oklch(lightness, ACCENT_C, HUES[name])
+def accent_shade(name: str, delta_l: float) -> str:
+    """Shift an accent by relative lightness, retaining hue and chroma."""
+    L, C, H = accent_coordinates(HUES[name])
+    return oklch(L + delta_l, C, H)
 
 
 def resolve(value: str) -> str:

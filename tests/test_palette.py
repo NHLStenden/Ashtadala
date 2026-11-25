@@ -1,4 +1,5 @@
 """Lock down the mathematical palette and cross-component default."""
+import math
 import sys
 from pathlib import Path
 import unittest
@@ -12,14 +13,42 @@ class PaletteTests(unittest.TestCase):
     def test_octagon(self):
         self.assertEqual(list(p.HUES.values()), list(range(0, 360, 45)))
         self.assertEqual(len(set(p.ACCENTS.values())), 8)
+        self.assertEqual(list(p.ACCENTS.values()), [
+            '#ee8dac', '#fb996c', '#ddb63e', '#90c970',
+            '#3bc9b2', '#45bde7', '#90aafa', '#cb96e2',
+        ])
         for name, h in p.HUES.items():
-            self.assertEqual(p.ACCENTS[name], p.oklch(.75, .125, h))
-            self.assertGreaterEqual(t.contrast(p.ACCENTS[name], t.PALETTE['BG']), 4.5)
+            weight = ((1 + math.sin(math.radians(h))) / 2)**3
+            L, C, H = p.accent_coordinates(h)
+            self.assertAlmostEqual(L, .75 + .04*weight)
+            self.assertAlmostEqual(C, .12 + .02*weight)
+            self.assertEqual(H, h)
+            self.assertEqual(p.ACCENTS[name], p.oklch(L, C, H))
+            self.assertGreaterEqual(t.contrast(p.ACCENTS[name], t.PALETTE['BG']), 7.0)
+            self.assertGreaterEqual(t.contrast(p.ACCENTS[name], t.PALETTE['HOVER']), 4.5)
             self.assertGreaterEqual(t.contrast(p.ACCENTS[name], t.accent_foreground(p.ACCENTS[name])), 4.5)
         with self.assertRaises(ValueError):
             p.resolve('magenta')
         with self.assertRaises(ValueError):
             p.oklch(.75, .13, 270)
+
+    def test_harmonic_symmetry_and_gamut(self):
+        for h in range(360):
+            L, C, H = p.accent_coordinates(h)
+            reflected = p.accent_coordinates((180 - h) % 360)
+            self.assertAlmostEqual(L, reflected[0])
+            self.assertAlmostEqual(C, reflected[1])
+            # The converter rejects out-of-gamut colors rather than clipping.
+            p.oklch(L, C, H)
+        for h, expected in [(90, (.79, .14, 90)), (270, (.75, .12, 270))]:
+            for actual, target in zip(p.accent_coordinates(h), expected):
+                self.assertAlmostEqual(actual, target)
+
+    def test_logo_palette(self):
+        from xml.etree import ElementTree as ET
+        logo = ET.parse(t.ROOT / 'assets/Ashtadala-logo.svg')
+        self.assertEqual([element.get('fill') for element in logo.iter('{http://www.w3.org/2000/svg}use')],
+                         list(p.ACCENTS.values()))
 
     def test_surface_ramp(self):
         for role, step, chroma in [('DEEP', -1, .018), ('BG', 0, .025), ('PANEL', 1, .040), ('SURFACE', 2, .041), ('HOVER', 3, .043), ('BORDER', 6, .064)]:

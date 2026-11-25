@@ -15,7 +15,7 @@
 #include <unistd.h>
 
 #define SLATE "#6f8396"
-#define DEFAULT_ACCENT "#8fa9fd"
+#define DEFAULT_ACCENT "#fb996c"
 #define COLOR_ENV "ASHTADALA_ACCENT_COLOR"
 #define LOG_ENV "ASHTADALA_ACCENT_LOG"
 

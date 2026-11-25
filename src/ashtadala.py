@@ -41,8 +41,8 @@ PALETTE = {
     'WARNING': ACCENTS['yellow'],
     'ERROR': ACCENTS['red'],
     'CLOSE': ACCENTS['yellow'],
-    'CLOSE_HOVER': accent_shade('yellow', .80),
-    'CLOSE_ACTIVE': accent_shade('yellow', .68),
+    'CLOSE_HOVER': accent_shade('yellow', .05),
+    'CLOSE_ACTIVE': accent_shade('yellow', -.07),
 }
 
 # Known dark grays in GNOME 51 Shell CSS. Leave light colors and alpha values alone.
