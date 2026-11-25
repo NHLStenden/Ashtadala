@@ -212,15 +212,20 @@ def gtk4_override(accent: str) -> str:
             + expand('gtk4-vars.css', values) + '\n}\n')
 
 
+def gtk4_theme(accent: str) -> str:
+    values = tokens(accent)
+    return ('@import url("resource:///org/gtk/libgtk/theme/Default/gtk-dark.css");\n'
+            + '@media (prefers-color-scheme: dark) {\n'
+            + expand('gtk4-vars.css', values) + '}\n'
+            + expand('gtk4-legacy.css', values))
+
+
 def theme_files(accent: str, shell_original: str) -> tuple[dict[str, bytes], dict[str, Any]]:
     values = tokens(accent)
     shell, counts = shell_recolor(shell_original, accent)
     check_quick_settings_css(shell, accent)
     gtk3 = expand('gtk3.css', values)
-    gtk4 = ('@import url("resource:///org/gtk/libgtk/theme/Default/gtk-dark.css");\n'
-            + '@media (prefers-color-scheme: dark) {\n'
-            + expand('gtk4-vars.css', values) + '}\n'
-            + expand('gtk4-legacy.css', values))
+    gtk4 = gtk4_theme(accent)
     meta = f'''[Desktop Entry]\nType=X-GNOME-Metatheme\nName=Ashtadala Night\nComment=GTK3, GTK4, GNOME Shell: Adwaita design with generated OKLCH palette\n[X-GNOME-Metatheme]\nGtkTheme={THEME}\nMetacityTheme=Adwaita\nIconTheme=Adwaita\nCursorTheme=Adwaita\n'''
     files = {
         'index.theme': meta.encode(),
@@ -657,7 +662,7 @@ def install(args):
         print('Flatpak: GTK theme directories shared read-only')
     if icon_files is not None:
         print(f'Papirus folders: {FOLDER_COLOR}')
-    print('Log out and back in to load the native accent hook.')
+    print('Log out and back in to reload GTK styles in running apps, Shell and the native accent hook.')
 
 
 def uninstall(args):
@@ -756,11 +761,44 @@ def diagnose() -> None:
         print('Theme files: valid')
     except ThemeError as e:
         print('Theme files:', e)
+    # Ownership hashes describe the installed release, not necessarily this source.
+    # Compare generated GTK files separately so an intact older release is detected.
+    accent = state['accent']
+    expected_gtk3 = expand('gtk3.css', tokens(accent)).encode()
+    expected_gtk4 = gtk4_theme(accent).encode()
+    expected = {Path(state['theme_path']) / f'gtk-{version}.0/{name}': css
+                for version, css in ((3, expected_gtk3), (4, expected_gtk4))
+                for name in ('gtk.css', 'gtk-dark.css')}
+    expected[p['gtk_override']] = gtk4_override(accent).encode()
+    stale = [str(path) for path, css in expected.items()
+             if not path.is_file() or path.read_bytes() != css]
+    print('Expected close colors (normal / hover / pressed):',
+          *(PALETTE[k] for k in ('CLOSE', 'CLOSE_HOVER', 'CLOSE_ACTIVE')))
+    if stale:
+        print('GTK styles differ from this source; run ./install.sh:')
+        for path in stale:
+            print('  ', path)
+    else:
+        print('GTK styles: current on disk (running apps may still use older CSS)')
+    try:
+        owned_file(p['gtk_override'], state['gtk_override_sha'], 'GTK4 override')
+        user_css = p['gtk_css'].read_text(encoding='utf-8') if p['gtk_css'].is_file() else ''
+        if START not in user_css:
+            raise ThemeError('Managed GTK4 import missing')
+        remaining = remove_import(user_css)
+        print('GTK4 user import: valid')
+        if remaining.strip():
+            print('Additional GTK4 user CSS exists; it may override theme styles.')
+    except ThemeError as e:
+        print('GTK4 user CSS:', e)
+    gtk3_user_css = p['gtk_css'].parent.parent / 'gtk-3.0/gtk.css'
+    if gtk3_user_css.is_file():
+        print('Additional GTK3 user CSS exists; it may override theme styles:', gtk3_user_css)
     try:
         hook_run('status')
     except ThemeError as e:
         print('Native accent hook:', e)
-    print('If the active color has not changed, log out and back in.')
+    print('If on-screen colors differ, log out and back in; disk checks cannot inspect running widgets.')
 
 
 def parse_args():
@@ -768,7 +806,7 @@ def parse_args():
     cmd = parser.add_subparsers(dest='command', required=True)
     install_cmd = cmd.add_parser('install', help='Install GTK, Shell, Flatpak and native accent hook')
     install_cmd.add_argument('accent', nargs='?', default=None,
-                             help='Palette color name or #RRGGBB; default blue')
+                             help='Palette color name or #RRGGBB; default peach on first install')
     configure_cmd = cmd.add_parser('configure', help='Change the installed accent')
     configure_cmd.add_argument('accent', help='Palette color name or #RRGGBB')
     cmd.add_parser('uninstall', help='Remove the theme and restore the previous settings')

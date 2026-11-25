@@ -1,5 +1,7 @@
 import argparse
 import ast
+import contextlib
+import io
 import json
 import tempfile
 from pathlib import Path
@@ -279,6 +281,47 @@ class InstallationTests(unittest.TestCase):
         self.assertEqual(new['accent'], '#9141ac')
         self.assertEqual(self.settings[('org.gnome.desktop.interface', 'accent-color')], "'slate'")
         t.uninstall(argparse.Namespace())
+
+    def test_upgrade_replaces_old_close_colors_in_all_gtk_layers(self):
+        # Reproduce an intact installation with the screenshot's old gold.
+        with mock.patch.dict(t.PALETTE, {'CLOSE': '#cdaa45'}):
+            self.install('#fb996c')
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            t.diagnose()
+        self.assertIn('Theme files: valid', out.getvalue())
+        self.assertIn('GTK styles differ from this source', out.getvalue())
+        self.assertIn('#eec651 #f8d05c #e4bc46', out.getvalue())
+        self.install(None)
+        for path in [*(self.paths['user_theme'] / f'gtk-{v}.0/{name}'
+                       for v in (3, 4) for name in ('gtk.css', 'gtk-dark.css')),
+                     self.paths['gtk_override']]:
+            css = path.read_text()
+            self.assertNotIn('#cdaa45', css)
+            self.assertIn('background-color: #eec651;', css)
+        self.assertEqual(t.read_state(self.paths['state'])['accent'], '#fb996c')
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            t.diagnose()
+        self.assertIn('GTK styles: current on disk', out.getvalue())
+        self.assertIn('GTK4 user import: valid', out.getvalue())
+        self.assertIn('Additional GTK4 user CSS exists', out.getvalue())
+        t.uninstall(argparse.Namespace())
+        self.assertEqual(self.paths['gtk_css'].read_bytes(), self.prior_css)
+
+    def test_diagnose_reports_missing_import_and_modified_overlay(self):
+        self.install()
+        self.paths['gtk_css'].write_bytes(self.prior_css)
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            t.diagnose()
+        self.assertIn('Managed GTK4 import missing', out.getvalue())
+        self.paths['gtk_override'].write_text('/* replaced */')
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            t.diagnose()
+        self.assertIn('GTK styles differ from this source', out.getvalue())
+        self.assertIn('GTK4 override was modified or removed', out.getvalue())
 
     def test_reconfigure_and_upgrade_preserves_original_settings(self):
         self.install('#ef9369')

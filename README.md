@@ -22,8 +22,7 @@ The color sets the desktop accent. Colors: `blue`, `cyan`, `purple`, `green`, `t
 `red`, or any `#RRGGBB`.
 
 Missing Fedora packages (`gcc`, `binutils`, User Themes) can be installed with
-`sudo dnf` after you confirm. Log out and back in to load Shell changes;
-restart Files if folder icons stay cached.
+`sudo dnf` after you confirm. Log out and back in to load Shell changes.
 
 ## Troubleshooting and validation
 
