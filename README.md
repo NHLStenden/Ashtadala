@@ -13,8 +13,8 @@ Ashtadala is a user theme for Fedora 45 and GNOME 51.
 Run as your desktop user:
 
 ```sh
-./install.sh              # install
-./iuninstall.sh           # uninstall
+./install.sh             # install
+./uninstall.sh           # uninstall
 ```
 
 Missing Fedora packages (`gcc`, `binutils`, User Themes) can be installed with `sudo dnf`. Log out and back in after installation to reload GTK styles in all running apps, Shell changes, and the native accent hook.
