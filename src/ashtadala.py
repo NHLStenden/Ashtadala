@@ -24,6 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 THEME = 'Ashtadala-Night'
 EXTENSION = 'user-theme@gnome-shell-extensions.gcampax.github.com'
 STATE_NAME = 'ashtadala-night'
+FLATPAK_GRANTS = ('xdg-config/gtk-4.0:ro', 'xdg-data/themes:ro')
 START = '/* BEGIN ASHTADALA-NIGHT: managed GTK4 import */'
 END = '/* END ASHTADALA-NIGHT */'
 IMPORT = '@import url("ashtadala-night.css");'
@@ -317,8 +318,8 @@ def parse_gvariant_array(value: str) -> list[str]:
 
 
 def gschema_exists(schema: str) -> bool:
-    p = run(['gsettings', 'list-schemas'], check=False)
-    return p.returncode == 0 and schema in p.stdout.decode().splitlines()
+    p = run(['gsettings', 'list-schemas'])
+    return schema in p.stdout.decode().splitlines()
 
 
 def setting_exists(schema: str, key: str) -> bool:
@@ -334,6 +335,10 @@ def gset(schema: str, key: str, value: str) -> None:
     run(['gsettings', 'set', schema, key, value])
 
 
+def greset(schema: str, key: str) -> None:
+    run(['gsettings', 'reset', schema, key])
+
+
 def paths() -> dict[str, Path]:
     home = Path.home()
     data = Path(os.environ.get('XDG_DATA_HOME') or str(home / '.local/share'))
@@ -347,15 +352,35 @@ def paths() -> dict[str, Path]:
 
 
 def read_state(statefile: Path) -> dict[str, Any] | None:
+    if statefile.is_symlink():
+        raise ThemeError('Installation state is a symlink; refusing to use it')
     if not statefile.exists():
         return None
+    if not statefile.is_file():
+        raise ThemeError('Installation state is not a regular file')
     data = json.loads(statefile.read_text(encoding='utf-8'))
-    if data.get('format') != 4:
-        raise ThemeError('Older installation detected. Uninstall it with its original release before installing this version.')
+    if not isinstance(data, dict) or data.get('format') != 4:
+        raise ThemeError('Unsupported installation state format')
+    required = {'theme_path': str, 'accent': str, 'files': dict,
+                'gtk_override_sha': str, 'settings': dict, 'flatpak_enabled': bool,
+                'gtk_css_existed': bool}
+    if any(not isinstance(data.get(key), kind) for key, kind in required.items()):
+        raise ThemeError('Malformed installation state')
+    if any(not isinstance(item, dict) or not isinstance(item.get('old'), str)
+           or not isinstance(item.get('set'), str) or '/' not in key
+           for key, item in data['settings'].items()):
+        raise ThemeError('Malformed saved GNOME settings')
+    if data.get('papirus') is not None and (not isinstance(data['papirus'], dict)
+                                          or not isinstance(data['papirus'].get('files'), dict)):
+        raise ThemeError('Malformed saved icon state')
     return data
 
 
-def atomic_write(path: Path, content: bytes, mode=0o644) -> None:
+def atomic_write(path: Path, content: bytes, mode=None) -> None:
+    if path.is_symlink():
+        raise ThemeError('Refusing to change symlink: ' + str(path))
+    if mode is None:
+        mode = path.stat().st_mode & 0o777 if path.exists() else 0o644
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, temporary = tempfile.mkstemp(prefix='.ashtadala-', dir=path.parent)
     try:
@@ -436,19 +461,28 @@ def stage_theme(directory: Path, files: dict[str, bytes], expected: dict[str, st
         assert_owned_theme(directory, expected)
     elif expected is not None:
         raise ThemeError('Previously installed theme directory disappeared; refusing overwrite')
-    with tempfile.TemporaryDirectory(prefix='.ashtadala-', dir=directory.parent) as temp:
-        generated = Path(temp) / THEME
+    temp = Path(tempfile.mkdtemp(prefix='.ashtadala-', dir=directory.parent))
+    preserve = False
+    try:
+        generated = temp / THEME
         create_tree(files, generated)
         if directory.exists():
-            old = Path(temp) / 'old'
+            old = temp / 'old'
             directory.rename(old)
             try:
                 generated.rename(directory)
-            except Exception:
-                old.rename(directory)
+            except (Exception, KeyboardInterrupt):
+                try:
+                    old.rename(directory)
+                except (Exception, KeyboardInterrupt) as err:
+                    preserve = True
+                    raise ThemeError(f'Cannot restore staged theme; original retained at {old}: {err}') from err
                 raise
         else:
             generated.rename(directory)
+    finally:
+        if not preserve:
+            shutil.rmtree(temp)
 
 
 def delete_theme(directory: Path, expected: dict[str, str]) -> None:
@@ -481,8 +515,7 @@ def flatpak_preflight() -> None:
 
 def flatpak_apply() -> None:
     run(['flatpak', 'override', '--user',
-         '--filesystem=xdg-config/gtk-4.0:ro',
-         '--filesystem=xdg-data/themes:ro'], capture=False)
+         *['--filesystem=' + grant for grant in FLATPAK_GRANTS]], capture=False)
 
 
 def restore_flatpak_snapshot(raw: bytes | None) -> None:
@@ -490,13 +523,15 @@ def restore_flatpak_snapshot(raw: bytes | None) -> None:
 
 
 def file_snapshot(path: Path):
-    if path.is_symlink():
-        raise ThemeError('Refusing to change symlink: ' + str(path))
+    if path.is_symlink() or (path.exists() and not path.is_file()):
+        raise ThemeError('Refusing to change non-regular file: ' + str(path))
     return path.read_bytes() if path.exists() else None
 
 
 def restore_snapshot(path: Path, raw: bytes | None):
     if raw is None:
+        if path.is_symlink():
+            raise ThemeError('Refusing to change symlink: ' + str(path))
         if path.exists():
             path.unlink()
     else:
@@ -510,6 +545,8 @@ def get_last_state() -> tuple[dict[str, Any] | None, dict[str, Path]]:
 
 def check_conflicts(state: dict[str, Any] | None, p: dict[str, Path], directory: Path):
     if state:
+        if state.get('pending'):
+            raise ThemeError('Incomplete installation; run ./uninstall.sh before installing again')
         if directory.as_posix() != state['theme_path']:
             raise ThemeError('Installed theme path differs from expected user path; uninstall first')
         assert_owned_theme(directory, state['files'])
@@ -523,7 +560,7 @@ def check_conflicts(state: dict[str, Any] | None, p: dict[str, Path], directory:
             raise ThemeError('Theme name already in use: ' + str(directory))
         owned_file(p['gtk_override'], None, 'GTK4 override')
         raw = file_snapshot(p['gtk_css'])
-        if raw and (START in raw.decode('utf-8') or END in raw.decode('utf-8')):
+        if raw and any(part in raw.decode('utf-8') for part in (START, END, IMPORT)):
             raise ThemeError('Unmanaged theme markers exist in GTK4 user CSS')
 
 
@@ -583,79 +620,105 @@ def install(args):
     prev_theme_files = {k: (directory / k).read_bytes() for k in state['files']} if state else None
     prev_icon_files = ({k: (p['icon_theme'] / k).read_bytes() for k in previous_icons['files']}
                        if previous_icons else None)
-    changed_settings: list[tuple[str, str, str]] = []
-    theme_applied = False
-    icons_applied = False
     flatpak_before = flatpak_snapshot() if flatpak_enabled else None
-    flatpak_changed = False
-    hook_touched = False
+    if flatpak_enabled:
+        if state and state['flatpak_enabled']:
+            if state['flatpak_written_sha'] != sha(flatpak_before or b''):
+                raise ThemeError('Flatpak override changed externally; refusing to overwrite')
+        else:
+            new_state['flatpak_old'] = flatpak_before.decode('utf-8') if flatpak_before is not None else None
+    extensions = parse_gvariant_array(gget('org.gnome.shell', 'enabled-extensions'))
+    if EXTENSION not in extensions:
+        extensions.append(EXTENSION)
+    settings_to_apply = SCHEMAS + [
+        ('org.gnome.desktop.interface', 'accent-color', 'slate'),
+        ('org.gnome.shell', 'enabled-extensions', extensions),
+    ]
+    if icon_files is not None:
+        settings_to_apply.append(('org.gnome.desktop.interface', 'icon-theme', papirus_icons.ICON_THEME))
+    planned = []
+    for schema, key, value in settings_to_apply:
+        skey = schema + '/' + key
+        last = gget(schema, key)
+        old = old_settings[skey]['old'] if skey in old_settings else last
+        encoded = repr(value)
+        new_state['settings'][skey] = {'old': old, 'set': encoded}
+        planned.append((schema, key, last, encoded))
+    previous_state = file_snapshot(p['state'])
+    changed_settings: list[tuple[str, str, str]] = []
+    theme_applied = icons_applied = flatpak_changed = hook_touched = False
+    gtk_override_touched = gtk_css_touched = False
+    # Save recovery information before changing any user resource.
+    new_state['pending'] = True
+    atomic_write(p['state'], (json.dumps(new_state, sort_keys=True, indent=2) + '\n').encode())
     try:
         stage_theme(directory, files, state['files'] if state else None)
         theme_applied = True
         if icon_files is not None:
             stage_theme(p['icon_theme'], icon_files, previous_icons['files'] if previous_icons else None)
             icons_applied = True
+        gtk_override_touched = True
         atomic_write(p['gtk_override'], gtk4_override(accent).encode('utf-8'))
+        gtk_css_touched = True
         atomic_write(p['gtk_css'], new_css.encode('utf-8'))
         if flatpak_enabled:
-            if state and state['flatpak_enabled']:
-                if state['flatpak_written_sha'] != sha(flatpak_before or b''):
-                    raise ThemeError('Flatpak override changed externally; refusing to overwrite')
-            else:
-                new_state['flatpak_old'] = flatpak_before.decode('utf-8') if flatpak_before is not None else None
             flatpak_changed = True
             flatpak_apply()
             new_state['flatpak_written_sha'] = sha(flatpak_snapshot() or b'')
-        extensions = parse_gvariant_array(gget('org.gnome.shell', 'enabled-extensions'))
-        if EXTENSION not in extensions:
-            extensions.append(EXTENSION)
-        settings_to_apply = SCHEMAS + [
-            ('org.gnome.desktop.interface', 'accent-color', 'slate'),
-            ('org.gnome.shell', 'enabled-extensions', extensions),
-        ]
-        if icon_files is not None:
-            settings_to_apply.append(('org.gnome.desktop.interface', 'icon-theme', papirus_icons.ICON_THEME))
-        for schema, key, new_value in settings_to_apply:
-            skey = schema + '/' + key
-            old = old_settings[skey]['old'] if skey in old_settings else gget(schema, key)
-            last = gget(schema, key)
-            encoded = repr(new_value)
+        for schema, key, last, encoded in planned:
             if last != encoded:
-                gset(schema, key, encoded)
+                # A command may change a setting and then report failure.
                 changed_settings.append((schema, key, last))
-            new_state['settings'][skey] = {'old': old, 'set': gget(schema, key)}
+                gset(schema, key, encoded)
+            actual = gget(schema, key)
+            if not setting_matches(key, actual, encoded):
+                raise ThemeError(f'GNOME setting did not take effect: {schema}/{key}')
+            new_state['settings'][schema + '/' + key]['set'] = actual
         hook_touched = True
         hook_run('install', accent)
+        new_state.pop('pending')
         atomic_write(p['state'], (json.dumps(new_state, sort_keys=True, indent=2) + '\n').encode())
-    except Exception:
-        if hook_touched:
+    except (Exception, KeyboardInterrupt):
+        errors = []
+        def rollback(label, action, *values):
             try:
-                if state:
-                    hook_run('install', state['accent'])
-                else:
-                    hook_run('uninstall')
+                action(*values)
             except Exception as err:
-                print('ROLLBACK warning (accent hook):', err, file=sys.stderr)
+                errors.append(label)
+                print(f'ROLLBACK FAILED ({label}): {err}', file=sys.stderr)
+        if hook_touched:
+            if state:
+                rollback('accent hook', hook_run, 'install', state['accent'])
+            else:
+                rollback('accent hook', hook_run, 'uninstall')
         for schema, key, old in reversed(changed_settings):
-            try: gset(schema, key, old)
-            except Exception as err: print('ROLLBACK warning (settings):', err, file=sys.stderr)
-        try:
-            if flatpak_changed:
-                restore_flatpak_snapshot(flatpak_before)
-            restore_snapshot(p['gtk_css'], previous_gtk)
-            restore_snapshot(p['gtk_override'], previous_override)
-            if theme_applied:
-                if state:
-                    stage_theme(directory, prev_theme_files, new_state['files'])
-                else:
-                    delete_theme(directory, new_state['files'])
-            if icons_applied:
-                if previous_icons:
-                    stage_theme(p['icon_theme'], prev_icon_files, new_state['papirus']['files'])
-                else:
-                    delete_theme(p['icon_theme'], new_state['papirus']['files'])
-        except Exception as err:
-            print('ROLLBACK FAILED; inspect installation:', err, file=sys.stderr)
+            rollback(schema + '/' + key, restore_setting, schema, key, old)
+        if flatpak_changed:
+            rollback('Flatpak', restore_flatpak_snapshot, flatpak_before)
+        if gtk_css_touched:
+            rollback('GTK4 CSS', restore_snapshot, p['gtk_css'], previous_gtk)
+        if gtk_override_touched:
+            rollback('GTK4 overlay', restore_snapshot, p['gtk_override'], previous_override)
+        if theme_applied:
+            if state:
+                rollback('theme', stage_theme, directory, prev_theme_files, new_state['files'])
+            else:
+                rollback('theme', delete_theme, directory, new_state['files'])
+        if icons_applied:
+            if previous_icons:
+                rollback('icons', stage_theme, p['icon_theme'], prev_icon_files, new_state['papirus']['files'])
+            else:
+                rollback('icons', delete_theme, p['icon_theme'], new_state['papirus']['files'])
+        # A failed directory swap can leave a preserved original outside the
+        # active path even before stage_theme returns successfully.
+        if state and not directory.is_dir():
+            errors.append('theme staging')
+        if previous_icons and not p['icon_theme'].is_dir():
+            errors.append('icon staging')
+        if not errors:
+            rollback('installation state', restore_snapshot, p['state'], previous_state)
+        if errors:
+            print('Recovery state retained; run ./uninstall.sh after resolving the errors.', file=sys.stderr)
         raise
     print(f'Installed {THEME} — {accent} (GTK, GNOME Shell, native accent hook).')
     if flatpak_enabled:
@@ -665,65 +728,230 @@ def install(args):
     print('Log out and back in to reload GTK styles in running apps, Shell and the native accent hook.')
 
 
-def uninstall(args):
-    state, p = get_last_state()
-    if not state:
-        print('No theme installation owned by this tool was found.')
+# The global Flatpak override is shared with other applications. Only undo
+# our two exact grants, not other permissions added after installation.
+def filesystem_line(raw: bytes | None) -> tuple[str, re.Match | None, list[str]]:
+    text = (raw or b'').decode('utf-8')
+    sections = list(re.finditer(r'^\[([^\]\r\n]+)\][ \t]*\r?$', text, re.M))
+    contexts = [i for i, m in enumerate(sections) if m[1] == 'Context']
+    if len(contexts) > 1:
+        raise ThemeError('Repeated Flatpak Context sections; refusing edit')
+    if not contexts:
+        return text, None, []
+    i = contexts[0]
+    end = sections[i + 1].start() if i + 1 < len(sections) else len(text)
+    pattern = re.compile(r'^(filesystems[ \t]*=[ \t]*)([^\r\n]*)', re.M)
+    matches = list(pattern.finditer(text, sections[i].end(), end))
+    if len(matches) > 1:
+        raise ThemeError('Repeated Flatpak filesystem keys; refusing edit')
+    if not matches:
+        return text, None, []
+    m = matches[0]
+    # GLib keyfiles escape literal semicolons and backslashes.
+    items = re.findall(r'(?:\\.|[^;\\])+', m[2])
+    if ';'.join(items).rstrip(';') != m[2].rstrip(';'):
+        raise ThemeError('Cannot safely parse Flatpak filesystem list')
+    return text, m, items
+
+
+def restore_flatpak_permissions(state: dict[str, Any]) -> None:
+    raw = flatpak_snapshot()
+    if raw is None:
+        return  # Already removed by the user or an earlier uninstall.
+    old = state.get('flatpak_old')
+    original = old.encode('utf-8') if old is not None else None
+    if sha(raw) == state.get('flatpak_written_sha'):
+        restore_flatpak_snapshot(original)
         return
-    directory = Path(state['theme_path'])
-    # Verify ownership before removing any managed files.
-    assert_owned_theme(directory, state['files'])
-    if state.get('papirus'):
-        assert_owned_theme(p['icon_theme'], state['papirus']['files'])
-    owned_file(p['gtk_override'], state['gtk_override_sha'], 'GTK4 override')
-    css = file_snapshot(p['gtk_css'])
-    if css is None:
-        raise ThemeError('GTK4 CSS was removed; refusing partial uninstallation')
-    new_css = remove_import(css.decode('utf-8'))
-    # Preserve settings changed since installation.
-    restores = []
-    for entry, setting in reversed(list(state['settings'].items())):
+    text, line, current = filesystem_line(raw)
+    _, _, previous = filesystem_line(original)
+    if line is None:
+        return
+    def location(entry):
+        return re.sub(r':(?:ro|rw|create)$', '', entry.lstrip('!'))
+    for grant in FLATPAK_GRANTS:
+        prior = [entry for entry in previous if location(entry) == location(grant)]
+        now = [entry for entry in current if location(entry) == location(grant)]
+        if now == [grant] and prior != now:
+            pos = current.index(grant)
+            current[pos:pos + 1] = prior
+    replacement = ';'.join(current) + (';' if current else '')
+    if replacement != line[2]:
+        restore_flatpak_snapshot((text[:line.start(2)] + replacement + text[line.end(2):]).encode('utf-8'))
+
+
+def setting_matches(key: str, actual: str, expected: str) -> bool:
+    if key == 'enabled-extensions':
+        return parse_gvariant_array(actual) == parse_gvariant_array(expected)
+    return actual == expected
+
+
+def restore_setting(schema: str, key: str, value: str) -> None:
+    if not setting_matches(key, gget(schema, key), value):
+        gset(schema, key, value)
+    if not setting_matches(key, gget(schema, key), value):
+        raise ThemeError(f'GNOME setting did not restore: {schema}/{key}')
+
+
+def present(path: Path) -> bool:
+    return path.exists() or path.is_symlink()
+
+
+def component_paths(p: dict[str, Path]) -> list[Path]:
+    return [p['user_theme'], p['icon_theme'], p['gtk_override'],
+            p['user_theme'].parent.parent / STATE_NAME / 'libaccent-hook.so',
+            p['gtk_css'].parent.parent / 'systemd/user/org.gnome.Shell@user.service.d/80-ashtadala-accent.conf']
+
+
+def retire_component(path: Path, expected, marker: str, backup_parent: Path, *, tree=False) -> None:
+    if not present(path):
+        return
+    if path.is_symlink():
+        raise ThemeError(f'Refusing to remove symlink: {path}')
+    # Delete only exact recorded content. Modified or untracked but identifiable
+    # theme components are moved out of active search paths instead.
+    if expected is not None:
+        try:
+            if tree:
+                assert_owned_theme(path, expected)
+            else:
+                owned_file(path, expected, 'GTK4 override')
+        except ThemeError:
+            pass
+        else:
+            if tree:
+                shutil.rmtree(path)
+            else:
+                path.unlink()
+            return
+    else:
+        check = path / 'index.theme' if tree else path
+        if check.is_symlink() or not check.is_file() or marker not in check.read_text(encoding='utf-8').splitlines():
+            raise ThemeError(f'Unrecognized component; inspect manually: {path}')
+    backup_parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    destination = Path(tempfile.mkdtemp(prefix='uninstall-', dir=backup_parent)) / path.name
+    shutil.move(str(path), str(destination))
+    print('Preserved modified or untracked component outside active paths:', destination)
+
+
+def uninstall(args):
+    p = paths()
+    errors = []
+    def attempt(label, action, *values, **kwargs):
+        try:
+            action(*values, **kwargs)
+        except Exception as err:
+            errors.append(label)
+            print(f'ERROR ({label}): {err}', file=sys.stderr)
+    state = None
+    try:
+        state = read_state(p['state'])
+    except (ThemeError, ValueError, OSError) as err:
+        errors.append('installation state')
+        print('ERROR (installation state):', err, file=sys.stderr)
+    if state:
+        state['pending'] = True
+        attempt('record recovery state', atomic_write, p['state'],
+                (json.dumps(state, sort_keys=True, indent=2) + '\n').encode())
+    had_components = any(present(path) for path in component_paths(p))
+    def remove_gtk_import():
+        nonlocal had_components
+        raw = file_snapshot(p['gtk_css'])
+        if raw is None:
+            return
+        css = raw.decode('utf-8')
+        new = remove_import(css)
+        # An exact import can survive if a user accidentally removed its markers.
+        # Ignore comments; do not rewrite arbitrary custom import syntax.
+        masked = re.sub(r'/\*[\s\S]*?\*/', lambda m: re.sub(r'[^\r\n]', ' ', m[0]), new)
+        for match in reversed(list(re.finditer(r'^' + re.escape(IMPORT) + r'[ \t]*(?:\r?\n|$)', masked, re.M))):
+            if new[match.start():match.end()].strip() == IMPORT:
+                new = new[:match.start()] + new[match.end():]
+        if 'ashtadala-night.css' in re.sub(r'/\*[\s\S]*?\*/', '', new):
+            raise ThemeError('Nonstandard Ashtadala CSS reference remains; inspect gtk.css')
+        if new == css:
+            return
+        had_components = True
+        if state and not state.get('gtk_css_existed', True) and not new.strip():
+            p['gtk_css'].unlink()
+        else:
+            atomic_write(p['gtk_css'], new.encode('utf-8'), p['gtk_css'].stat().st_mode & 0o777)
+    attempt('native hook', hook_run, 'uninstall')
+    attempt('GTK4 import', remove_gtk_import)
+    backup_parent = p['state'].parent.parent / 'ashtadala-cleanup-backups'
+    if state and state.get('theme_path') != p['user_theme'].as_posix():
+        errors.append('theme path')
+        print('ERROR: recorded theme path differs from current XDG path; inspect original location.', file=sys.stderr)
+    attempt('theme', retire_component, p['user_theme'],
+            state.get('files') if state and state.get('theme_path') == p['user_theme'].as_posix() else None,
+            f'GtkTheme={THEME}', backup_parent, tree=True)
+    attempt('icons', retire_component, p['icon_theme'],
+            (state.get('papirus') or {}).get('files') if state else None,
+            'Name=Ashtadala Night Papirus', backup_parent, tree=True)
+    attempt('GTK4 overlay', retire_component, p['gtk_override'],
+            state.get('gtk_override_sha') if state else None,
+            '/* Ashtadala Night: dark-only libadwaita palette. */', backup_parent)
+    if state and state.get('flatpak_enabled'):
+        attempt('Flatpak permissions', restore_flatpak_permissions, state)
+    named = {('org.gnome.desktop.interface', 'gtk-theme'): THEME,
+             ('org.gnome.desktop.interface', 'icon-theme'): papirus_icons.ICON_THEME,
+             ('org.gnome.shell.extensions.user-theme', 'name'): THEME}
+    def read_theme_setting(schema, key):
+        try:
+            return gget(schema, key)
+        except ThemeError:
+            # The optional extension package may have been uninstalled already.
+            if schema == 'org.gnome.shell.extensions.user-theme' and not gschema_exists(schema):
+                return None
+            raise
+    def restore_entry(entry, setting):
         schema, key = entry.rsplit('/', 1)
-        current = gget(schema, key)
-        if current == setting['set']:
-            restores.append((schema, key, setting['old']))
+        current = read_theme_setting(schema, key)
+        if current is None:
+            return
+        if setting_matches(key, current, setting['set']):
+            if named.get((schema, key)) and setting['old'] == repr(named[schema, key]):
+                greset(schema, key)
+                if gget(schema, key) == repr(named[schema, key]):
+                    raise ThemeError('Theme is still selected after reset')
+            else:
+                restore_setting(schema, key, setting['old'])
         elif entry == 'org.gnome.shell/enabled-extensions':
-            try:
-                before = parse_gvariant_array(setting['old'])
-                now = parse_gvariant_array(current)
-                if isinstance(before, list) and isinstance(now, list) and EXTENSION not in before:
-                    restores.append((schema, key, repr([e for e in now if e != EXTENSION])))
-                    print('Removing only theme extension; retaining new user extensions')
-            except (SyntaxError, ValueError, ThemeError):
-                print('Warning: could not safely update changed extension list', file=sys.stderr)
+            before = parse_gvariant_array(setting['old'])
+            now = parse_gvariant_array(current)
+            if EXTENSION not in before and EXTENSION in now:
+                restore_setting(schema, key, repr([e for e in now if e != EXTENSION]))
         else:
             print('Keeping user-modified setting:', entry)
-    # Do not overwrite Flatpak permissions changed after installation.
-    flatpak_restore = False
-    if state.get('flatpak_enabled'):
-        fp_raw = flatpak_snapshot()
-        flatpak_restore = sha(fp_raw or b'') == state.get('flatpak_written_sha')
-        if not flatpak_restore:
-            print('WARNING: Flatpak override was modified after install; leaving it untouched')
-    # Stop the native hook first; fail closed if its systemd drop-in is not ours.
-    hook_run('uninstall')
-    if state.get('papirus'):
-        delete_theme(p['icon_theme'], state['papirus']['files'])
-    delete_theme(directory, state['files'])
-    if not state.get('gtk_css_existed', True) and not new_css.strip():
-        p['gtk_css'].unlink()
-    else:
-        atomic_write(p['gtk_css'], new_css.encode('utf-8'))
-    p['gtk_override'].unlink()
-    if flatpak_restore:
-        restore_flatpak_snapshot(state.get('flatpak_old').encode('utf-8') if state.get('flatpak_old') is not None else None)
-    for schema, key, old in restores:
+    if state:
+        for entry, setting in reversed(list(state.get('settings', {}).items())):
+            attempt(entry, restore_entry, entry, setting)
+    # Never leave our named themes selected, even with no recovery state.
+    def clear_selection(schema, key, value):
+        nonlocal had_components
+        current = read_theme_setting(schema, key)
+        if current == repr(value):
+            had_components = True
+            greset(schema, key)
+            if gget(schema, key) == repr(value):
+                raise ThemeError('Theme is still selected after reset')
+    for (schema, key), value in named.items():
+        attempt(schema + '/' + key, clear_selection, schema, key, value)
+    if errors:
+        raise ThemeError('Uninstall incomplete: ' + ', '.join(errors) + '. Resolve the errors and rerun; recovery state retained if present.')
+    if state:
+        p['state'].unlink()
         try:
-            gset(schema, key, old)
-        except Exception as err:
-            print('Warning restoring setting:', schema, key, err, file=sys.stderr)
-    p['state'].unlink()
-    print('Uninstalled Ashtadala Night. Existing CSS outside our import preserved.')
+            p['state'].parent.rmdir()
+        except OSError:
+            pass
+        print('Uninstalled Ashtadala Night. Existing CSS outside our import preserved.')
+    elif had_components:
+        raise ThemeError('Identifiable theme components cleaned, but installation state is missing. '
+                         'Previous accent, dark-mode, extension and Flatpak settings cannot be reconstructed. '
+                         'Check them manually and log out/in.')
+    else:
+        print('No installation state or identifiable active components found.')
     print('Log out and back in to fully return to the previous GNOME Shell style.')
 
 
@@ -739,14 +967,37 @@ def do_validate() -> None:
 def diagnose() -> None:
     print('Ashtadala Night diagnostics')
     for schema, key in [*[(s, k) for s, k, _ in SCHEMAS],
-                        ('org.gnome.desktop.interface', 'accent-color')]:
+                        ('org.gnome.desktop.interface', 'accent-color'),
+                        ('org.gnome.desktop.interface', 'icon-theme')]:
         try:
             print(f'{schema}/{key}: {gget(schema, key)}')
         except ThemeError as e:
             print(f'{schema}/{key}: unavailable ({e})')
-    state, p = get_last_state()
+    p = paths()
+    try:
+        state = read_state(p['state'])
+    except (ThemeError, OSError, ValueError) as e:
+        print('Installation state:', e)
+        state = None
     if not state:
-        print('Theme: not installed')
+        print('Theme: no usable installation state')
+        for path in component_paths(p):
+            if present(path):
+                print('Untracked component:', path)
+        try:
+            css = file_snapshot(p['gtk_css']) or b''
+            if START.encode() in css or IMPORT.encode() in css or END.encode() in css:
+                print('Untracked GTK4 import:', p['gtk_css'])
+        except (ThemeError, OSError) as e:
+            print('GTK4 CSS:', e)
+        try:
+            hook_run('status')
+        except ThemeError as e:
+            print('Native accent hook:', e)
+        return
+    if state.get('pending'):
+        print('Incomplete installation; run ./uninstall.sh to recover.')
+        hook_run('status')
         return
     print('Primary accent:', state['accent'])
     if state.get('papirus'):
@@ -818,6 +1069,8 @@ def parse_args():
 def main():
     args = parse_args()
     try:
+        if args.command in ('install', 'configure', 'uninstall') and os.geteuid() == 0:
+            raise ThemeError('Run as your GNOME desktop user, not sudo')
         if args.command == 'install':
             install(args)
         elif args.command == 'configure':
@@ -830,7 +1083,7 @@ def main():
             diagnose()
         elif args.command == 'validate':
             do_validate()
-    except ThemeError as e:
+    except (ThemeError, OSError, ValueError) as e:
         print('ERROR:', e, file=sys.stderr)
         return 2
     return 0

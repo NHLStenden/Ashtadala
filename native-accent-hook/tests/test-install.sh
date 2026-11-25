@@ -26,6 +26,7 @@ case "$*" in
     [[ -z ${preload:-} ]] || printf 'LD_PRELOAD=%s\n' "$preload"
     exit 0 ;;
   '--user show org.gnome.Shell@user.service -p MainPID --value') echo 0; exit 0 ;;
+  '--user show-environment') printf '%s\n' "${MOCK_MANAGER_ENV:-}" ;;
   '--user daemon-reload') [[ ${MOCK_RELOAD_FAIL:-0} != 1 ]] ;;
   *) echo "Unexpected mock systemctl: $*" >&2; exit 2 ;;
 esac
@@ -66,41 +67,60 @@ fi
 bash "$SCRIPT" uninstall
 [[ ! -e "$DROPIN" && ! -e "$LIB" ]]
 bash "$SCRIPT" uninstall
-# Reproduce the old install using its actual emitted configuration.
-OLD_LIB="$XDG_DATA_HOME/tokyoadwaita-night/libaccent-hook.so"
-OLD_DROPIN="$(dirname "$DROPIN")/80-tokyoadwaita-accent.conf"
-mkdir -p "$(dirname "$OLD_LIB")" "$(dirname "$OLD_DROPIN")"
-touch "$OLD_LIB"
-printf '%s\n' '# Managed by TokyoAdwaita Night native accent hook' '[Service]' \
-  "Environment=\"LD_PRELOAD=$OLD_LIB\"" 'Environment="TOKYOADWAITA_ACCENT_COLOR=#7aa2f7"' \
-  'Environment="TOKYOADWAITA_ACCENT_LOG=1"' > "$OLD_DROPIN"
-cp "$OLD_DROPIN" "$DIR/original-dropin"
-bash "$SCRIPT" check
-cmp "$OLD_DROPIN" "$DIR/original-dropin"  # Preflight is read-only.
+# Failed install must restore both files; failed reload on uninstall must be retryable.
 if MOCK_RELOAD_FAIL=1 bash "$SCRIPT" install '#90aafa' > "$DIR/error" 2>&1; then
   echo 'Reload failure accepted' >&2; exit 1
 fi
-cmp "$OLD_DROPIN" "$DIR/original-dropin"
 [[ ! -e "$DROPIN" && ! -e "$LIB" ]]
-# A modified old drop-in is not ours to remove.
-printf 'Environment="OTHER=1"\n' >> "$OLD_DROPIN"
-if bash "$SCRIPT" check > "$DIR/error" 2>&1; then
-  echo 'Modified legacy drop-in accepted' >&2; exit 1
-fi
-cp "$DIR/original-dropin" "$OLD_DROPIN"
-if MOCK_SYSTEMD_ENV="LD_PRELOAD=$OLD_LIB:/another/foreign.so" bash "$SCRIPT" check > "$DIR/error" 2>&1; then
-  echo 'Mixed legacy preload accepted' >&2; exit 1
-fi
 bash "$SCRIPT" install '#90aafa'
-[[ ! -e "$OLD_DROPIN" && -f "$OLD_LIB" && -f "$DROPIN" && -f "$LIB" ]]
-[[ $(systemctl --user show org.gnome.Shell@user.service -p Environment --value) == "LD_PRELOAD=$LIB" ]]
-bash "$SCRIPT" install '#fb996c'
+cp "$DROPIN" "$DIR/original-dropin"
+cp "$LIB" "$DIR/original-library"
+if MOCK_RELOAD_FAIL=1 bash "$SCRIPT" install '#fb996c' > "$DIR/error" 2>&1; then
+  echo 'Reconfigure reload failure accepted' >&2; exit 1
+fi
+cmp "$DROPIN" "$DIR/original-dropin"
+cmp "$LIB" "$DIR/original-library"
+if MOCK_RELOAD_FAIL=1 bash "$SCRIPT" uninstall > "$DIR/error" 2>&1; then
+  echo 'Uninstall reload failure accepted' >&2; exit 1
+fi
+[[ ! -e "$DROPIN" && -f "$LIB" ]]
+bash "$SCRIPT" status | grep -F 'Orphaned hook library remains' >/dev/null
+if MOCK_SHOW_FAIL=1 bash "$SCRIPT" uninstall > "$DIR/error" 2>&1; then
+  echo 'Unverified service environment accepted' >&2; exit 1
+fi
+[[ -f "$LIB" ]]
+if MOCK_SYSTEMD_ENV="LD_PRELOAD=$LIB" bash "$SCRIPT" uninstall > "$DIR/error" 2>&1; then
+  echo 'Referenced library removed' >&2; exit 1
+fi
+[[ -f "$LIB" ]]
+if MOCK_MANAGER_ENV="LD_PRELOAD=$LIB" bash "$SCRIPT" uninstall > "$DIR/error" 2>&1; then
+  echo 'Manager-referenced library removed' >&2; exit 1
+fi
+[[ -f "$LIB" ]]
 bash "$SCRIPT" uninstall
 [[ ! -e "$DROPIN" && ! -e "$LIB" ]]
-# A legacy path without its authentic drop-in is still foreign.
-if MOCK_SYSTEMD_ENV="LD_PRELOAD=$OLD_LIB" bash "$SCRIPT" check > "$DIR/error" 2>&1; then
-  echo 'Unowned legacy preload accepted' >&2; exit 1
+bash "$SCRIPT" uninstall
+if MOCK_MANAGER_ENV='LD_PRELOAD=/another/foreign.so' bash "$SCRIPT" check > "$DIR/error" 2>&1; then
+  echo 'Foreign manager preload accepted' >&2; exit 1
 fi
+# A modified marked drop-in is not safe to delete.
+bash "$SCRIPT" install '#90aafa'
+cp "$DROPIN" "$DIR/original-dropin"
+printf 'Environment="OTHER=1"\n' >> "$DROPIN"
+if bash "$SCRIPT" uninstall > "$DIR/error" 2>&1; then
+  echo 'Modified drop-in removed' >&2; exit 1
+fi
+[[ -f "$DROPIN" && -f "$LIB" ]]
+cp "$DIR/original-dropin" "$DROPIN"
+bash "$SCRIPT" uninstall
+# A file at the dedicated library path without our marker is not ours.
+mkdir -p "$(dirname "$LIB")"
+printf 'foreign' > "$LIB"
+if bash "$SCRIPT" uninstall > "$DIR/error" 2>&1; then
+  echo 'Foreign library removed' >&2; exit 1
+fi
+[[ $(cat "$LIB") == foreign ]]
+rm "$LIB"
 # Refuse to overwrite files without the ownership marker.
 mkdir -p "$(dirname "$DROPIN")"
 printf '[Service]\n' > "$DROPIN"

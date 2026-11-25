@@ -348,14 +348,18 @@ class InstallationTests(unittest.TestCase):
         t.uninstall(argparse.Namespace())
         self.assertEqual(self.settings[('org.gnome.desktop.interface', 'accent-color')], "'blue'")
 
-    def test_uninstaller_refuses_modified_theme_and_does_not_erase(self):
+    def test_uninstaller_preserves_modified_theme_outside_active_paths(self):
         self.install()
         f = self.paths['user_theme'] / 'gtk-3.0/gtk.css'
         f.write_text('user modified stylesheet')
-        with self.assertRaises(t.ThemeError):
-            t.uninstall(argparse.Namespace())
-        self.assertTrue(f.exists())
-        self.assertTrue(self.paths['state'].exists())
+        t.uninstall(argparse.Namespace())
+        self.assertFalse(self.paths['user_theme'].exists())
+        self.assertFalse(self.paths['gtk_override'].exists())
+        self.assertFalse(self.paths['state'].exists())
+        backup = list(self.paths['state'].parent.parent.glob('ashtadala-cleanup-backups/*/Ashtadala-Night/gtk-3.0/gtk.css'))
+        self.assertEqual(len(backup), 1)
+        self.assertEqual(backup[0].read_text(), 'user modified stylesheet')
+        self.assertEqual(self.paths['gtk_css'].read_bytes(), self.prior_css)
 
     def test_user_modified_settings_are_preserved(self):
         self.install()
@@ -377,7 +381,7 @@ class InstallationTests(unittest.TestCase):
         state = t.read_state(self.paths['state'])
         state['format'] = 3
         self.paths['state'].write_text(json.dumps(state))
-        with self.assertRaisesRegex(t.ThemeError, 'Older installation'):
+        with self.assertRaisesRegex(t.ThemeError, 'Unsupported installation state format'):
             self.install('blue')
         self.assertTrue(self.paths['user_theme'].exists())
 
@@ -395,7 +399,7 @@ class InstallationTests(unittest.TestCase):
             t.uninstall(argparse.Namespace())
         self.assertEqual(self.paths['flatpak_fake'].read_bytes(), original)
 
-    def test_flatpak_modified_after_install_is_preserved_on_uninstall(self):
+    def test_flatpak_modified_after_install_removes_only_our_grants(self):
         fp = self.paths['state'].parent / 'flatpak-global'
         fp.parent.mkdir(parents=True, exist_ok=True)
         def fake_apply():
@@ -404,7 +408,7 @@ class InstallationTests(unittest.TestCase):
             t.install(argparse.Namespace(accent='#ef9369'))
             fp.write_text('[Context]\nfilesystems=xdg-config/gtk-4.0:ro;xdg-download;\n')
             t.uninstall(argparse.Namespace())
-        self.assertIn('xdg-download', fp.read_text())
+        self.assertEqual(fp.read_text(), '[Context]\nfilesystems=xdg-download;\n')
 
     def test_flatpak_failure_after_change_rolls_back(self):
         fp = self.paths['state'].parent / 'flatpak-global'
@@ -434,6 +438,199 @@ class InstallationTests(unittest.TestCase):
             self.assertTrue(t.read_state(self.paths['state'])['flatpak_enabled'])
             t.uninstall(argparse.Namespace())
         self.assertEqual(fp.read_text(), '[Context]\nfilesystems=xdg-download;\n')
+
+    def test_flatpak_restores_previous_permission_and_keeps_new_settings(self):
+        fp = self.paths['state'].parent / 'flatpak-global'
+        fp.parent.mkdir(parents=True, exist_ok=True)
+        fp.write_text('[Context]\nfilesystems=xdg-config/gtk-4.0;xdg-data/themes:ro;\n')
+        def apply():
+            fp.write_text('[Context]\nfilesystems=xdg-config/gtk-4.0:ro;xdg-data/themes:ro;\n')
+        with mock.patch.object(t, 'flatpak_present', return_value=True), mock.patch.object(t, 'flatpak_preflight'), mock.patch.object(t, 'flatpak_path', return_value=fp), mock.patch.object(t, 'flatpak_apply', side_effect=apply):
+            self.install()
+            fp.write_text('[Context]\nfilesystems=xdg-config/gtk-4.0:ro;xdg-data/themes:ro;xdg-download;\n[Environment]\nEXAMPLE=yes\n')
+            t.uninstall(argparse.Namespace())
+        self.assertEqual(fp.read_text(), '[Context]\nfilesystems=xdg-config/gtk-4.0;xdg-data/themes:ro;xdg-download;\n[Environment]\nEXAMPLE=yes\n')
+
+    def test_flatpak_preserves_grant_changed_by_user_and_escaped_entries(self):
+        fp = self.paths['state'].parent / 'flatpak-global'
+        fp.parent.mkdir(parents=True, exist_ok=True)
+        raw = b'[Context]\nfilesystems=xdg-config/gtk-4.0:rw;xdg-data/themes:ro;/path/with\\;semicolon;\n[Environment]\nEXAMPLE=yes\n'
+        fp.write_bytes(raw)
+        with mock.patch.object(t, 'flatpak_path', return_value=fp):
+            t.restore_flatpak_permissions({'flatpak_old': None, 'flatpak_written_sha': 'different'})
+        self.assertEqual(fp.read_bytes(), raw.replace(b'xdg-data/themes:ro;', b''))
+
+    def test_uninstall_without_state_cleans_identifiable_components(self):
+        self.install()
+        self.paths['state'].unlink()
+        defaults = {('org.gnome.desktop.interface', 'gtk-theme'): "'Adwaita'",
+                    ('org.gnome.shell.extensions.user-theme', 'name'): "''"}
+        with mock.patch.object(t, 'greset', side_effect=lambda s, k: self.settings.__setitem__((s,k),defaults[s,k])):
+            with self.assertRaisesRegex(t.ThemeError, 'installation state is missing'):
+                t.uninstall(argparse.Namespace())
+        self.assertFalse(self.paths['user_theme'].exists())
+        self.assertFalse(self.paths['gtk_override'].exists())
+        self.assertEqual(self.paths['gtk_css'].read_bytes(), self.prior_css)
+        self.assertEqual(self.settings[('org.gnome.desktop.interface', 'gtk-theme')], "'Adwaita'")
+        # We cannot infer whether these shared preferences existed before installation.
+        self.assertEqual(self.settings[('org.gnome.desktop.interface', 'accent-color')], "'slate'")
+        t.uninstall(argparse.Namespace())  # no identifiable components remain
+
+    def test_uninstall_missing_css_and_missing_theme_is_retryable(self):
+        self.install()
+        self.paths['gtk_css'].unlink()
+        (self.paths['user_theme'] / 'gtk-3.0/gtk.css').unlink()
+        t.uninstall(argparse.Namespace())
+        self.assertFalse(self.paths['gtk_override'].exists())
+        self.assertFalse(self.paths['user_theme'].exists())
+        self.assertFalse(self.paths['state'].exists())
+        t.uninstall(argparse.Namespace())
+
+    def test_uninstall_failure_preserves_state_and_continues(self):
+        self.install()
+        original_set = t.gset
+        def fail(schema, key, value):
+            if key == 'accent-color':
+                raise t.ThemeError('simulated settings failure')
+            return original_set(schema, key, value)
+        with mock.patch.object(t, 'hook_run', side_effect=t.ThemeError('simulated hook failure')), mock.patch.object(t, 'gset', side_effect=fail):
+            with self.assertRaisesRegex(t.ThemeError, 'Uninstall incomplete'):
+                t.uninstall(argparse.Namespace())
+        self.assertTrue(self.paths['state'].exists())
+        self.assertFalse(self.paths['user_theme'].exists())
+        self.assertFalse(self.paths['gtk_override'].exists())
+        self.assertEqual(self.paths['gtk_css'].read_bytes(), self.prior_css)
+        self.assertEqual(self.settings[('org.gnome.desktop.interface', 'gtk-theme')], "'Adwaita'")
+        t.uninstall(argparse.Namespace())
+        self.assertFalse(self.paths['state'].exists())
+        self.assertEqual(self.settings[('org.gnome.desktop.interface', 'accent-color')], "'blue'")
+
+    def test_uninstall_malformed_import_preserves_it_but_cleans_other_components(self):
+        self.install()
+        modified = self.paths['gtk_css'].read_text().replace(t.IMPORT, '@import url("custom.css");')
+        self.paths['gtk_css'].write_text(modified)
+        with self.assertRaisesRegex(t.ThemeError, 'Uninstall incomplete'):
+            t.uninstall(argparse.Namespace())
+        self.assertEqual(self.paths['gtk_css'].read_text(), modified)
+        self.assertFalse(self.paths['user_theme'].exists())
+        self.assertFalse(self.paths['gtk_override'].exists())
+        self.assertTrue(self.paths['state'].exists())
+        self.paths['gtk_css'].write_bytes(self.prior_css)
+        t.uninstall(argparse.Namespace())
+        self.assertFalse(self.paths['state'].exists())
+
+    def test_uninstall_exact_import_without_markers(self):
+        self.install()
+        self.paths['gtk_css'].write_bytes((t.IMPORT + '\n').encode() + self.prior_css)
+        t.uninstall(argparse.Namespace())
+        self.assertEqual(self.paths['gtk_css'].read_bytes(), self.prior_css)
+
+    def test_uninstall_unrecognized_orphan_does_not_delete_user_files(self):
+        self.paths['user_theme'].mkdir(parents=True)
+        extra = self.paths['user_theme'] / 'user.txt'
+        extra.write_text('my data')
+        with self.assertRaisesRegex(t.ThemeError, 'Uninstall incomplete'):
+            t.uninstall(argparse.Namespace())
+        self.assertEqual(extra.read_text(), 'my data')
+
+    def test_diagnose_without_state_reports_components_and_hook(self):
+        self.install()
+        self.paths['state'].unlink()
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            t.diagnose()
+        self.assertIn('Untracked component:', out.getvalue())
+        self.assertIn('Untracked GTK4 import:', out.getvalue())
+        t.hook_run.assert_any_call('status')
+
+    def test_install_journal_survives_failed_rollback(self):
+        original_set = t.gset
+        def fail(schema, key, value):
+            self.assertTrue(t.read_state(self.paths['state'])['pending'])
+            if key == 'gtk-theme' and value == "'Adwaita'":
+                raise t.ThemeError('rollback denied')
+            original_set(schema, key, value)
+            if key == 'color-scheme' and value == "'prefer-dark'":
+                raise t.ThemeError('failed after setting changed')
+        with mock.patch.object(t, 'gset', side_effect=fail):
+            with self.assertRaisesRegex(t.ThemeError, 'failed after setting changed'):
+                self.install()
+        self.assertTrue(t.read_state(self.paths['state'])['pending'])
+        self.assertFalse(self.paths['user_theme'].exists())
+        self.assertFalse(self.paths['gtk_override'].exists())
+        self.assertEqual(self.paths['gtk_css'].read_bytes(), self.prior_css)
+        self.assertEqual(self.settings[('org.gnome.desktop.interface', 'color-scheme')], "'default'")
+        with self.assertRaisesRegex(t.ThemeError, 'Incomplete installation'):
+            self.install()
+        t.uninstall(argparse.Namespace())
+        self.assertFalse(self.paths['state'].exists())
+        self.assertEqual(self.settings[('org.gnome.desktop.interface', 'gtk-theme')], "'Adwaita'")
+
+    def test_rollback_failure_does_not_skip_other_files(self):
+        original_restore = t.restore_snapshot
+        def restore(path, raw):
+            if path == self.paths['gtk_css']:
+                raise t.ThemeError('GTK CSS restore denied')
+            return original_restore(path, raw)
+        def fail(*args):
+            if args[0] == 'install':
+                raise t.ThemeError('hook failed')
+        with mock.patch.object(t, 'restore_snapshot', side_effect=restore), mock.patch.object(t, 'hook_run', side_effect=fail):
+            with self.assertRaisesRegex(t.ThemeError, 'hook failed'):
+                self.install()
+        self.assertFalse(self.paths['user_theme'].exists())
+        self.assertFalse(self.paths['gtk_override'].exists())
+        self.assertTrue(t.read_state(self.paths['state'])['pending'])
+        t.uninstall(argparse.Namespace())
+        self.assertEqual(self.paths['gtk_css'].read_bytes(), self.prior_css)
+        self.assertFalse(self.paths['state'].exists())
+
+    def test_corrupt_state_does_not_block_identifiable_cleanup(self):
+        self.install()
+        self.paths['state'].write_text('{broken json')
+        defaults = {('org.gnome.desktop.interface', 'gtk-theme'): "'Adwaita'",
+                    ('org.gnome.shell.extensions.user-theme', 'name'): "''"}
+        with mock.patch.object(t, 'greset', side_effect=lambda s,k: self.settings.__setitem__((s,k), defaults[s,k])):
+            with self.assertRaisesRegex(t.ThemeError, 'Uninstall incomplete'):
+                t.uninstall(argparse.Namespace())
+        self.assertEqual(self.paths['state'].read_text(), '{broken json')
+        self.assertFalse(self.paths['user_theme'].exists())
+        self.assertFalse(self.paths['gtk_override'].exists())
+        self.assertEqual(self.paths['gtk_css'].read_bytes(), self.prior_css)
+
+    def test_setting_command_success_without_change_is_detected(self):
+        self.install()
+        original_set = t.gset
+        def ignore_accent(schema, key, value):
+            if key != 'accent-color':
+                original_set(schema, key, value)
+        with mock.patch.object(t, 'gset', side_effect=ignore_accent):
+            with self.assertRaisesRegex(t.ThemeError, 'Uninstall incomplete'):
+                t.uninstall(argparse.Namespace())
+        self.assertTrue(t.read_state(self.paths['state'])['pending'])
+        self.assertEqual(self.settings[('org.gnome.desktop.interface', 'accent-color')], "'slate'")
+        t.uninstall(argparse.Namespace())
+        self.assertFalse(self.paths['state'].exists())
+        self.assertEqual(self.settings[('org.gnome.desktop.interface', 'accent-color')], "'blue'")
+
+    def test_staging_preserves_original_if_both_renames_fail(self):
+        self.install()
+        original = (self.paths['user_theme'] / 'palette.json').read_bytes()
+        rename = Path.rename
+        def fail_replacement(path, target):
+            if Path(target) == self.paths['user_theme']:
+                raise OSError('simulated rename failure')
+            return rename(path, target)
+        with mock.patch.object(Path, 'rename', fail_replacement):
+            with self.assertRaisesRegex(t.ThemeError, 'original retained'):
+                self.install('blue')
+        self.assertTrue(t.read_state(self.paths['state'])['pending'])
+        copies = list(self.paths['user_theme'].parent.glob('.ashtadala-*/old/palette.json'))
+        self.assertEqual(len(copies), 1)
+        self.assertEqual(copies[0].read_bytes(), original)
+        t.uninstall(argparse.Namespace())
+        self.assertFalse(self.paths['state'].exists())
+        self.assertEqual(copies[0].read_bytes(), original)
 
     def test_failure_during_settings_write_rolls_back_files(self):
         original_set = t.gset

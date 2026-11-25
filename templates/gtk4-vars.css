@@ -50,11 +50,21 @@ button.default:not(.flat):not(.destructive-action):not(:disabled) {
 }
 button.suggested-action:not(.flat):not(.destructive-action):not(:disabled):hover,
 button.default:not(.flat):not(.destructive-action):not(:disabled):hover {
-  background-image: image(color-mix(in srgb, @ACCENT_FG@ 10%, transparent));
+  --accent-bg-color: @ACCENT_HOVER@;
+  --accent-fg-color: @ACCENT_HOVER_FG@;
+  background-image: none;
+  background-color: @ACCENT_HOVER@;
+  border-color: @ACCENT_HOVER@;
+  color: @ACCENT_HOVER_FG@;
 }
 button.suggested-action:not(.flat):not(.destructive-action):not(:disabled):active,
 button.default:not(.flat):not(.destructive-action):not(:disabled):active {
-  background-image: image(color-mix(in srgb, @ACCENT_FG@ 20%, transparent));
+  --accent-bg-color: @ACCENT_ACTIVE@;
+  --accent-fg-color: @ACCENT_ACTIVE_FG@;
+  background-image: none;
+  background-color: @ACCENT_ACTIVE@;
+  border-color: @ACCENT_ACTIVE@;
+  color: @ACCENT_ACTIVE_FG@;
 }
 
 /* Dim the text rather than compositing the whole label: markup links in

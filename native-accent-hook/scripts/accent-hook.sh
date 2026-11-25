@@ -10,28 +10,23 @@ DATA="${XDG_DATA_HOME:-$HOME/.local/share}/ashtadala-night"
 LIB="$DATA/libaccent-hook.so"
 DROPIN_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user/$UNIT.d"
 DROPIN="$DROPIN_DIR/80-ashtadala-accent.conf"
-LEGACY_DROPIN="$DROPIN_DIR/80-tokyoadwaita-accent.conf"
-LEGACY_LIB="${XDG_DATA_HOME:-$HOME/.local/share}/tokyoadwaita-night/libaccent-hook.so"
 LIBST="${ASHTADALA_LIBST:-/usr/lib64/gnome-shell/libst-51.so}"
 SYSTEMCTL="${ASHTADALA_SYSTEMCTL:-systemctl}"
 
 fail() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 need() { command -v "$1" >/dev/null 2>&1 || fail "Missing command: $1"; }
-owned() { [[ -f "$DROPIN" && ! -L "$DROPIN" ]] && grep -Fxq -- "$MARKER" "$DROPIN"; }
-# Recognize only the exact configuration emitted by the previous installer.
-legacy_owned() {
-  [[ -f "$LEGACY_DROPIN" && ! -L "$LEGACY_DROPIN" ]] || return 1
-  python3 - "$LEGACY_DROPIN" "$LEGACY_LIB" <<'PYTHON'
-import re, sys
-from pathlib import Path
-lines = Path(sys.argv[1]).read_text().splitlines()
-valid = (len(lines) == 5 and lines[:3] == [
-    '# Managed by TokyoAdwaita Night native accent hook', '[Service]',
-    f'Environment="LD_PRELOAD={sys.argv[2]}"']
-    and re.fullmatch(r'Environment="TOKYOADWAITA_ACCENT_COLOR=#[0-9a-fA-F]{6}"', lines[3])
-    and lines[4] == 'Environment="TOKYOADWAITA_ACCENT_LOG=1"')
-sys.exit(0 if valid else 1)
-PYTHON
+owned_library() {
+  [[ -f "$LIB" && ! -L "$LIB" ]] && grep -aFq -- '[ashtadala-accent]' "$LIB"
+}
+owned() {
+  [[ -f "$DROPIN" && ! -L "$DROPIN" ]] || return 1
+  local -a lines=()
+  mapfile -t lines < "$DROPIN"
+  [[ ${#lines[@]} -eq 5 ]] &&
+    [[ "${lines[0]}" == "$MARKER" && "${lines[1]}" == '[Service]' &&
+       "${lines[2]}" == "Environment=\"LD_PRELOAD=$LIB\"" &&
+       "${lines[4]}" == 'Environment="ASHTADALA_ACCENT_LOG=1"' ]] &&
+    [[ "${lines[3]}" =~ ^Environment=\"ASHTADALA_ACCENT_COLOR=\#[[:xdigit:]]{6}\"$ ]]
 }
 preload_value() {
   python3 -c 'import shlex, sys
@@ -57,16 +52,19 @@ check() {
   if [[ -e "$DROPIN" || -L "$DROPIN" ]] && ! owned; then
       fail "Refusing to replace unmanaged drop-in: $DROPIN"
   fi
-  local env preload
+  local env preload manager
   env="$("$SYSTEMCTL" --user show "$UNIT" -p Environment --value)" || fail 'Cannot read Shell service environment'
   preload="$(printf '%s' "$env" | preload_value)" || fail 'Cannot parse Shell service environment'
-  if [[ -e "$LEGACY_DROPIN" || -L "$LEGACY_DROPIN" ]] && ! legacy_owned; then
-      fail "Refusing to replace unmanaged legacy drop-in: $LEGACY_DROPIN"
+  if [[ -n "$preload" ]] && { [[ "$preload" != "$LIB" ]] || ! owned; }; then
+      fail 'Another Shell LD_PRELOAD is active; remove it first'
   fi
-  if [[ -n "$preload" && "$preload" != "$LIB" ]]; then
-      if [[ "$preload" != "$LEGACY_LIB" ]] || ! legacy_owned; then
-          fail 'Another Shell LD_PRELOAD is active; remove it first (including older standalone hooks)'
-      fi
+  manager="$("$SYSTEMCTL" --user show-environment)" || fail 'Cannot read user manager environment'
+  preload="$(printf '%s' "$manager" | preload_value)" || fail 'Cannot parse user manager environment'
+  if [[ -n "$preload" ]]; then
+      fail 'A user-manager LD_PRELOAD is active; remove it first'
+  fi
+  if [[ -e "$LIB" || -L "$LIB" ]] && ! owned_library; then
+      fail "Refusing to replace unmanaged library: $LIB"
   fi
 }
 install_hook() {
@@ -90,59 +88,53 @@ install_hook() {
     printf 'Environment="ASHTADALA_ACCENT_LOG=1"\n'
   } > "$tmp/config"
   install -m 0644 "$tmp/config" "$tmp/dropin"
-  # The old filename sorts after the new one and would override LD_PRELOAD.
   if owned; then cp -- "$DROPIN" "$tmp/previous-dropin"; fi
   if [[ -e "$LIB" || -L "$LIB" ]]; then cp -P -- "$LIB" "$tmp/previous-library"; fi
-  mv -f -- "$tmp/library" "$LIB"
-  mv -f -- "$tmp/dropin" "$DROPIN"
-  if legacy_owned; then
-    mv -- "$LEGACY_DROPIN" "$tmp/legacy-dropin"
-  fi
   local effective
-  if ! "$SYSTEMCTL" --user daemon-reload ||
+  if ! mv -f -- "$tmp/library" "$LIB" ||
+     ! mv -f -- "$tmp/dropin" "$DROPIN" ||
+     ! "$SYSTEMCTL" --user daemon-reload ||
      ! effective="$("$SYSTEMCTL" --user show "$UNIT" -p Environment --value | preload_value)" ||
      [[ "$effective" != "$LIB" ]]; then
+    local restore_failed=0
     if [[ -f "$tmp/previous-dropin" ]]; then
-      mv -f -- "$tmp/previous-dropin" "$DROPIN"
+      cp -- "$tmp/previous-dropin" "$DROPIN" || restore_failed=1
     else
-      rm -f -- "$DROPIN"
+      rm -f -- "$DROPIN" || restore_failed=1
     fi
-    if [[ -f "$tmp/legacy-dropin" ]]; then
-      mv -- "$tmp/legacy-dropin" "$LEGACY_DROPIN"
-    fi
-    if [[ -e "$tmp/previous-library" || -L "$tmp/previous-library" ]]; then
-      mv -f -- "$tmp/previous-library" "$LIB"
+    if [[ -f "$tmp/previous-library" ]]; then
+      cp -- "$tmp/previous-library" "$LIB" || restore_failed=1
     else
-      rm -f -- "$LIB"
+      rm -f -- "$LIB" || restore_failed=1
     fi
-    "$SYSTEMCTL" --user daemon-reload || true
+    if (( restore_failed )); then
+      trap - EXIT
+      fail "Cannot activate or restore native hook; backups retained at $tmp"
+    fi
+    "$SYSTEMCTL" --user daemon-reload || fail 'Native hook files restored, but systemd reload failed; retry uninstall or installation'
     fail 'Cannot activate native hook; previous configuration restored'
-  fi
-  if [[ -f "$tmp/legacy-dropin" ]]; then
-    printf 'Migrated previous TokyoAdwaita native accent hook (takes effect next login)\n'
   fi
   rm -rf -- "$tmp"
   printf 'Native accent hook: %s -> %s (takes effect next login)\n' "$SLATE" "$color"
 }
 uninstall_hook() {
   (( EUID != 0 )) || fail 'Run as your desktop user, never sudo.'
-  local was_owned=0
   if [[ -e "$DROPIN" || -L "$DROPIN" ]]; then
     owned || fail "Unmanaged drop-in; refusing removal: $DROPIN"
-    was_owned=1
-  elif [[ -f "$LIB" ]]; then
-    fail "Orphan hook library exists; inspect manually: $LIB"
-  fi
-  if (( was_owned )); then
-    # Check whether another service/drop-in also references our library.
     rm -- "$DROPIN"
-    "$SYSTEMCTL" --user daemon-reload || fail 'systemd user daemon-reload failed'
-    if "$SYSTEMCTL" --user cat "$UNIT" 2>/dev/null | grep -Fq -- "$LIB"; then
-      fail 'Hook library is still referenced; leave it in place'
-    fi
-    [[ ! -e "$LIB" && ! -L "$LIB" ]] || rm -- "$LIB"
-  else
-    "$SYSTEMCTL" --user daemon-reload || fail 'systemd user daemon-reload failed'
+  fi
+  # Always reload, even on retry after a previous reload failure.
+  "$SYSTEMCTL" --user daemon-reload || fail 'systemd user daemon-reload failed; retry uninstall'
+  local unit env manager
+  unit="$("$SYSTEMCTL" --user cat "$UNIT")" || fail 'Cannot verify Shell service'
+  env="$("$SYSTEMCTL" --user show "$UNIT" -p Environment --value)" || fail 'Cannot verify Shell service environment'
+  manager="$("$SYSTEMCTL" --user show-environment)" || fail 'Cannot verify user manager environment'
+  if [[ "$unit" == *"$LIB"* || "$env" == *"$LIB"* || "$manager" == *"$LIB"* ]]; then
+    fail 'Hook library is still referenced; leave it in place'
+  fi
+  if [[ -e "$LIB" || -L "$LIB" ]]; then
+    owned_library || fail "Unmanaged hook library; refusing removal: $LIB"
+    rm -- "$LIB"
   fi
   rmdir -- "$DROPIN_DIR" "$DATA" 2>/dev/null || true
   printf 'Native accent hook removed (takes effect next login)\n'
@@ -151,6 +143,10 @@ status() {
   printf 'Hook: %s\n' "$LIB"
   if owned; then
     sed -n '/ASHTADALA_ACCENT_COLOR=/p' "$DROPIN"
+  elif [[ -e "$DROPIN" || -L "$DROPIN" ]]; then
+    printf 'Unmanaged drop-in remains: %s\n' "$DROPIN"
+  elif [[ -e "$LIB" || -L "$LIB" ]]; then
+    printf 'Orphaned hook library remains: %s\n' "$LIB"
   else
     printf 'Not installed\n'
   fi

@@ -47,7 +47,7 @@ class WidgetRoleTests(unittest.TestCase):
             self.assertNotIn(rule, user)
 
     def test_gtk4_action_roles_in_both_layers(self):
-        for primary in [*t.ACCENTS.values(), '#7e69dd']:
+        for primary in [*t.ACCENTS.values(), '#7e69dd', '#777777', '#ffffff', '#000000']:
             values = t.tokens(primary)
             files, _ = t.theme_files(primary, SHELL_SOURCE)
             for css in (t.gtk4_override(primary), files['gtk-4.0/gtk.css'].decode()):
@@ -55,8 +55,11 @@ class WidgetRoleTests(unittest.TestCase):
                     self.assertIn(f'button.{cls}:not(.flat):not(.destructive-action):not(:disabled)', css)
                 self.assertIn(f'background-color: {primary};\n  border-color: {primary};\n  color: {values["ACCENT_FG"]};', css)
                 self.assertIn('background-color: #ee8dac;\n  color: #13161e;', css)
-                self.assertIn(':not(:disabled):hover', css)
-                self.assertIn(':not(:disabled):active', css)
+                for state, token in (('hover', 'ACCENT_HOVER'), ('active', 'ACCENT_ACTIVE')):
+                    self.assertIn(f':not(:disabled):{state}', css)
+                    bg, fg = values[token], values[token + '_FG']
+                    self.assertIn(f'background-image: none;\n  background-color: {bg};\n  border-color: {bg};\n  color: {fg};', css)
+                    self.assertGreaterEqual(t.contrast(bg, fg), 4.5)
             stock = files['gtk-4.0/gtk.css'].decode()
             self.assertIn(f'@define-color theme_selected_bg_color {primary};', stock)
             self.assertIn(f'@define-color theme_selected_fg_color {values["ACCENT_FG"]};', stock)

@@ -129,13 +129,16 @@ class IntegrationTests(unittest.TestCase):
         self.assertEqual(state['papirus']['hex'], '#cb96e2')
         t.uninstall(argparse.Namespace())
 
-    def test_modified_overlay_refuses_uninstall(self):
+    def test_modified_overlay_is_preserved_outside_active_paths(self):
         t.install(argparse.Namespace(accent='peach'))
         (self.paths['icon_theme'] / '48x48/places/folder.svg').write_text('modified')
-        with self.assertRaisesRegex(t.ThemeError, 'changed outside this tool'):
-            t.uninstall(argparse.Namespace())
-        self.assertTrue(self.paths['state'].exists())
-        self.assertTrue(self.paths['user_theme'].exists())
+        t.uninstall(argparse.Namespace())
+        self.assertFalse(self.paths['state'].exists())
+        self.assertFalse(self.paths['user_theme'].exists())
+        self.assertFalse(self.paths['icon_theme'].exists())
+        backups = list(self.paths['state'].parent.parent.glob('ashtadala-cleanup-backups/*/Ashtadala-Night-Papirus/48x48/places/folder.svg'))
+        self.assertEqual(len(backups), 1)
+        self.assertEqual(backups[0].read_text(), 'modified')
 
     def test_icon_overlay_rolls_back_after_hook_failure(self):
         def fail_hook(action, color=None):
