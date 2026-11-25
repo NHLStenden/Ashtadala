@@ -213,3 +213,40 @@ windowcontrols > button.close:not(:disabled):active > image {
   background-color: @CLOSE_ACTIVE@;
   color: @DEEP@;
 }
+
+/* Fixed cyan keyboard focus; keep native widths, radii and transitions.
+ * Both GTK4 layers use this block only in dark, normal-contrast mode. */
+@media (prefers-contrast: no-preference) {
+  button:focus:focus-visible:not(:disabled):not(:backdrop),
+  row:focus:focus-visible:not(:disabled):not(:backdrop),
+  child:focus:focus-visible:not(:disabled):not(:backdrop),
+  flowboxchild:focus:focus-visible:not(:disabled):not(:backdrop),
+  treeview.view:focus:focus-visible:not(:disabled):not(:backdrop),
+  iconview.view:focus:focus-visible:not(:disabled):not(:backdrop),
+  tab:focus:focus-visible:not(:disabled):not(:backdrop),
+  checkbutton:focus:focus-visible:not(:disabled):not(:backdrop),
+  switch:focus:focus-visible:not(:disabled):not(:backdrop),
+  checkbutton:focus:focus-visible:not(:disabled):not(:backdrop) > check,
+  checkbutton:focus:focus-visible:not(:disabled):not(:backdrop) > radio,
+  scale:focus:focus-visible:not(:disabled):not(:backdrop),
+  scale:focus:focus-visible:not(:disabled):not(:backdrop) slider {
+    outline-color: @FOCUS@;
+  }
+  entry:focus-within:not(.error):not(.warning):not(:disabled):not(:backdrop):not(:drop(active)),
+  spinbutton:focus-within:not(.error):not(.warning):not(:disabled):not(:backdrop):not(:drop(active)) {
+    outline-color: @FOCUS@;
+  }
+  /* Opaque action buttons use an outside ring, as in libadwaita. */
+  button.suggested-action:focus:focus-visible:not(.flat):not(:disabled):not(:backdrop),
+  button.default:focus:focus-visible:not(.flat):not(:disabled):not(:backdrop),
+  button.destructive-action:focus:focus-visible:not(.flat):not(:disabled):not(:backdrop) {
+    outline-color: @FOCUS@;
+    outline-offset: 1px;
+  }
+  /* Our navigation selection is opaque; an inset cyan ring would vanish. */
+  .navigation-sidebar > row:selected:focus:focus-visible:not(:disabled):not(:backdrop),
+  .navigation-sidebar > child:selected:focus:focus-visible:not(:disabled):not(:backdrop),
+  .navigation-sidebar > flowboxchild:selected:focus:focus-visible:not(:disabled):not(:backdrop) {
+    outline-color: @SELECTION_FG@;
+  }
+}

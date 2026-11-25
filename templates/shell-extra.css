@@ -13,7 +13,7 @@
 .quick-settings .quick-toggle:checked:focus {
   background-color: @ACCENT@;
   color: @ACCENT_FG@;
-  box-shadow: inset 0 0 0 2px st-transparentize(@ACCENT_FG@, 0.55);
+  box-shadow: inset 0 0 0 2px @ACCENT_FG@ !important;
 }
 .quick-settings .quick-toggle:checked:focus:hover {
   background-color: st-lighten(@ACCENT@, 4%);
@@ -33,7 +33,7 @@
 .quick-settings .quick-toggle-has-menu .quick-toggle-menu-button:checked:focus {
   background-color: st-mix(@ACCENT@, #ffffff, 85%);
   color: @ACCENT_FG@;
-  box-shadow: inset 0 0 0 2px st-transparentize(@ACCENT_FG@, 0.55);
+  box-shadow: inset 0 0 0 2px @FOCUS_SPLIT@ !important;
 }
 .quick-settings .quick-toggle-has-menu .quick-toggle-menu-button:checked:insensitive {
   background-color: st-mix(st-darken(@ACCENT@, 8%), #ffffff, 85%);

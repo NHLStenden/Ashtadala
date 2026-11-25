@@ -131,6 +131,8 @@ def tokens(accent: str) -> dict[str, str]:
         return '#' + ''.join(f'{round(int(accent[i:i + 2], 16) * (1 - amount) + int(fg[i:i + 2], 16) * amount):02x}'
                              for i in (1, 3, 5))
     hover, active = tint(.10), tint(.20)
+    split = '#' + ''.join(f'{round(int(accent[i:i + 2], 16) * .85 + 255 * .15):02x}'
+                          for i in (1, 3, 5))
     return dict(PALETTE, ACCENT=accent, ACCENT_FG=fg,
                 ACCENT_HOVER=hover, ACCENT_HOVER_FG=accent_foreground(hover),
                 ACCENT_ACTIVE=active, ACCENT_ACTIVE_FG=accent_foreground(active),
@@ -139,6 +141,7 @@ def tokens(accent: str) -> dict[str, str]:
                 LEVEL_FG=accent_foreground(ACCENTS['green']),
                 PROGRESS=ACCENTS['green'],
                 PROGRESS_FG=accent_foreground(ACCENTS['green']),
+                FOCUS=ACCENTS['cyan'], FOCUS_SPLIT=accent_foreground(split),
                 TAB=ACCENTS['purple'],
                 SECONDARY_ACCENT=FOLDER_COLOR,
                 LINK=ACCENTS['blue'],
@@ -164,7 +167,24 @@ def shell_recolor(css: str, accent: str) -> tuple[str, dict[str, int]]:
     if '.quick-toggle:checked' not in css or '.quick-toggle-menu-button:checked' not in css:
         raise ThemeError('GNOME Shell stylesheet lacks expected Quick Settings selectors; do not apply an unverified accent patch')
     values = tokens(accent)
-    counts = {}
+    counts = {'focus_ring': 0}
+    # GNOME 51's focus_ring() emits this inset shadow. Recolor only native
+    # focus-only rules using the direct accent, not filled/default variants,
+    # other shadows, focus backgrounds or lock-screen foreground treatments.
+    ring = re.compile(r'(box-shadow:\s*inset\s+0\s+0\s+0\s+2px\s+)'
+                      r'st-transparentize\(\s*-st-accent-color\s*,\s*[\d.]+%?\s*\)'
+                      r'(\s*!important\s*;)')
+    def focus_rule(match: re.Match[str]) -> str:
+        selectors, body = match.groups()
+        if not all(re.search(r':focus\b', selector) and
+                   not re.search(r':(?:checked|selected|insensitive)\b|\.default\b', selector)
+                   for selector in selectors.split(',')):
+            return match.group(0)
+        body, n = ring.subn(lambda m: m[1] + values['FOCUS'] + m[2], body)
+        if n:
+            counts['focus_ring'] = counts.get('focus_ring', 0) + n
+        return selectors + '{' + body + '}'
+    css = re.sub(r'([^{}]+)\{([^{}]*)\}', focus_rule, css)
     # Replace whole accent tokens, including those inside Shell color functions.
     for key, replacement in [('-st-accent-fg-color', values['ACCENT_FG']),
                              ('-st-accent-color', values['ACCENT'])]:

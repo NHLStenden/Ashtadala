@@ -152,7 +152,9 @@ class ColorTests(unittest.TestCase):
             self.assertIn('.quick-toggle:checked:focus', quick)
             self.assertNotIn('#6f8396', quick)
             self.assertNotIn('#ed5b00', quick)
-            self.assertNotIn('!important', quick)
+            # Native Shell focus rings are important; only the two filled
+            # Quick Settings focus overrides may use the same priority.
+            self.assertEqual(quick.count('!important'), 2)
             self.assertNotIn('#becdf6', quick)
             # Each selected button must have readable text, not white on peach.
             self.assertGreaterEqual(t.contrast(accent, t.accent_foreground(accent)), 4.5)

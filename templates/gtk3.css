@@ -172,3 +172,34 @@ button.titlebutton.close:not(:disabled):active {
   text-shadow: none;
   -gtk-icon-shadow: none;
 }
+
+/* Fixed cyan focus, without changing Adwaita's focus geometry or fills.
+ * GTK3 uses :focus (not GTK4's :focus-visible). Keep semantic entry states. */
+button:focus:not(:disabled):not(:backdrop),
+row:focus:not(:disabled):not(:backdrop),
+treeview.view:focus:not(:disabled):not(:backdrop),
+iconview.view:focus:not(:disabled):not(:backdrop),
+notebook > header > tabs > tab:focus:not(:disabled):not(:backdrop),
+checkbutton:focus:not(:disabled):not(:backdrop),
+radiobutton:focus:not(:disabled):not(:backdrop),
+switch:focus:not(:disabled):not(:backdrop),
+scale:focus:not(:disabled):not(:backdrop),
+scale:focus:not(:disabled):not(:backdrop) trough {
+  outline-color: @FOCUS@;
+}
+entry:focus:not(.error):not(.warning):not(.flat):not(:disabled):not(:backdrop):not(:drop(active)),
+spinbutton:focus:not(.error):not(.warning):not(.flat):not(.vertical):not(:disabled):not(:backdrop):not(:drop(active)) {
+  border-color: @FOCUS@;
+  box-shadow: inset 0 0 0 1px @FOCUS@;
+}
+/* Inset focus on opaque fills needs contrasting ink, not cyan on cyan. */
+button.suggested-action:focus:not(.flat):not(.destructive-action):not(:disabled):not(:backdrop),
+button.default:focus:not(.flat):not(.destructive-action):not(:disabled):not(:backdrop),
+button.titlebutton.close:focus:not(:disabled):not(:backdrop),
+row:selected:focus:not(:disabled):not(:backdrop),
+treeview.view:selected:focus:not(:disabled):not(:backdrop),
+iconview.view:selected:focus:not(:disabled):not(:backdrop) {
+  outline-color: currentColor;
+}
+/* The checked switch focus is inset over its colored fill. */
+switch:checked:focus:not(:disabled):not(:backdrop) {outline-color: @ACCENT_FG@;}
