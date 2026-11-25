@@ -105,11 +105,12 @@ notebook > header.right > tabs > tab:checked:not(:disabled) {
 }
 
 /* Window controls: native geometry and symbolic icons, generated dark surfaces.
+ * Minimize and maximize/restore use fixed teal in active windows.
  * Close stays solid golden yellow even in inactive windows; disabled states remain native. */
 button.titlebutton.minimize:not(:disabled):not(:backdrop),
 button.titlebutton.maximize:not(:disabled):not(:backdrop) {
   background-color: @HOVER@;
-  color: @CONTROL_FG@;
+  color: @WINDOW_CONTROL@;
   background-image: none;
   border-color: transparent;
   box-shadow: none;
@@ -120,7 +121,7 @@ button.titlebutton.maximize:not(:disabled):not(:backdrop) {
 button.titlebutton.minimize:not(:disabled):hover:not(:backdrop),
 button.titlebutton.maximize:not(:disabled):hover:not(:backdrop) {
   background-color: @BORDER@;
-  color: @LINK_HOVER@;
+  color: @WINDOW_CONTROL@;
   background-image: none;
   border-color: transparent;
   box-shadow: none;
@@ -130,7 +131,7 @@ button.titlebutton.maximize:not(:disabled):hover:not(:backdrop) {
 }
 button.titlebutton.minimize:not(:disabled):active:not(:backdrop),
 button.titlebutton.maximize:not(:disabled):active:not(:backdrop) {
-  background-color: @LINK@;
+  background-color: @WINDOW_CONTROL@;
   color: @DEEP@;
   background-image: none;
   border-color: transparent;

@@ -37,7 +37,7 @@ PALETTE = {
     'SURFACE': surface(2),
     'HOVER': surface(3),
     'BORDER': surface(6),
-    'CONTROL_FG': oklch(.85, .06, 270),
+    'WINDOW_CONTROL': ACCENTS['teal'],
     'SUCCESS': ACCENTS['green'],
     'WARNING': ACCENTS['yellow'],
     'ERROR': ACCENTS['red'],

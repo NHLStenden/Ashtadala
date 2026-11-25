@@ -145,6 +145,7 @@ tabbar tabbox:not(.single-tab) tab:selected:not(:disabled) {
 }
 
 /* Window controls: native geometry and symbolic icons, generated dark surfaces.
+ * Minimize and maximize/restore use fixed teal in active windows.
  * Close stays solid golden yellow even in inactive windows; disabled states remain native. */
 /* Libadwaita dims both standalone headerbars and the outer windowhandle
  * in AdwToolbarView (including wrapped headerbars, as in Files previews).
@@ -183,16 +184,16 @@ toolbarview > .bottom-bar:backdrop > windowhandle > box > .toolbar {
 windowcontrols > button.minimize:not(:disabled):not(:backdrop) > image,
 windowcontrols > button.maximize:not(:disabled):not(:backdrop) > image {
   background-color: @HOVER@;
-  color: @CONTROL_FG@;
+  color: @WINDOW_CONTROL@;
 }
 windowcontrols > button.minimize:not(:disabled):hover:not(:backdrop) > image,
 windowcontrols > button.maximize:not(:disabled):hover:not(:backdrop) > image {
   background-color: @BORDER@;
-  color: @LINK_HOVER@;
+  color: @WINDOW_CONTROL@;
 }
 windowcontrols > button.minimize:not(:disabled):active:not(:backdrop) > image,
 windowcontrols > button.maximize:not(:disabled):active:not(:backdrop) > image {
-  background-color: @LINK@;
+  background-color: @WINDOW_CONTROL@;
   color: @DEEP@;
 }
 windowcontrols > button.close:not(:disabled) > image {
