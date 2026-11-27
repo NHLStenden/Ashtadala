@@ -33,3 +33,49 @@ ASHTADALA_ACCENT_LOG=1 LD_PRELOAD="$DIR/libaccent-hook.so" "$DIR/driver" '#6f839
 grep -Fq 'loaded' "$LOG_OUT"
 grep -Fq 'replaced native slate with #fb996c' "$LOG_OUT"
 printf 'PASS: runtime load and replacement diagnostics\n'
+
+# The parent still substitutes the accent, but its exec'd child must not.
+assert_eq "$(LD_PRELOAD="$DIR/libaccent-hook.so" "$DIR/driver" '#6f8396' exec-child)" \
+    $'#fb996c\n#6f8396' 'preload does not leak to exec child'
+# Do not alter another preload, including an unsupported mixed configuration.
+mixed="$DIR/libaccent-hook.so:$DIR/libfakecogl.so"
+assert_eq "$(LD_PRELOAD="$mixed" bash -c 'printf %s "$LD_PRELOAD"')" "$mixed" \
+    'mixed preload is preserved'
+assert_eq "$(LD_PRELOAD="$DIR/libfakecogl.so" bash -c 'printf %s "$LD_PRELOAD"')" \
+    "$DIR/libfakecogl.so" 'foreign preload is preserved'
+
+# Reproduce the Resources helper's stderr pipe with no reader. Python restores
+# default SIGPIPE in the child (unlike Python's own ignored disposition).
+python3 - "$DIR" <<'PYTEST'
+import os
+import socket
+import subprocess
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+env = dict(os.environ, LD_PRELOAD=str(root / 'libaccent-hook.so'),
+           ASHTADALA_ACCENT_LOG='1', ASHTADALA_ACCENT_COLOR='#fb996c')
+for kind in ('pipe', 'socket', 'closed-fd'):
+    if kind == 'pipe':
+        reader, writer = os.pipe()
+        os.close(reader)
+    elif kind == 'socket':
+        peer, endpoint = socket.socketpair()
+        peer.close()
+        writer = endpoint.detach()
+    else:
+        writer = None
+    try:
+        result = subprocess.run([str(root / 'driver'), '#6f8396'], env=env,
+                                stdout=subprocess.PIPE, stderr=writer,
+                                restore_signals=True,
+                                preexec_fn=(lambda: os.close(2)) if writer is None else None,
+                                timeout=5)
+        assert result.returncode == 0, (kind, result.returncode)
+        assert result.stdout == b'#fb996c\n', (kind, result.stdout)
+        print(f'PASS: diagnostic logging survives {kind}')
+    finally:
+        if writer is not None:
+            os.close(writer)
+PYTEST

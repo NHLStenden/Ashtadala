@@ -25,7 +25,8 @@ owned() {
   [[ ${#lines[@]} -eq 5 ]] &&
     [[ "${lines[0]}" == "$MARKER" && "${lines[1]}" == '[Service]' &&
        "${lines[2]}" == "Environment=\"LD_PRELOAD=$LIB\"" &&
-       "${lines[4]}" == 'Environment="ASHTADALA_ACCENT_LOG=1"' ]] &&
+       ( "${lines[4]}" == 'Environment="ASHTADALA_ACCENT_LOG=1"' ||
+         "${lines[4]}" == 'Environment="ASHTADALA_ACCENT_LOG=0"' ) ]] &&
     [[ "${lines[3]}" =~ ^Environment=\"ASHTADALA_ACCENT_COLOR=\#[[:xdigit:]]{6}\"$ ]]
 }
 preload_value() {
@@ -85,7 +86,7 @@ install_hook() {
     printf '%s\n[Service]\n' "$MARKER"
     printf 'Environment="LD_PRELOAD=%s"\n' "$LIB"
     printf 'Environment="ASHTADALA_ACCENT_COLOR=%s"\n' "$color"
-    printf 'Environment="ASHTADALA_ACCENT_LOG=1"\n'
+    printf 'Environment="ASHTADALA_ACCENT_LOG=0"\n'
   } > "$tmp/config"
   install -m 0644 "$tmp/config" "$tmp/dropin"
   if owned; then cp -- "$DROPIN" "$tmp/previous-dropin"; fi

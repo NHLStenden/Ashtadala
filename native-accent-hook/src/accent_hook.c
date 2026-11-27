@@ -7,6 +7,8 @@
  */
 #define _GNU_SOURCE
 #include <dlfcn.h>
+#include <errno.h>
+#include <signal.h>
 #include <pthread.h>
 #include <stdatomic.h>
 #include <stdio.h>
@@ -31,6 +33,30 @@ static int logging_enabled(void)
     return v && v[0] == '1' && v[1] == '\0';
 }
 
+/* Diagnostics must never terminate the host on a closed stderr pipe/socket.
+ * Block SIGPIPE only in this thread, and consume only a newly generated signal.
+ * Preserve an existing pending SIGPIPE and the caller's signal mask. */
+static void write_log(const char *line, size_t len)
+{
+    int saved_errno = errno;
+    sigset_t pipe_signal, previous, pending;
+    sigemptyset(&pipe_signal);
+    sigaddset(&pipe_signal, SIGPIPE);
+    if (pthread_sigmask(SIG_BLOCK, &pipe_signal, &previous) != 0)
+        goto done;
+    if (sigpending(&pending) == 0) {
+        ssize_t result = write(STDERR_FILENO, line, len);
+        if (result < 0 && errno == EPIPE && !sigismember(&pending, SIGPIPE)) {
+            const struct timespec timeout = {0, 0};
+            while (sigtimedwait(&pipe_signal, NULL, &timeout) < 0 && errno == EINTR)
+                ;
+        }
+    }
+    (void)pthread_sigmask(SIG_SETMASK, &previous, NULL);
+done:
+    errno = saved_errno;
+}
+
 static void emit_log(const char *action, const char *color)
 {
     if (!logging_enabled())
@@ -41,12 +67,20 @@ static void emit_log(const char *action, const char *color)
                        (long)getpid(), action, color ? " " : "",
                        color ? color : "");
     if (len > 0 && (size_t)len < sizeof(line))
-        (void)write(STDERR_FILENO, line, (size_t)len);
+        write_log(line, (size_t)len);
 }
 
 /* A load marker helps distinguish wrong service wiring from wrong C hook. */
 __attribute__((constructor)) static void on_load(void)
 {
+    /* The dynamic linker has already loaded us. Remove only the exact
+     * single-library preload installed by Ashtadala before Shell starts
+     * launching applications. Do not disturb a foreign/mixed preload. */
+    const char *preload = getenv("LD_PRELOAD");
+    Dl_info self;
+    if (preload && dladdr(&reported_match, &self) && self.dli_fname &&
+        strcmp(preload, self.dli_fname) == 0)
+        (void)unsetenv("LD_PRELOAD");
     emit_log("loaded", NULL);
 }
 

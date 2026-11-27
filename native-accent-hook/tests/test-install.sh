@@ -48,8 +48,13 @@ bash "$SCRIPT" install '#fb996c'
 grep -Fxq '# Managed by Ashtadala Night native accent hook' "$DROPIN"
 grep -Fq 'ASHTADALA_ACCENT_COLOR=#fb996c' "$DROPIN"
 grep -Fq 'LD_PRELOAD=' "$DROPIN"
+grep -Fxq 'Environment="ASHTADALA_ACCENT_LOG=0"' "$DROPIN"
+# Upgrade the original managed drop-in without requiring an uninstall.
+sed -i 's/ASHTADALA_ACCENT_LOG=0/ASHTADALA_ACCENT_LOG=1/' "$DROPIN"
+bash "$SCRIPT" check
 bash "$SCRIPT" install '#90aafa'
 grep -Fq 'ASHTADALA_ACCENT_COLOR=#90aafa' "$DROPIN"
+grep -Fxq 'Environment="ASHTADALA_ACCENT_LOG=0"' "$DROPIN"
 if bash "$SCRIPT" install orange > "$DIR/error" 2>&1; then
   echo 'Invalid accent accepted' >&2; exit 1
 fi
