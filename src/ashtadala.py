@@ -588,6 +588,8 @@ def check_conflicts(state: dict[str, Any] | None, p: dict[str, Path], directory:
 def install(args):
     state, p = get_last_state()
     accent = accent_choice(args.accent or (state['accent'] if state else DEFAULT_ACCENT_NAME))
+    folder_color = accent_choice(getattr(args, 'folder_color', None) or
+                                 (state.get('folder_color', FOLDER_COLOR) if state else FOLDER_COLOR))
     directory = p['user_theme']
     check_conflicts(state, p, directory)
     previous_icons = state.get('papirus') if state else None
@@ -601,7 +603,7 @@ def install(args):
     icon_files = None
     if papirus:
         try:
-            icon_files = papirus_icons.build_overlay(papirus[0], papirus[1], FOLDER_COLOR)
+            icon_files = papirus_icons.build_overlay(papirus[0], papirus[1], folder_color)
         except (papirus_icons.IconError, ValueError, OSError, UnicodeError) as e:
             raise ThemeError(f'Papirus: {e}') from e
         icon_dir = p['icon_theme']
@@ -623,6 +625,7 @@ def install(args):
         'format': 4,
         'theme_path': directory.as_posix(),
         'accent': accent,
+        'folder_color': folder_color,
         'files': {name: sha(data) for name, data in files.items()},
         'gtk_override_sha': sha(gtk4_override(accent)),
         'shell_source_sha': metrics['source_sha256'],
@@ -631,8 +634,8 @@ def install(args):
         'flatpak_old': state['flatpak_old'] if state else None,
         'flatpak_written_sha': state['flatpak_written_sha'] if state else None,
         'settings': old_settings,
-        'papirus': ({'base': papirus[0], 'color': FOLDER_COLOR,
-                     'hex': FOLDER_COLOR,
+        'papirus': ({'base': papirus[0], 'color': folder_color,
+                     'hex': folder_color,
                      'files': {name: sha(data) for name, data in icon_files.items()}}
                     if icon_files is not None else None),
     }
@@ -745,7 +748,7 @@ def install(args):
     if flatpak_enabled:
         print('Flatpak: GTK theme directories shared read-only')
     if icon_files is not None:
-        print(f'Papirus folders: {FOLDER_COLOR}')
+        print(f'Papirus folders: {folder_color}')
     print('Log out and back in to reload GTK styles in running apps, Shell and the native accent hook.')
 
 
@@ -1079,8 +1082,10 @@ def parse_args():
     install_cmd = cmd.add_parser('install', help='Install GTK, Shell, Flatpak and native accent hook')
     install_cmd.add_argument('accent', nargs='?', default=None,
                              help='Palette color name or #RRGGBB; default peach on first install')
+    install_cmd.add_argument('folder_color', nargs='?', help=argparse.SUPPRESS)
     configure_cmd = cmd.add_parser('configure', help='Change the installed accent')
     configure_cmd.add_argument('accent', help='Palette color name or #RRGGBB')
+    configure_cmd.add_argument('folder_color', nargs='?', help=argparse.SUPPRESS)
     cmd.add_parser('uninstall', help='Remove the theme and restore the previous settings')
     cmd.add_parser('diagnose', help='Inspect the installed theme and hook')
     cmd.add_parser('validate', help='Run automated tests')

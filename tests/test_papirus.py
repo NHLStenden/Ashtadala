@@ -1,6 +1,7 @@
 """Papirus overlay generation and installer behavior."""
 import argparse
 import json
+import io
 import tempfile
 import sys
 import unittest
@@ -112,6 +113,42 @@ class IntegrationTests(unittest.TestCase):
         self.assertEqual(t.read_state(self.paths['state'])['papirus']['hex'], '#cb96e2')
         t.uninstall(argparse.Namespace())
 
+    def test_custom_folder_color_persists_and_is_independent(self):
+        t.install(argparse.Namespace(accent='blue', folder_color='GREEN'))
+        state = t.read_state(self.paths['state'])
+        self.assertEqual(state['folder_color'], t.ACCENTS['green'])
+        self.assertEqual(state['papirus']['hex'], t.ACCENTS['green'])
+        self.assertEqual(state['accent'], t.ACCENTS['blue'])
+        self.assertIn(t.ACCENTS['green'], (self.paths['icon_theme'] / '48x48/places/folder.svg').read_text())
+        t.install(argparse.Namespace(accent='peach'))
+        self.assertEqual(t.read_state(self.paths['state'])['papirus']['hex'], t.ACCENTS['green'])
+        t.install(argparse.Namespace(accent='peach', folder_color='#123ABC'))
+        self.assertEqual(t.read_state(self.paths['state'])['folder_color'], '#123abc')
+        self.assertIn('#123abc', (self.paths['icon_theme'] / '48x48/places/folder.svg').read_text())
+        self.assertEqual(json.loads((self.paths['user_theme'] / 'palette.json').read_text())['SECONDARY_ACCENT'], t.ACCENTS['purple'])
+        t.install(argparse.Namespace(accent='peach', folder_color='purple'))
+        self.assertEqual(t.read_state(self.paths['state'])['papirus']['hex'], t.ACCENTS['purple'])
+        t.uninstall(argparse.Namespace())
+
+    def test_invalid_folder_color_leaves_state_unchanged(self):
+        t.install(argparse.Namespace(accent='blue'))
+        before = self.paths['state'].read_bytes()
+        with self.assertRaises(t.ThemeError):
+            t.install(argparse.Namespace(accent='green', folder_color='invalid'))
+        self.assertEqual(self.paths['state'].read_bytes(), before)
+
+    def test_hidden_second_positional(self):
+        for command in ('install', 'configure'):
+            with mock.patch.object(sys, 'argv', ['ashtadala.py', command, 'blue', 'green']):
+                args = t.parse_args()
+                self.assertEqual((args.accent, args.folder_color), ('blue', 'green'))
+            with mock.patch.object(sys, 'argv', ['ashtadala.py', command, '--help']):
+                with mock.patch('sys.stdout', new_callable=io.StringIO) as output:
+                    with self.assertRaises(SystemExit) as exit_info:
+                        t.parse_args()
+                    self.assertEqual(exit_info.exception.code, 0)
+                    self.assertNotIn('folder_color', output.getvalue())
+
     def test_primary_purple_keeps_purple_folders(self):
         t.install(argparse.Namespace(accent='purple'))
         self.assertEqual(t.read_state(self.paths['state'])['papirus']['hex'], '#cb96e2')
@@ -120,6 +157,7 @@ class IntegrationTests(unittest.TestCase):
     def test_old_secondary_setting_is_ignored_on_reconfigure(self):
         t.install(argparse.Namespace(accent='blue'))
         state = t.read_state(self.paths['state'])
+        state.pop('folder_color')  # Simulate a state written before the new parameter.
         state['secondary_accent'] = '#45bde7'
         state['papirus']['color'] = state['papirus']['hex'] = '#45bde7'
         self.paths['state'].write_text(json.dumps(state))
